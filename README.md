@@ -1,7 +1,7 @@
 # sport-watch
 
 ## Nama Anggota Kelompok
-![Anggota](anggota.png)
+![Anggota](Anggota.png)
 
 ## Apa Aplikasi ini?
 
