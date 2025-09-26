@@ -14,6 +14,8 @@
 
 - Edward & Fadhil -> Brainstorming Idea
 
+- Faiz Yusuf Ridwan -> Contact Person
+
 ## Tautan PWS Deploymeny
 Coming Soon...
   
