@@ -91,7 +91,7 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 1.  **Faiz Yusuf Ridwan** - `2406434292`
 2.  **Muhammad Fadhil Al Afifi Fajar** - `2406430104`
 3.  **Edward Jeremy Worang** - `2406359475`
-4.  **Kadek Ngurah Septyawan Chandra Diputra**
+4.  **Kadek Ngurah Septyawan Chandra Diputra** - `2406420772`
 5.  **Dzaki Abrar Fatihul Ihsan** - `2406275241`
 
 ### Pembagian Tugas Modul:
