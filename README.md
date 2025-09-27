@@ -43,7 +43,7 @@
 Aplikasi ini dirancang untuk melayani berbagai jenis pengguna:
 - **Guest User**: Pengguna umum yang hanya ingin melihat informasi di halaman awal.
 - **Sports Fans**: Pengguna yang setia pada satu tim/klub dan aktif memantau berita terkait.
-- **Shopper **: Pengguna yang tertarik pada dunia olahraga dan memiliki daya beli untuk alat-alat olahraga atau fan merchandise.
+- **Shopper**: Pengguna yang tertarik pada dunia olahraga dan memiliki daya beli untuk alat-alat olahraga atau fan merchandise.
 - **Admin**: Pengguna dengan hak istimewa untuk mengatur konten dan fungsionalitas website.
 
 ---
