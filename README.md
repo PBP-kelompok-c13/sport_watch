@@ -26,7 +26,7 @@
 
 ## ✨ Fitur Utama
 - **📰 Portal Berita**: Menampilkan berita olahraga terkini dengan format yang rapi dan mudah dibaca.
-- ** scoreboard Live Scoreboard**: Memantau dan menampilkan skor pertandingan secara langsung.
+- **Live Scoreboard**: Memantau dan menampilkan skor pertandingan secara langsung.
 - **🛒 Fitur Belanja (Shop)**: Halaman khusus untuk melihat dan membeli merchandise olahraga.
 
 ## Fitur tambahan (Opsional jika fitur utama sudah aman)
