@@ -29,6 +29,11 @@
 - ** scoreboard Live Scoreboard**: Memantau dan menampilkan skor pertandingan secara langsung.
 - **🛒 Fitur Belanja (Shop)**: Halaman khusus untuk melihat dan membeli merchandise olahraga.
 
+## Fitur tambahan (Opsional jika fitur utama sudah aman)
+- Fans bisa melihat suatu bertia terus bisa reply dan saling chatting mengenai 1 berita tersebut
+- Upcoming jadwal pertandingan yang hits, 
+- Dan lain-lain kalau modulenya tidak cukup atau tidak sesuai definisi "module"
+
 ---
 
 ## 🛠️ Teknologi yang Digunakan
@@ -94,17 +99,86 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 4.  **Kadek Ngurah Septyawan Chandra Diputra** - `2406420772`
 5.  **Dzaki Abrar Fatihul Ihsan** - `2306275241`
 
-### Pembagian Tugas Modul:
-- **`portal-berita`** (Faiz Yusuf Ridwan)
-  - Mengatur tampilan dan format berita.
-  - **`scoreboard`** (Muhammad Fadhil Al Afifi Fajar): Mengawasi scoreboard di halaman awal.
-  - **`fitur-berita`** (Kadek Ngurah S. C. D.): Mengatur penampilan berita di halaman awal.
-- **`shop`** (Dzaki Abrar Fatihul Ihsan)
-  - Mengatur halaman belanja.
-  - **`fitur-belanja`** (Edward Jeremy Worang): Mengatur fungsionalitas berbelanja.
+
+
+## 📑 Pembagian Tugas Modul (Breakdown):
+
+### 1. **Portal Berita (`portal-berita`)**
+
+**Penanggung jawab:** Faiz Yusuf Ridwan
+**Deskripsi Modul:** Menyediakan halaman berita olahraga terkini, CRUD berita oleh admin, dan filter berita berdasarkan kategori.
+**Sub-tugas:**
+
+* **Backend:**
+
+  * Model berita (judul, isi, tanggal, kategori).
+  * View untuk daftar berita & detail berita.
+  * Admin interface untuk tambah/ubah/hapus berita.
+* **Frontend:**
+
+  * Template halaman daftar berita.
+  * Template halaman detail berita.
+  * Layout yang responsif & mudah dibaca.
 
 ---
 
+### 2. **Scoreboard (`scoreboard`)**
+
+**Penanggung jawab:** Muhammad Fadhil Al Afifi Fajar
+**Deskripsi Modul:** Menampilkan skor pertandingan olahraga secara real-time atau update manual.
+**Sub-tugas:**
+
+* **Backend:**
+
+  * Model pertandingan (tim A, tim B, skor, waktu).
+  * API endpoint untuk update skor (opsional).
+* **Frontend:**
+
+  * Widget scoreboard di halaman utama.
+  * Tampilan skor yang mudah di-scan pengguna.
+
+---
+
+### 3. **Fitur Berita Tambahan (`fitur-berita`)**
+
+**Penanggung jawab:** Kadek Ngurah Septyawan Chandra Diputra
+**Deskripsi Modul:** Menambahkan fitur ekstra untuk meningkatkan UX di portal berita.
+**Sub-tugas:**
+
+* Filter & pencarian berita.
+* Menandai berita trending / top news.
+* Pagination atau infinite scroll.
+
+---
+### 4. **Shop (`shop`)**
+
+**Penanggung jawab:** Dzaki Abrar Fatihul Ihsan
+**Deskripsi Modul:** Halaman khusus untuk melihat dan membeli merchandise olahraga.
+**Sub-tugas:**
+
+* **Backend:**
+
+  * Model produk (nama, harga, stok, kategori).
+  * Model transaksi / keranjang belanja.
+* **Frontend:**
+
+  * Template daftar produk (grid view).
+  * Template detail produk.
+
+---
+
+### 5. **Fitur Belanja (`fitur-belanja`)**
+
+**Penanggung jawab:** Edward Jeremy Worang
+**Deskripsi Modul:** Mengatur logika pembelian & checkout.
+**Sub-tugas:**
+
+* Tambah produk ke keranjang.
+* Hapus produk dari keranjang.
+* Hitung total harga.
+* Simulasi checkout (dummy payment).
+
+---
 ## 📚 Sumber Data Awal
 - [Detik Sport](https://sport.detik.com/)
 - [Kompas Olahraga](https://olahraga.kompas.com/)
