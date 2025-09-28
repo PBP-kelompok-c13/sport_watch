@@ -2,7 +2,7 @@
 
 > Your all-in-one portal for sports news, live scores, and merchandise.
 
-[![Deployment](https://img.shields.io/badge/Deployment-Live-brightgreen.svg)](https://pbp.cs.ui.ac.id/web/project/faiz.yusuf/sportwatch)
+[![Deployment](https://img.shields.io/badge/Deployment-Live-brightgreen.svg)](https://faiz-yusuf-sportwatch.pbp.cs.ui.ac.id/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-4.2-darkgreen.svg)](https://www.djangoproject.com/)
 
