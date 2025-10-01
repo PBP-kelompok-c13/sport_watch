@@ -29,10 +29,9 @@
 - **Live Scoreboard**: Memantau dan menampilkan skor pertandingan secara langsung.
 - **🛒 Fitur Belanja (Shop)**: Halaman khusus untuk melihat dan membeli merchandise olahraga.
 
-## Fitur tambahan (Opsional jika fitur utama sudah aman, agar bisa lebih unik)
+## Fitur tambahan 
 - Fans bisa melihat suatu bertia terus bisa reply dan saling chatting mengenai 1 berita tersebut
 - Upcoming jadwal pertandingan yang hits, 
-- Dan lain-lain kalau modulenya tidak cukup atau tidak sesuai definisi "module"
 
 ---
 
@@ -153,7 +152,7 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 
 ---
 
-### 3. **Pencarian (`fitur-berita`)**
+### 3. **Fitur pencarian**
 
 **Penanggung jawab:** Kadek Ngurah Septyawan Chandra Diputra
 **Deskripsi Modul:** Menambahkan fitur ekstra untuk meningkatkan UX di portal berita.
@@ -197,7 +196,7 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 * Hitung total harga.
 * Simulasi checkout (dummy payment).
 
-### 6. Link Figma:
+###  Link Figma:
 https://exit-upload-30788858.figma.site/ (hanya untuk inspirasi saja, hasil prompting, karena tim kita kurang designers, untuk actual designnya akan kita lakukan sebelum hari deadline hari rabu)
 
 ---
