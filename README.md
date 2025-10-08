@@ -82,6 +82,7 @@ SportWatch bukan hanya portal berita—**ini adalah ekosistem olahraga digital m
 ## 👤 Peran Pengguna
 Aplikasi ini dirancang untuk melayani berbagai jenis pengguna:
 - **User**: Pengguna umum website yang dapat mengakses informasi seputar olahraga, memantau berita atau perkembangan tim/klub, serta melakukan aktivitas seperti melihat dan membeli produk olahraga maupun merchandise.
+- **Guest** : Pengunjung yang dapat membaca berita dan melihat skor atau produk, tetapi belum dapat berinteraksi atau bertransaksi sebelum mendaftar.
 - **Admin**: Pengguna dengan hak istimewa untuk mengatur konten dan fungsionalitas website.
 
 ---
@@ -249,4 +250,4 @@ https://exit-upload-30788858.figma.site/ (Reference)
 - [ESPN] (https://global.espn.com/)  untuk module Scoreboard
 - [Decathlon] (https://www.decathlon.co.id/en-ID/c/team-sports.html?srsltid=AfmBOopfZCShVKLqiBjDRFXVJD3X64eG61l3b8Zr80wmR0s69gVibtYt) untuk module Shop
 - [SportsStation] (https://www.sportsstation.id/) untuk Module Shop
-- 
+- [FootLocker] (https://www.footlocker.id/nike.html) untuk Module Shop
