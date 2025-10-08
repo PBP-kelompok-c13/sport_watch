@@ -240,7 +240,9 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 * Hitung total harga.
 * Simulasi checkout (dummy payment).
 
-###  Link Figma:
+---
+
+**Link Figma:**
 https://exit-upload-30788858.figma.site/ (Reference)
 
 ---
