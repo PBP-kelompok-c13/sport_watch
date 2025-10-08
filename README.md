@@ -103,9 +103,10 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 ### 1. **Portal Berita (`portal-berita`)**
 
 **Penanggung jawab:** Faiz Yusuf Ridwan
-**Deskripsi Modul:** Menyediakan halaman berita olahraga terkini, CRUD berita oleh admin, dan filter berita berdasarkan kategori.
-**Sub-tugas:**
 
+**Deskripsi Modul:** Menyediakan halaman berita olahraga terkini, CRUD berita oleh admin, dan filter berita berdasarkan kategori.
+
+**Sub-tugas:**
 * **Backend:**
 
   * Model berita (judul, isi, tanggal, kategori).
@@ -123,7 +124,9 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 ### 2. **Scoreboard (`scoreboard`)**
 
 **Penanggung jawab:** Muhammad Fadhil Al Afifi Fajar
+
 **Deskripsi Modul:** Menampilkan skor pertandingan olahraga secara real-time atau update manual.
+
 **Sub-tugas:**
 
 * **Backend:**
@@ -155,7 +158,9 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 ### 3. **Fitur pencarian**
 
 **Penanggung jawab:** Kadek Ngurah Septyawan Chandra Diputra
+
 **Deskripsi Modul:** Menambahkan fitur ekstra untuk meningkatkan UX di portal berita.
+
 **Sub-tugas:**
 
 
@@ -171,7 +176,9 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 ### 4. **Shop (`shop`)**
 
 **Penanggung jawab:** Dzaki Abrar Fatihul Ihsan
+
 **Deskripsi Modul:** Halaman khusus untuk melihat dan membeli merchandise olahraga.
+
 **Sub-tugas:**
 
 * **Backend:**
@@ -188,7 +195,9 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 ### 5. **Fitur Belanja (`fitur-belanja`)**
 
 **Penanggung jawab:** Edward Jeremy Worang
+
 **Deskripsi Modul:** Mengatur logika pembelian & checkout.
+
 **Sub-tugas:**
 
 * Tambah produk ke keranjang.
