@@ -16,6 +16,6 @@ def portalnews_info(request):
         'Who': 'Presented By Kelompok C 13',
     }
 
-    return render(request, "main.html", context)
+    return render(request, "portal_berita.html", context)
 
 # Create your views here.
