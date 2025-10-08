@@ -19,8 +19,44 @@
 
 ---
 
-## 📌 Tentang Aplikasi
-**SportWatch** adalah portal berita yang menyajikan informasi terbaru dari dunia olahraga. Pengguna dapat mengakses *Live Scoreboard*, mengecek berita terkini, dan melihat produk-produk baru melalui fitur *Shop*.
+## ⚽ Tentang Aplikasi — *SportWatch: Lebih dari Sekadar Portal Olahraga*
+
+**SportWatch** adalah platform digital terpadu yang membawa dunia olahraga langsung ke tangan Anda. Tidak hanya sekadar membaca berita, pengguna dapat **merasakan atmosfer pertandingan secara real-time**, berdiskusi dengan sesama penggemar, hingga menjelajahi **produk dan merchandise resmi dari tim favorit mereka** semuanya dalam satu tempat.
+
+Kami percaya bahwa olahraga bukan hanya tentang skor dan statistik, tetapi juga **tentang emosi, komunitas, dan gaya hidup**. Karena itu, SportWatch hadir untuk menjadi jembatan antara penggemar dan dunia olahraga global dengan cara yang informatif, interaktif, dan inspiratif.
+
+---
+
+### 🎯 Visi
+
+Menjadi **portal olahraga digital paling interaktif di Indonesia**, yang menghubungkan penggemar, berita, dan brand olahraga dalam satu ekosistem yang dinamis.
+
+### 💡 Misi
+
+1. Menyediakan **berita olahraga terkini** dari berbagai sumber terpercaya dalam tampilan yang modern dan mudah diakses.
+2. Menghadirkan **Live Scoreboard** yang akurat dan update agar pengguna tak pernah ketinggalan momen penting.
+3. Mengembangkan ruang interaksi antar-fans melalui fitur **komentar dan diskusi berita**.
+4. Memberikan pengalaman berbelanja **merchandise eksklusif dan produk olahraga** tanpa harus berpindah platform.
+
+---
+
+### 🌟 Nilai Unggulan SportWatch
+
+* **Semua olahraga, satu portal:** Dari sepak bola hingga basket, pengguna dapat mengikuti beragam cabang olahraga dalam satu tempat.
+* **Interaktif & Sosial:** Fans bisa saling berdiskusi, memberi opini, atau berbagi antusiasme lewat fitur komentar berita.
+* **Personalized Experience:** Sistem akan terus dikembangkan untuk menampilkan berita dan produk sesuai minat pengguna.
+* **Marketplace Olahraga:** Pengguna bisa langsung membeli perlengkapan olahraga atau merchandise favorit melalui fitur *Shop*.
+* **Up-to-date Scores:** Pantau skor pertandingan secara langsung, baik melalui update manual maupun integrasi API ke depan.
+
+---
+
+### 🚀 Mengapa SportWatch Layak Diperhatikan
+
+Bagi pengguna, **SportWatch** menghadirkan pengalaman olahraga yang lebih dekat, praktis, dan menyenangkan.
+Bagi investor atau mitra, platform ini membuka peluang besar dalam **pasar digital sporttainment** yang terus tumbuh, dengan potensi monetisasi dari iklan, afiliasi merchandise, dan sistem langganan berita premium.
+
+SportWatch bukan hanya portal berita—**ini adalah ekosistem olahraga digital masa depan.**
+
 
 ---
 
@@ -151,8 +187,6 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
   Delete:
   Admin dapat menghapus data pertandingan (misalnya pertandingan uji coba yang batal dilaksanakan)
 
-  Note: Kelompok kita masih belum decide mau include olahraga apa untuk sementara, tapi in the long run setelah MVP product sudah jadi web ini akan include semua olahraga dan sedunia, tapi kita juga terbuka dari saran Ibu, mungkin 3 cabang olahraga cukup.
-
 ---
 
 ### 3. **Fitur pencarian**
@@ -206,9 +240,13 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 * Simulasi checkout (dummy payment).
 
 ###  Link Figma:
-https://exit-upload-30788858.figma.site/ (hanya untuk inspirasi saja, hasil prompting, karena tim kita kurang designers, untuk actual designnya akan kita lakukan sebelum hari deadline hari rabu)
+https://exit-upload-30788858.figma.site/ (Reference)
 
 ---
 ## 📚 Sumber Data Awal
-- [Detik Sport](https://sport.detik.com/)
-- [Kompas Olahraga](https://olahraga.kompas.com/)
+- [Detik Sport](https://sport.detik.com/) untuk module Portal Berita
+- [Kompas Olahraga](https://olahraga.kompas.com/) untuk module Portal Berita
+- [ESPN] (https://global.espn.com/)  untuk module Scoreboard
+- [Decathlon] (https://www.decathlon.co.id/en-ID/c/team-sports.html?srsltid=AfmBOopfZCShVKLqiBjDRFXVJD3X64eG61l3b8Zr80wmR0s69gVibtYt) untuk module Shop
+- [SportsStation] (https://www.sportsstation.id/) untuk Module Shop
+- 
