@@ -9,7 +9,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.core import serializers
 
-from portal_berita.forms import BeritaForm
+from portal_berita.forms import BeritaForm, KategoriBeritaForm
 from portal_berita.models import Berita, KategoriBerita
 
 def is_admin(user):
@@ -139,3 +139,22 @@ def berita_json_view(request):
     all_berita = Berita.objects.all()
     data = serializers.serialize('json', all_berita)
     return JsonResponse(data, safe=False)
+
+@user_passes_test(is_admin)
+@login_required
+def add_category(request):
+    if request.method == 'POST':
+        form = KategoriBeritaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('portal_berita:create_news')
+    else:
+        form = KategoriBeritaForm()
+    return render(request, 'portal_berita/add_category.html', {'form': form})
+
+@user_passes_test(is_admin)
+@login_required
+def news_management(request):
+    news_list = Berita.objects.all()
+    context = {'news_list': news_list}
+    return render(request, 'portal_berita/news_management.html', context)

@@ -4,9 +4,7 @@
 <div class="container mx-auto">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800">News List</h1>
-        {% if user.is_staff %}
-        <a href="{% url 'portal_berita:create_news' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create News</a>
-        {% endif %}
+
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for news_item in news_list %}
@@ -16,7 +14,6 @@
             {% endif %}
             <div class="p-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-2">{{ news_item.judul }}</h2>
-                <p class="text-gray-600 mb-4">{{ news_item.ringkasan }}</p>
                 <a href="{% url 'portal_berita:detail_news' news_item.id %}" class="text-blue-500 hover:text-blue-700 font-semibold">Read More</a>
                 {% if user.is_staff %}
                 <a href="{% url 'portal_berita:edit_news' news_item.id %}" class="text-green-500 hover:text-green-700 font-semibold ml-4">Edit</a>

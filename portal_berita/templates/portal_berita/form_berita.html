@@ -10,15 +10,14 @@
             {{ form.judul }}
         </div>
         <div>
-            <label for="{{ form.ringkasan.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.ringkasan.label }}</label>
-            {{ form.ringkasan }}
-        </div>
-        <div>
             <label for="{{ form.konten.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.konten.label }}</label>
             {{ form.konten }}
         </div>
         <div>
-            <label for="{{ form.kategori.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.kategori.label }}</label>
+            <div class="flex justify-between items-center">
+                <label for="{{ form.kategori.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.kategori.label }}</label>
+                <a href="{% url 'portal_berita:add_category' %}" class="text-sm text-blue-500 hover:text-blue-700">+ Add Category</a>
+            </div>
             {{ form.kategori }}
         </div>
         <div>
