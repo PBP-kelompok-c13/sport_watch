@@ -1,23 +1,219 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
-  <h1 class="text-2xl font-bold mb-4">{{ judul }}</h1>
-  <table class="w-full border border-gray-300 rounded-lg">
-    <thead class="bg-gray-200">
-      <tr>
-        <th class="p-2">Tim</th>
-        <th class="p-2">Skor</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for t in tim %}
-      <tr class="border-t">
-        <td class="p-2">{{ t.nama }}</td>
-        <td class="p-2 text-center">{{ t.skor }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4">
+
+  <!-- Header -->
+  <div class="mb-3">
+    <h1 class="text-2xl font-bold tracking-tight">Live Scores & Results</h1>
+    <p class="text-sm text-gray-500 mt-1">PBP C Kelompok 13</p>
+  </div>
+
+  <!-- Filtersnya -->
+  <div class="mb-5">
+    <div class="w-full rounded-2xl border border-gray-200 bg-white/70 backdrop-blur p-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Statusnya -->
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500 text-sm">Status:</span>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-900 text-white">All</button>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">Live</button>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">Finished</button>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">Upcoming</button>
+        </div>
+
+        <span class="hidden sm:block h-5 w-px bg-gray-200"></span>
+
+        <!-- ini untuk League -->
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500 text-sm">League:</span>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-900 text-white">All</button>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">???</button>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">???</button>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">???</button>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">???</button>
+          <button class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">???</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ini untuk Live Now -->
+  <section class="mb-8">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="h-2.5 w-2.5 rounded-full bg-rose-500 ring-4 ring-rose-100"></span>
+      <h2 class="text-lg font-semibold">Live Now</h2>
+      {% if live %}<span class="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">1 Live</span>{% endif %}
+    </div>
+
+    {% if live %}
+      <div class="grid">
+        {% for score in live %}
+          <article class="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition p-4">
+            <div class="flex items-start justify-between">
+              <p class="text-xs text-gray-500 uppercase tracking-wide">NBA</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-600 text-white">LIVE</span>
+            </div>
+
+            <div class="mt-3 flex items-center justify-between">
+              <!-- Team 1 -->
+              <div class="flex items-center gap-2.5">
+                <div class="h-9 w-9 rounded bg-gray-100"></div>
+                <div class="text-base font-semibold text-gray-900">{{ score.tim1 }}</div>
+              </div>
+
+              <!-- Score -->
+              <div class="flex items-end gap-2">
+                <span class="text-3xl font-extrabold leading-none">{{ score.skor_tim1 }}</span>
+                <span class="text-lg font-bold text-gray-400">-</span>
+                <span class="text-3xl font-extrabold leading-none">{{ score.skor_tim2 }}</span>
+              </div>
+
+              <!-- Team 2 -->
+              <div class="flex items-center gap-2.5 justify-end">
+                <div class="text-base font-semibold text-gray-900 text-right">{{ score.tim2 }}</div>
+                <div class="h-9 w-9 rounded bg-gray-100"></div>
+              </div>
+            </div>
+
+            <p class="mt-2 text-xs text-gray-500">Crypto.com Arena • {{ score.tanggal }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <!-- Placeholder card (frame) when no live match) -->
+      <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4">
+        <div class="flex items-start justify-between">
+          <p class="text-xs text-gray-400 uppercase tracking-wide">NBA</p>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-500">LIVE</span>
+        </div>
+        <div class="mt-3 flex items-center justify-between max-w-md mx-auto">
+          <div class="flex items-center gap-2.5">
+            <div class="h-9 w-9 rounded bg-gray-100"></div>
+            <div class="text-base font-semibold text-gray-400">Team A</div>
+          </div>
+          <div class="flex items-end gap-2">
+            <span class="text-3xl font-extrabold leading-none text-gray-300">0</span>
+            <span class="text-lg font-bold text-gray-300">-</span>
+            <span class="text-3xl font-extrabold leading-none text-gray-300">0</span>
+          </div>
+          <div class="flex items-center gap-2.5 justify-end">
+            <div class="text-base font-semibold text-gray-400 text-right">Team B</div>
+            <div class="h-9 w-9 rounded bg-gray-100"></div>
+          </div>
+        </div>
+        <p class="mt-2 text-center text-xs text-gray-400">Nggak ada match live hari ini</p>
+      </article>
+    {% endif %}
+  </section>
+
+  <!-- Recent Results -->
+  <section class="mb-8">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="h-4 w-4 inline-flex items-center justify-center rounded-full border border-gray-300">
+        <svg class="h-3 w-3 text-gray-500" viewBox="0 0 24 24" fill="none"><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+      <h2 class="text-lg font-semibold">Recent Results</h2>
+    </div>
+
+    {% if finished %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for score in finished %}
+          <article class="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition p-4">
+            <div class="flex items-start justify-between">
+              <p class="text-xs text-gray-500 uppercase tracking-wide">NBA</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-900 text-white">FT</span>
+            </div>
+
+            <div class="mt-2.5 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="h-8 w-8 rounded bg-gray-100"></div>
+                <div class="text-sm font-semibold text-gray-900">{{ score.tim1 }}</div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span class="text-2xl font-extrabold leading-none">{{ score.skor_tim1 }}</span>
+                <span class="text-base font-bold text-gray-400">-</span>
+                <span class="text-2xl font-extrabold leading-none">{{ score.skor_tim2 }}</span>
+              </div>
+
+              <div class="flex items-center gap-2.5 justify-end">
+                <div class="text-sm font-semibold text-gray-900 text-right">{{ score.tim2 }}</div>
+                <div class="h-8 w-8 rounded bg-gray-100"></div>
+              </div>
+            </div>
+
+            <p class="mt-2 text-xs text-gray-500">{{ score.tanggal }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <!-- Placeholder card (frame) when no finished result) -->
+      <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4">
+        <div class="flex items-start justify-between">
+          <p class="text-xs text-gray-400 uppercase tracking-wide">NBA</p>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">FT</span>
+        </div>
+        <div class="mt-2.5 flex items-center justify-between max-w-md mx-auto">
+          <div class="flex items-center gap-2.5">
+            <div class="h-8 w-8 rounded bg-gray-100"></div>
+            <div class="text-sm font-semibold text-gray-400">Team A</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-extrabold leading-none text-gray-300">0</span>
+            <span class="text-base font-bold text-gray-300">-</span>
+            <span class="text-2xl font-extrabold leading-none text-gray-300">0</span>
+          </div>
+          <div class="flex items-center gap-2.5 justify-end">
+            <div class="text-sm font-semibold text-gray-400 text-right">Team B</div>
+            <div class="h-8 w-8 rounded bg-gray-100"></div>
+          </div>
+        </div>
+        <p class="mt-2 text-center text-xs text-gray-400">Belum ada match yang selesai</p>
+      </article>
+    {% endif %}
+  </section>
+
+  <!-- Upcoming -->
+  <section>
+    <div class="flex items-center gap-2 mb-3">
+      <span class="h-2.5 w-2.5 rounded-full bg-amber-400 ring-4 ring-amber-100"></span>
+      <h2 class="text-lg font-semibold">Upcoming Match</h2>
+    </div>
+
+    {% if upcoming %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for score in upcoming %}
+          <article class="rounded-2xl border border-amber-200 bg-white shadow-sm hover:shadow-md transition p-4">
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Premier League</p>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700">SOON</span>
+            </div>
+            <div class="mt-2.5 flex items-center justify-center gap-2.5">
+              <span class="text-sm font-semibold text-gray-900">{{ score.tim1 }}</span>
+              <span class="text-gray-400 text-sm">vs</span>
+              <span class="text-sm font-semibold text-gray-900">{{ score.tim2 }}</span>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 text-center">{{ score.tanggal }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <!-- Placeholder card (frame) when no upcoming match) -->
+      <article class="rounded-2xl border border-amber-200 bg-white shadow-sm p-4">
+        <div class="flex items-center justify-between">
+          <p class="text-xs text-gray-400 uppercase tracking-wide">Premier League</p>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-600">SOON</span>
+        </div>
+        <div class="mt-2.5 flex items-center justify-center gap-2.5">
+          <span class="text-sm font-semibold text-gray-400">Team A</span>
+          <span class="text-gray-300 text-sm">vs</span>
+          <span class="text-sm font-semibold text-gray-400">Team B</span>
+        </div>
+        <p class="mt-2 text-xs text-gray-400 text-center">Belum ada match mendatang</p>
+      </article>
+    {% endif %}
+  </section>
+
 </div>
 {% endblock %}
