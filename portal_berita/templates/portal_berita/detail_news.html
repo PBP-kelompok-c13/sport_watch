@@ -20,7 +20,7 @@
             </div>
             {% if user.is_staff %}
             <div class="flex space-x-4">
-                <a href="{% url 'portal_berita:update_news' news.id %}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Edit</a>
+                <a href="{% url 'portal_berita:edit_news' news.id %}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Edit</a>
                 <form action="{% url 'portal_berita:delete_news' news.id %}" method="post" id="delete-form">
                     {% csrf_token %}
                     <button type="button" id="delete-btn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Delete</button>
