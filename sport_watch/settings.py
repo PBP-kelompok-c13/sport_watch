@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'portal_berita',
     'scoreboard',
-]
+    'fitur_belanja',
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
