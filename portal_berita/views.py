@@ -98,7 +98,7 @@ def create_news(request):
 @csrf_exempt
 @user_passes_test(is_admin)
 @login_required
-def update_news(request, id):
+def edit_news(request, id):
     berita = get_object_or_404(Berita, id=id)
 
     if request.method == 'POST':
@@ -131,6 +131,7 @@ def delete_news(request, id):
         return JsonResponse({'status': 'success', 'message': 'News deleted successfully.'})
     
     return HttpResponseRedirect(reverse('portal_berita:list_news'))
+
 
 @csrf_exempt
 @require_POST
