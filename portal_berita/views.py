@@ -17,9 +17,11 @@ def is_admin(user):
 
 @login_required
 def main_view(request):
+    news_list = Berita.objects.filter(is_published=True)
     context = {
         'Welcome': 'Welcome to Sport Watch!',
         'Who': 'Presented By Kelompok C 13',
+        'news_list': news_list,
     }
     return render(request, "portal_berita/main.html", context)
 

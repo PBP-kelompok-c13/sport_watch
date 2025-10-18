@@ -20,6 +20,7 @@ class Berita(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     judul = models.CharField(max_length=255, unique=True)
     konten = models.TextField()
+    deskripsi = models.TextField(blank=True, null=True)
     kategori = models.ForeignKey(
         KategoriBerita,
         on_delete=models.SET_NULL,
