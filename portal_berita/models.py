@@ -19,12 +19,12 @@ class KategoriBerita(models.Model):
 class Berita(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     judul = models.CharField(max_length=255, unique=True)
-    ringkasan = models.TextField(max_length=500, blank=True)
     konten = models.TextField()
     kategori = models.ForeignKey(
         KategoriBerita,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="berita",
     )
     thumbnail = models.URLField(blank=True, null=True)
@@ -49,6 +49,7 @@ class Berita(models.Model):
     def increment_views(self):
         self.views = models.F("views") + 1
         self.save(update_fields=["views"])
+        self.refresh_from_db(fields=["views"])
 
     @property
     def berita_hot(self):

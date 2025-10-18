@@ -18,7 +18,6 @@ class BeritaForm(forms.ModelForm):
         model = Berita
         fields = [
             'judul',
-            'ringkasan',
             'konten',
             'kategori',
             'thumbnail',
@@ -29,7 +28,6 @@ class BeritaForm(forms.ModelForm):
 
         widgets = {
             'judul': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the article title'}),
-            'ringkasan': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Provide a brief summary'}),
             'konten': forms.Textarea(attrs={'class': 'form-control', 'rows': 10}),
             'kategori': forms.Select(attrs={'class': 'form-select'}),
             'thumbnail': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com/image.jpg'}),
