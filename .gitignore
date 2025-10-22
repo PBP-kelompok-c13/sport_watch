@@ -115,3 +115,5 @@ GitHub.sublime-settings
 .history
 #drawio
 *.drawio
+scraper.py
+scrape_news.py

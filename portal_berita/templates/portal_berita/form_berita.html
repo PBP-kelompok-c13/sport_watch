@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">{% if form.instance.id %}Edit{% else %}Create{% endif %} News</h1>
+    <form method="post" id="news-form" class="space-y-6">
+        {% csrf_token %}
+        <div>
+            <label for="{{ form.judul.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.judul.label }}</label>
+            {{ form.judul }}
+        </div>
+        <div>
+            <label for="{{ form.konten.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.konten.label }}</label>
+            {{ form.konten }}
+        </div>
+        <div>
+            <div class="flex justify-between items-center">
+                <label for="{{ form.kategori.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.kategori.label }}</label>
+                <a href="{% url 'portal_berita:add_category' %}" class="text-sm text-blue-500 hover:text-blue-700">+ Add Category</a>
+            </div>
+            {{ form.kategori }}
+        </div>
+        <div>
+            <label for="{{ form.thumbnail.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.thumbnail.label }}</label>
+            {{ form.thumbnail }}
+        </div>
+        <div>
+            <label for="{{ form.sumber.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.sumber.label }}</label>
+            {{ form.sumber }}
+        </div>
+        <div>
+            <label for="{{ form.penulis.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.penulis.label }}</label>
+            {{ form.penulis }}
+        </div>
+        <div class="flex items-center">
+            {{ form.is_published }}
+            <label for="{{ form.is_published.id_for_label }}" class="ml-2 block text-sm text-gray-900">{{ form.is_published.label }}</label>
+        </div>
+        <div>
+            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('news-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var form = this;
+    var formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.href = "{% url 'portal_berita:list_news' %}";
+        } else {
+            // Handle errors
+            console.log(data.errors);
+            alert('Please correct the errors and try again.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+// Add Tailwind classes to form fields
+const fields = document.querySelectorAll('#news-form input, #news-form textarea, #news-form select');
+fields.forEach(field => {
+    if (field.type !== 'checkbox') {
+        field.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'shadow-sm', 'focus:border-indigo-300', 'focus:ring', 'focus:ring-indigo-200', 'focus:ring-opacity-50');
+    }
+});
+</script>
+{% endblock %}
