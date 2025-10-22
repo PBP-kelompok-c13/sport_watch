@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{% url 'shop:list' %}" class="text-blue-600">&larr; Back to Shop</a>
+
+<div class="grid lg:grid-cols-2 gap-8 mt-4">
+  <div>
+    <div class="bg-white rounded-2xl overflow-hidden">
+      {% if product.thumbnail %}<img src="{{product.thumbnail}}" class="w-full">{% endif %}
+    </div>
+  </div>
+  <div>
+    <div class="text-sm text-gray-500">{{ product.category.name }}</div>
+    <h1 class="text-3xl font-bold mt-1">{{ product.name }}</h1>
+
+    <div class="flex items-end gap-2 mt-3">
+      <div class="text-3xl font-bold">Rp {{ product.final_price|floatformat:0 }}</div>
+      {% if product.sale_price %}
+        <div class="text-gray-400 line-through">Rp {{ product.price|floatformat:0 }}</div>
+      {% endif %}
+      {% if product.sale_price %}<span class="px-2 py-1 bg-red-500 text-white text-xs rounded">Sale - {{ product.discount_percent }}%</span>{% endif %}
+      {% if not product.in_stock %}<span class="px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>{% endif %}
+    </div>
+
+    <p class="mt-4 text-gray-700">{{ product.description }}</p>
+
+    {% if show_member_price %}
+      <div class="mt-2 text-green-700 text-sm">Member benefit: akses harga promo & review.</div>
+    {% endif %}
+
+    <button class="mt-6 px-6 py-3 bg-blue-600 text-white rounded">Add to Cart</button>
+  </div>
+</div>
+
+<!-- Reviews (Form + AJAX POST untuk rubrik Forms + AJAX) -->
+<div class="mt-10">
+  <h2 class="text-xl font-semibold mb-3">Reviews ({{ product.rating_count }}) — {{ product.rating_avg|floatformat:1 }}★</h2>
+
+  {% if user.is_authenticated %}
+  <form id="reviewForm" class="bg-white p-4 rounded-lg shadow mb-6">
+    {{ form.as_p }}
+    <button class="px-4 py-2 bg-gray-900 text-white rounded">Submit Review</button>
+  </form>
+  {% else %}
+  <div class="bg-yellow-50 border border-yellow-200 text-sm p-3 rounded mb-6">
+    Login untuk menulis review.
+  </div>
+  {% endif %}
+
+  <div id="reviewList" class="space-y-4">
+    {% for r in reviews %}
+      <div class="bg-white p-4 rounded shadow">
+        <div class="text-sm text-gray-500">{{ r.user.username }} • {{ r.rating }}★</div>
+        {% if r.title %}<div class="font-semibold">{{ r.title }}</div>{% endif %}
+        <div class="text-gray-700">{{ r.content }}</div>
+      </div>
+    {% empty %}
+      <p class="text-gray-500">Belum ada review.</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% if user.is_authenticated %}
+<script>
+  // AJAX submit review
+  const form = document.getElementById('reviewForm');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const res = await fetch("{% url 'shop:create_review' product.id %}", {
+      method: "POST",
+      headers: {"X-Requested-With":"XMLHttpRequest", "X-CSRFToken": "{{ csrf_token }}"},
+      body: fd
+    });
+    const data = await res.json();
+    if (!data.ok) { alert("Gagal: " + JSON.stringify(data.errors)); return; }
+
+    const box = document.createElement('div');
+    box.className = "bg-white p-4 rounded shadow";
+    box.innerHTML = `<div class="text-sm text-gray-500">{{ request.user.username }} • ${data.review.rating}★</div>
+                     ${data.review.title ? `<div class="font-semibold">${data.review.title}</div>` : ''}
+                     <div class="text-gray-700">${data.review.content}</div>`;
+    document.getElementById('reviewList').prepend(box);
+    form.reset();
+  });
+</script>
+{% endif %}
+{% endblock %}
