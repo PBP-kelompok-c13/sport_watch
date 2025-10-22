@@ -9,13 +9,13 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.core import serializers
 
-from portal_berita.forms import BeritaForm, KategoriBeritaForm
-from portal_berita.models import Berita, KategoriBerita
+from portal_berita.forms import BeritaForm, KategoriBeritaForm, CommentForm
+from portal_berita.models import Berita, KategoriBerita, Comment
 
 def is_admin(user):
     return user.is_staff
 
-@login_required
+
 def main_view(request):
     news_list = Berita.objects.filter(is_published=True)
     context = {
@@ -25,53 +25,35 @@ def main_view(request):
     }
     return render(request, "portal_berita/main.html", context)
 
-def register_view(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Account created successfully! Please log in.')
-            return redirect('portal_berita:login')
-        else:
-            messages.error(request, 'Error creating account. Please check your input.')
-    else:
-        form = UserCreationForm()
-    return render(request, "portal_berita/register.html", {'form': form})
-
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome, {username}!')
-                return redirect('portal_berita:main')
-            else:
-                messages.error(request, 'Invalid username or password.')
-        else:
-            messages.error(request, 'Invalid username or password.')
-    else:
-        form = AuthenticationForm()
-    return render(request, "portal_berita/login.html", {'form': form})
-
-@login_required
-def logout_view(request):
-    logout(request)
-    messages.info(request, 'You have been logged out.')
-    return redirect('portal_berita:login')
-
-def list_news(request):
-    news_list = Berita.objects.filter(is_published=True)
-    context = {'news_list': news_list}
-    return render(request, 'portal_berita/list_news.html', context)
-
 def detail_news(request, id):
     news = get_object_or_404(Berita, id=id)
     news.increment_views()
-    context = {'news': news}
+
+    comments = news.comments.filter(parent__isnull=True)
+    comment_form = CommentForm()
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect('login')
+
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.berita = news
+            new_comment.user = request.user
+            
+            parent_id = request.POST.get('parent_id')
+            if parent_id:
+                new_comment.parent = Comment.objects.get(id=parent_id)
+            
+            new_comment.save()
+            return redirect('portal_berita:detail_news', id=id)
+
+    context = {
+        'news': news,
+        'comments': comments,
+        'comment_form': comment_form,
+    }
     return render(request, 'portal_berita/detail_news.html', context)
 
 @csrf_exempt
