@@ -7,7 +7,7 @@ class CommentForm(forms.ModelForm):
         fields = ['content']
         widgets = {
             'content': forms.Textarea(attrs={
-                'class': 'form-control',
+                'class': 'form-control w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none',
                 'rows': 3,
                 'placeholder': 'Join the discussion and leave a comment!'
             }),
