@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Pembayaran Sukses - Sport Watch{% endblock %}
+{% block content %}
+<div class="container mx-auto px-6 py-8 text-center">
+  <h1 class="text-3xl font-bold text-green-600 mb-4">Pembayaran Berhasil!</h1>
+  <p class="text-lg mb-6">Terima kasih telah berbelanja di <strong>Sport Watch</strong>.</p>
+  <a href="{% url 'shopping' %}" class="bg-black text-white py-3 px-6 rounded hover:bg-gray-800">Kembali ke Belanja</a>
+</div>
+{% endblock %}

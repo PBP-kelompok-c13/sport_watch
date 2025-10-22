@@ -5,4 +5,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('portal_berita.urls')),
     path('scoreboard/', include('scoreboard.urls')), 
+    path('fitur_belanja/', include('fitur_belanja.urls')), 
 ]
