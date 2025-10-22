@@ -1,0 +1,69 @@
+{# Partial create form for modal #}
+<form id="productCreateForm" method="post">
+  {% csrf_token %}
+
+  <div class="grid md:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium mb-1">Name</label>
+      {{ form.name }}
+      {% for e in form.name.errors %}<p class="text-red-600 text-sm">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Category</label>
+      {{ form.category }}
+      {% for e in form.category.errors %}<p class="text-red-600 text-sm">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Brand</label>
+      {{ form.brand }}
+      {% for e in form.brand.errors %}<p class="text-red-600 text-sm">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Stock</label>
+      {{ form.stock }}
+      {% for e in form.stock.errors %}<p class="text-red-600 text-sm">{{ e }}</p>{% endfor %}
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <label class="block text-sm font-medium mb-1">Description</label>
+    {{ form.description }}
+    {% for e in form.description.errors %}<p class="text-red-600 text-sm">{{ e }}</p>{% endfor %}
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-4 mt-4">
+    <div>
+      <label class="block text-sm font-medium mb-1">Price</label>
+      {{ form.price }}
+      {% for e in form.price.errors %}<p class="text-red-600 text-sm">{{ e }}</p>{% endfor %}
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Sale price</label>
+      {{ form.sale_price }}
+      {% for e in form.sale_price.errors %}<p class="text-red-600 text-sm">{{ e }}</p>{% endfor %}
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Currency</label>
+      {{ form.currency }}
+      {% for e in form.currency.errors %}<p class="text-red-600 text-sm">{{ e }}</p>{% endfor %}
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <label class="block text-sm font-medium mb-1">Thumbnail URL</label>
+    {{ form.thumbnail }}
+    {% for e in form.thumbnail.errors %}<p class="text-red-600 text-sm">{{ e }}</p>{% endfor %}
+  </div>
+
+  <div class="mt-4 flex items-center gap-2">
+    {{ form.is_featured }} <span class="text-sm">Featured</span>
+  </div>
+
+  <div class="mt-6 flex gap-3">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+    <button type="button" id="closeCreateModal" class="px-4 py-2 border rounded">Cancel</button>
+  </div>
+</form>

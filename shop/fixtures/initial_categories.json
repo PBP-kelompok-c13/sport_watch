@@ -1,0 +1,17 @@
+[
+  {"model":"shop.category","fields":{
+    "name":"Jerseys","slug":"jerseys","parent":null,
+    "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}},
+  {"model":"shop.category","fields":{
+    "name":"Footwear","slug":"footwear","parent":null,
+    "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}},
+  {"model":"shop.category","fields":{
+    "name":"Equipment","slug":"equipment","parent":null,
+    "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}},
+  {"model":"shop.category","fields":{
+    "name":"Accessories","slug":"accessories","parent":null,
+    "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}},
+  {"model":"shop.category","fields":{
+    "name":"Apparel","slug":"apparel","parent":null,
+    "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}}
+]
