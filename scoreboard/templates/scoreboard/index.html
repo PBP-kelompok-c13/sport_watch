@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function renderTo(targetWrap, data, status) {
     targetWrap.innerHTML = "";
     if (!data || data.length === 0) {
-      targetWrap.innerHTML = `<article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 text-center text-gray-400">No matches found.</article>`;
+      targetWrap.innerHTML = <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 text-center text-gray-400">No matches found.</article>;
       return;
     }
     data.forEach(s => targetWrap.insertAdjacentHTML("beforeend", cardHTML(s, status)));
@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      fetch(`/scoreboard/filter/?status=${encodeURIComponent(status)}`)
+      fetch(/scoreboard/filter/?status=${encodeURIComponent(status)})
         .then(r => r.json())
         .then(({scores}) => {
           if (status === "live")    { showOnly(secLive);     renderTo(wrapLive, scores, status); }
@@ -332,7 +332,7 @@ document.addEventListener("DOMContentLoaded", function () {
     btn.addEventListener("click", () => {
       const league = btn.getAttribute("data-league");
       setActive(leagueButtons, btn);
-      showToast(league ? `${league.toUpperCase()} filter applied ✅` : "Showing all sports 🏀⚽");
+      showToast(league ? ${league.toUpperCase()} filter applied ✅ : "Showing all sports 🏀⚽");
     });
   });
 });

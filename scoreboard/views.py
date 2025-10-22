@@ -82,4 +82,3 @@ def filter_scores(request):
         for s in data
      ]
     return jsonResponse({'scores': results})
-     
