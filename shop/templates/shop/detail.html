@@ -10,7 +10,7 @@
     </div>
   </div>
   <div>
-    <!-- kategori + owner -->
+    <!-- kategori dan ow owner -->
     <div class="text-sm text-gray-500">
       {{ product.category.name }}
       {% if product.created_by_id %} • by <span class="font-medium">{{ product.created_by.username }}</span>{% endif %}
@@ -52,7 +52,7 @@
   </div>
 </div>
 
-<!-- Reviews (Form + AJAX POST untuk rubrik Forms + AJAX) -->
+<!-- Reviews using ajaz-->
 <div class="mt-10">
   <h2 class="text-xl font-semibold mb-3">
     Reviews ({{ product.rating_count }}) — {% star_rating product.rating_avg 5 %}

@@ -4,7 +4,7 @@
 <h1 class="text-3xl font-bold mb-1">Sports Merchandise</h1>
 <p class="text-gray-600 mb-6">Shop official team gear and premium sports equipment</p>
 
-<!-- Toolbar: Search & Sort -->
+<!-- Toolbar Search dan Sort -->
 <form method="get" class="flex items-center gap-3 mb-4">
   <input name="q" value="{{ request.GET.q }}" placeholder="Search products..." class="flex-1 border rounded px-3 py-2">
   <select name="sort" class="border rounded px-3 py-2">
@@ -15,7 +15,7 @@
   <button class="px-4 py-2 bg-blue-600 text-white rounded">Apply</button>
 </form>
 
-<!-- (1) Add Product DI ATAS GRID — sekarang pakai modal (tanpa pindah page) -->
+<!-- Add Product DI ATAS GRID  using modal -->
 {% if user.is_authenticated %}
   <div class="mb-4 flex justify-end">
     <button id="openCreateModal"
@@ -37,7 +37,7 @@
 
 <p class="text-sm text-gray-500 mb-3">Showing {{ products|length }} of {{ page_obj.paginator.count }} products</p>
 
-<!-- (3) EMPTY STATE + CTA -->
+<!-- State kosong-->
 {% if page_obj.paginator.count == 0 %}
   <div class="bg-white rounded-xl p-10 text-center">
     <p class="text-gray-600 mb-4">Belum ada produk untuk kategori/pencarian ini.</p>
@@ -64,7 +64,7 @@
         <div class="text-xs text-gray-500">{% star_rating p.rating_avg 5 %} ({{ p.rating_count }})</div>
       </a>
 
-      <!-- Owner di kartu -->
+      <!-- owner pemilik card -->
       <div class="text-xs text-gray-500 mt-1">
         {% if p.created_by_id %}by <span class="font-medium">{{ p.created_by.username }}</span>{% endif %}
       </div>
@@ -113,7 +113,7 @@
 
 
 
-<!-- ===== Modal Create Product (tanpa pindah halaman) ===== -->
+<!--  Modal Create Product -->
 <div id="createModal" class="fixed inset-0 z-50 hidden">
   <!-- backdrop -->
   <div class="absolute inset-0 bg-black/40"></div>
@@ -133,7 +133,7 @@
 </div>
 
 <script>
-  // ===== AJAX Load More =====
+  //  AJAX Load More 
   const loadBtn = document.getElementById('loadMore');
   if (loadBtn) {
     loadBtn.addEventListener('click', async () => {
@@ -144,8 +144,7 @@
       const grid = document.getElementById('grid');
 
       data.results.forEach(p => {
-        // BACKEND NOTE:
-        // idealnya API mengirim p.is_owner (boolean) & p.owner (username)
+        //p.is_owner (boolean) & p.owner (username)
         const ownerText = p.owner ? `by <span class="font-medium">${p.owner}</span>` : '';
         const isOwner = !!p.is_owner; // fallback false jika tidak ada field-nya
         const disable = (!p.in_stock || isOwner) ? 'disabled' : '';
@@ -180,10 +179,10 @@
     });
   }
 
-  // ===== Mini toast helper =====
+  // mini toast helper 
   
 
-  // ===== Event untuk integrasi Cart (decoupled) =====
+  // ===== Event untuk integrasi CART (decoupled) =====
   document.addEventListener('click', (e) => {
     if (e.target.closest('.add-to-cart')) {
       const card = e.target.closest('[data-product-id]');
@@ -196,7 +195,7 @@
   });
   document.addEventListener('product:added', (e) => { showToast(`Added: ${e.detail.name}`, 'success'); }); //TOAST SUKSES
 
-  // ===== Modal Create Product (GET form fragment + POST via AJAX) =====
+  // ===== Modal Create Product  =====
   const modal = document.getElementById('createModal');
   const modalBody = document.getElementById('createModalBody');
   const openButtons = [
@@ -250,7 +249,7 @@
         return;
       }
 
-      // sukses -> tutup modal, prepend kartu baru
+      //wukses maka tutup modalprepend kartu baru
       closeCreateModal();
       const p = data.product;
       const ownerText = p.owner ? `by <span class="font-medium">${p.owner}</span>` : 'by <span class="font-medium">you</span>';

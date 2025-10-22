@@ -14,7 +14,7 @@ def price_idr(value):
 
 @register.simple_tag
 def star_rating(avg, size=5):
-    """Render ★★★★☆ dari angka 0..5 (bisa pecahan)"""
+    """Render bintang dari angka 05 """
     try:
         avg = float(avg or 0)
     except (TypeError, ValueError):

@@ -8,7 +8,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 User = get_user_model()
 
 
-# Inheritance base
+#Inh
 class TimeStampedUUIDModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -85,12 +85,12 @@ class Product(TimeStampedUUIDModel):
     description = models.TextField(blank=True)
 
     # harga dan stok
-    # DecimalField untuk akurasi harga (best practice)
+    # DecimalField untuk harga
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     sale_price = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
     )
-    currency = models.CharField(max_length=3, default="IDR")  #Bisa uuid atau idr
+    currency = models.CharField(max_length=3, default="IDR")  
     stock = models.PositiveIntegerField(default=0)
     total_sold = models.PositiveIntegerField(default=0)
 
@@ -120,7 +120,7 @@ class Product(TimeStampedUUIDModel):
     # util propertires view dan templatte
     @property
     def final_price(self):
-        #kita prioritaskan yang diskon
+        
         return self.sale_price if self.sale_price is not None else self.price
 
     @property
@@ -154,7 +154,7 @@ class Product(TimeStampedUUIDModel):
     def save(self, *args, **kwargs):
         if not self.slug:
             base = slugify(self.name)
-            # pastikan unik walau nama sama
+            #  unik walau nama sama
             candidate, i = base, 1
             while Product.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
                 i += 1

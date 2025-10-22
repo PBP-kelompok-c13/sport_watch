@@ -24,7 +24,7 @@ class ProductForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # pastikan dropdown Category/Brand terisi rapi
+        
         self.fields["category"].queryset = Category.objects.order_by("name")
         self.fields["brand"].queryset = Brand.objects.order_by("name")
         self.fields["category"].empty_label = "Select a category"

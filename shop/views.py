@@ -162,11 +162,7 @@ def product_edit(request, pk):
 @require_http_methods(["GET", "POST"])
 @login_required
 def product_create(request):
-    """
-    Jika GET via AJAX -> kirim fragment HTML form untuk dimuat ke modal.
-    Jika POST via AJAX -> validasi & simpan, lalu kembalikan JSON produk baru.
-    Jika non-AJAX -> redirect kembali ke list (kita pakai modal saja).
-    """
+   # get post via ajax, atau gak pakai ajax
     # form publik 
     from .forms import ProductForm
     class PublicProductForm(ProductForm):
@@ -256,18 +252,13 @@ def products_json(request):
 
 
 def _is_ajax(request):
-    # Standard way we used in this project
+   
     return request.headers.get("x-requested-with") == "XMLHttpRequest"
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def create_product(request):
-    """
-    Create Product.
-    - AJAX GET: returns JSON {'html': '<form ...>'}
-    - AJAX POST: returns JSON {'ok': True, 'product': {...}} or {'ok': False, 'html': '<form with errors>'}
-    - Non-AJAX: renders a normal page (optional fallback)
-    """
+  # ajax, get, post atau non ajax
     if request.method == "GET":
         form = ProductForm()
         if _is_ajax(request):
@@ -298,7 +289,7 @@ def create_product(request):
         }
         return JsonResponse({"ok": True, "product": payload}, status=201)
 
-    # invalid -> return the form fragment with errors
+    #Invalid maka return the form fragment with errors
     html = render_to_string("shop/_product_form.html", {"form": form}, request=request)
     return JsonResponse({"ok": False, "html": html}, status=400)
 
