@@ -6,4 +6,5 @@ urlpatterns = [
     path('', include('portal_berita.urls')),
     path('scoreboard/', include('scoreboard.urls')), 
     path("shop/", include("shop.urls")),
+    path('fitur_belanja/', include('fitur_belanja.urls')), 
 ]
