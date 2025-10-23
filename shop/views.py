@@ -16,20 +16,30 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q, F, Avg, Count 
 from django.core.exceptions import PermissionDenied
+from django.db.models.functions import Coalesce
+from django.db.models import DecimalField, F
 
 def product_list(request):
-    # filter dasar
     qs = Product.objects.filter(status="active").select_related("category","brand")
     cat = request.GET.get("category")
-    sort = request.GET.get("sort")  # sorting atau featured
-    q   = request.GET.get("q")      #MODULE SEARCH REFERENSI SINI
+    sort = request.GET.get("sort")
+    q   = request.GET.get("q")
 
     if cat: qs = qs.filter(category__slug=cat)
     if q:   qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
 
-    if sort == "price_asc":   qs = qs.order_by("sale_price","price")
-    elif sort == "price_desc":qs = qs.order_by(F("sale_price").desc(nulls_last=True), F("price").desc())
-    elif sort == "featured":  qs = qs.order_by("-is_featured","-created_at")
+    
+    qs = qs.annotate(effective_price=Coalesce("sale_price", "price", output_field=DecimalField()))
+
+    if sort == "price_asc":
+        qs = qs.order_by("effective_price", "-created_at")
+    elif sort == "price_desc":
+        qs = qs.order_by(F("effective_price").desc(), "-created_at")
+    elif sort == "featured":
+        # hanya feature
+        qs = qs.filter(is_featured=True).order_by("-created_at")
+    else:
+        qs = qs.order_by("-created_at")
 
     paginator = Paginator(qs, 6)  # 6 cards first
     page_obj = paginator.get_page(request.GET.get("page"))
@@ -217,7 +227,8 @@ def product_create(request):
         class Meta(ProductForm.Meta):
             fields = [
                 "name","category","brand","description",
-                "price","sale_price","currency","stock","thumbnail"
+                "price","sale_price","currency","stock","thumbnail",
+                "is_featured",  
             ]
 
     FormCls = PublicProductForm if not request.user.is_staff else ProductForm
@@ -268,14 +279,26 @@ def product_create(request):
 
 
 def products_json(request):
-    qs = Product.objects.filter(status="active")
-    cat = request.GET.get("category")
-    q   = request.GET.get("q")
+    qs   = Product.objects.filter(status="active").select_related("category","created_by")
+    cat  = request.GET.get("category")
+    q    = request.GET.get("q")
+    sort = request.GET.get("sort")
     page = int(request.GET.get("page", 1))
+
     if cat: qs = qs.filter(category__slug=cat)
     if q:   qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
 
-    paginator = Paginator(qs.order_by("-created_at"), 6)
+    qs = qs.annotate(effective_price=Coalesce("sale_price", "price", output_field=DecimalField()))
+    if sort == "price_asc":
+        qs = qs.order_by("effective_price", "-created_at")
+    elif sort == "price_desc":
+        qs = qs.order_by(F("effective_price").desc(), "-created_at")
+    elif sort == "featured":
+        qs = qs.filter(is_featured=True).order_by("-created_at")
+    else:
+        qs = qs.order_by("-created_at")
+
+    paginator = Paginator(qs, 6)
     page_obj = paginator.get_page(page)
 
     items = []
