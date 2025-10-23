@@ -1,20 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.decorators import user_passes_test
-from .models import scoreboard  
+from .models import Scoreboard
 from .forms import ScoreBoardForm
 from django.http import JsonResponse
 
 def is_admin(user):
     return user.is_authenticated and (user.is_staff or user.is_superuser)
 
-
 def index(request):
-    today = timezone.localdate()
-
-    live = scoreboard.objects.filter(tanggal=today).order_by('-tanggal')
-    finished = scoreboard.objects.filter(tanggal__lt=today).order_by('-tanggal')
-    upcoming = scoreboard.objects.filter(tanggal__gt=today).order_by('-tanggal')
+    # ambil langsung berdasarkan status
+    live = Scoreboard.objects.filter(status='live').order_by('-tanggal')
+    finished = Scoreboard.objects.filter(status='recent').order_by('-tanggal')
+    upcoming = Scoreboard.objects.filter(status='upcoming').order_by('-tanggal')
 
     context = {
         'judul': 'Scoreboard',
@@ -24,12 +22,10 @@ def index(request):
     }
     return render(request, 'scoreboard/index.html', context)
 
-
 @user_passes_test(is_admin)
 def scoreboard_management(request):
-    scores = scoreboard.objects.all().order_by('-tanggal')
+    scores = Scoreboard.objects.all().order_by('-tanggal')
     return render(request, 'scoreboard/scoreboard_management.html', {'scores': scores})
-
 
 @user_passes_test(is_admin)
 def create_score(request):
@@ -39,20 +35,18 @@ def create_score(request):
         return redirect('scoreboard:scoreboard_management')
     return render(request, 'scoreboard/score_form.html', {'form': form, 'title': 'Add New Score'})
 
-
 @user_passes_test(is_admin)
 def edit_score(request, pk):
-    item = get_object_or_404(scoreboard, pk=pk)
+    item = get_object_or_404(Scoreboard, pk=pk)
     form = ScoreBoardForm(request.POST or None, instance=item)
     if request.method == 'POST' and form.is_valid():
         form.save()
         return redirect('scoreboard:scoreboard_management')
     return render(request, 'scoreboard/score_form.html', {'form': form, 'title': 'Edit Score'})
 
-
 @user_passes_test(is_admin)
 def delete_score(request, pk):
-    item = get_object_or_404(scoreboard, pk=pk)
+    item = get_object_or_404(Scoreboard, pk=pk)
     if request.method == 'POST':
         item.delete()
         return redirect('scoreboard:scoreboard_management')
@@ -60,25 +54,26 @@ def delete_score(request, pk):
 
 def filter_scores(request):
     status = request.GET.get('status')
-    today = timezone.localdate()
-    
-    if status ==  "live":
-        data = scoreboard.objects.filter(tanggal=today)
-    elif status == "finished":
-        data = scoreboard.objects.filter(tanggal__lt=today)
-    elif status == "upcoming":
-        data = scoreboard,objects.filter(tanggal__gt=today)
-    else:
-        data = scoreboard.objects.all()
-        
+    sport = request.GET.get('sport')
+
+    data = Scoreboard.objects.all()
+
+    if status in {'live', 'recent', 'upcoming'}:
+        data = data.filter(status=status)
+
+    if sport:
+        data = data.filter(sport__iexact=sport)
+
     results = [
         {
             'tim1': s.tim1,
             'tim2': s.tim2,
             'skor_tim1': s.skor_tim1,
             'skor_tim2': s.skor_tim2,
-            'tanggal': s.tanggal.strftime('%Y-%m-%d'),
+            'tanggal': s.tanggal.strftime('%Y-%m-%d %H:%M') if hasattr(s.tanggal, 'strftime') else str(s.tanggal),
+            'sport': s.sport,
+            'status': s.status,
         }
         for s in data
-     ]
-    return jsonResponse({'scores': results})
+    ]
+    return JsonResponse({'scores': results})

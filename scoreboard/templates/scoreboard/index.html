@@ -63,7 +63,7 @@
     <div class="flex items-center gap-2 mb-3">
       <span class="h-2.5 w-2.5 rounded-full bg-rose-500 ring-4 ring-rose-100"></span>
       <h2 class="text-lg font-semibold">Live Now</h2>
-      {% if live %}<span class="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">1 Live</span>{% endif %}
+      {% if live %}<span class="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">{{ live|length }} Live</span>{% endif %}
     </div>
 
     {% if live %}
@@ -71,8 +71,16 @@
         {% for score in live %}
           <article class="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition p-4">
             <div class="flex items-start justify-between">
-              <p class="text-xs text-gray-500 uppercase tracking-wide">NBA</p>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-600 text-white">LIVE</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded
+                {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700
+                {% elif score.sport == 'EPL' %} bg-emerald-100 text-emerald-700
+                {% elif score.sport == 'NFL' %} bg-rose-100 text-rose-700
+                {% elif score.sport == 'MLB' %} bg-blue-100 text-blue-700
+                {% elif score.sport == 'NHL' %} bg-slate-100 text-slate-700
+                {% else %} bg-gray-100 text-gray-700 {% endif %}">
+                {{ score.get_sport_display }}
+              </span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-600 text-white ring-4 ring-rose-100">LIVE</span>
             </div>
 
             <div class="mt-3 flex items-center justify-between">
@@ -100,7 +108,7 @@
     {% else %}
       <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4">
         <div class="flex items-start justify-between">
-          <p class="text-xs text-gray-400 uppercase tracking-wide">NBA</p>
+          <p class="text-xs text-gray-400 uppercase tracking-wide">—</p>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-500">LIVE</span>
         </div>
         <div class="mt-3 flex items-center justify-between max-w-md mx-auto">
@@ -137,8 +145,16 @@
         {% for score in finished %}
           <article class="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition p-4">
             <div class="flex items-start justify-between">
-              <p class="text-xs text-gray-500 uppercase tracking-wide">NBA</p>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-900 text-white">FT</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded
+                {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700
+                {% elif score.sport == 'EPL' %} bg-emerald-100 text-emerald-700
+                {% elif score.sport == 'NFL' %} bg-rose-100 text-rose-700
+                {% elif score.sport == 'MLB' %} bg-blue-100 text-blue-700
+                {% elif score.sport == 'NHL' %} bg-slate-100 text-slate-700
+                {% else %} bg-gray-100 text-gray-700 {% endif %}">
+                {{ score.get_sport_display }}
+              </span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-900 text-white ring-4 ring-gray-100">FT</span>
             </div>
 
             <div class="mt-2.5 flex items-center justify-between">
@@ -166,7 +182,7 @@
     {% else %}
       <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4">
         <div class="flex items-start justify-between">
-          <p class="text-xs text-gray-400 uppercase tracking-wide">NBA</p>
+          <p class="text-xs text-gray-400 uppercase tracking-wide">—</p>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">FT</span>
         </div>
         <div class="mt-2.5 flex items-center justify-between max-w-md mx-auto">
@@ -201,8 +217,16 @@
         {% for score in upcoming %}
           <article class="rounded-2xl border border-amber-200 bg-white shadow-sm hover:shadow-md transition p-4">
             <div class="flex items-center justify-between">
-              <p class="text-xs text-gray-500 uppercase tracking-wide">Premier League</p>
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700">SOON</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded
+                {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700
+                {% elif score.sport == 'EPL' %} bg-emerald-100 text-emerald-700
+                {% elif score.sport == 'NFL' %} bg-rose-100 text-rose-700
+                {% elif score.sport == 'MLB' %} bg-blue-100 text-blue-700
+                {% elif score.sport == 'NHL' %} bg-slate-100 text-slate-700
+                {% else %} bg-gray-100 text-gray-700 {% endif %}">
+                {{ score.get_sport_display }}
+              </span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 ring-4 ring-amber-50">SOON</span>
             </div>
             <div class="mt-2.5 flex items-center justify-center gap-2.5">
               <span class="text-sm font-semibold text-gray-900">{{ score.tim1 }}</span>
@@ -216,7 +240,7 @@
     {% else %}
       <article class="rounded-2xl border border-amber-200 bg-white shadow-sm p-4">
         <div class="flex items-center justify-between">
-          <p class="text-xs text-gray-400 uppercase tracking-wide">Premier League</p>
+          <p class="text-xs text-gray-400 uppercase tracking-wide">—</p>
           <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-600">SOON</span>
         </div>
         <div class="mt-2.5 flex items-center justify-center gap-2.5">
@@ -243,17 +267,24 @@ document.addEventListener("DOMContentLoaded", function () {
   const wrapFinished = document.getElementById("finished-wrap");
   const wrapUpcoming = document.getElementById("upcoming-wrap");
 
-  function showToast(msg) {
+  let currentStatus = "";
+  let currentLeague = "";
+
+  // --- Toast helper ---
+  function showToast(msg, isError = false) {
     const toast = document.createElement("div");
     toast.textContent = msg;
-    toast.className = "fixed bottom-6 right-6 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-md text-sm z-50 animate-fade";
+    toast.className = `fixed bottom-6 right-6 px-4 py-2 rounded-lg shadow-md text-sm z-50 animate-fade ${
+      isError ? "bg-rose-600 text-white" : "bg-gray-900 text-white"
+    }`;
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2000);
+    setTimeout(() => toast.remove(), 2200);
   }
 
+  // --- UI helper ---
   function setActive(group, btn) {
-    group.forEach(b => b.classList.remove("bg-gray-900","text-white"));
-    btn.classList.add("bg-gray-900","text-white");
+    group.forEach(b => b.classList.remove("bg-gray-900", "text-white"));
+    btn.classList.add("bg-gray-900", "text-white");
   }
 
   function showOnly(section) {
@@ -262,17 +293,31 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function badgeFor(status) {
-    if (status === "live")    return '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-600 text-white">LIVE</span>';
-    if (status === "finished")return '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-900 text-white">FT</span>';
-    if (status === "upcoming")return '<span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700">SOON</span>';
+    if (status === "live")    return '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-600 text-white ring-4 ring-rose-100">LIVE</span>';
+    if (status === "finished")return '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-900 text-white ring-4 ring-gray-100">FT</span>';
+    if (status === "upcoming")return '<span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 ring-4 ring-amber-50">SOON</span>';
     return "";
+  }
+
+  // league color helper
+  function leagueBadgeClasses(code) {
+    switch ((code || '').toUpperCase()) {
+      case 'NBA': return 'bg-indigo-100 text-indigo-700';
+      case 'EPL': return 'bg-emerald-100 text-emerald-700';
+      case 'NFL': return 'bg-rose-100 text-rose-700';
+      case 'MLB': return 'bg-blue-100 text-blue-700';
+      case 'NHL': return 'bg-slate-100 text-slate-700';
+      default:    return 'bg-gray-100 text-gray-700';
+    }
   }
 
   function cardHTML(s, status) {
     return `
       <article class="rounded-2xl border ${status==='upcoming' ? 'border-amber-200' : 'border-gray-200'} bg-white shadow-sm hover:shadow-md transition p-4">
         <div class="flex items-start justify-between">
-          <p class="text-xs text-gray-500 uppercase tracking-wide">League</p>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded ${leagueBadgeClasses(s.sport)}">
+            ${s.sport_display || s.sport || "League"}
+          </span>
           ${badgeFor(status)}
         </div>
         <div class="mt-3 flex items-center justify-between">
@@ -298,41 +343,70 @@ document.addEventListener("DOMContentLoaded", function () {
   function renderTo(targetWrap, data, status) {
     targetWrap.innerHTML = "";
     if (!data || data.length === 0) {
-      targetWrap.innerHTML = <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 text-center text-gray-400">No matches found.</article>;
+      targetWrap.innerHTML = `
+        <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 text-center text-gray-400">
+          Nggak ada match untuk filter ini.
+        </article>`;
       return;
     }
     data.forEach(s => targetWrap.insertAdjacentHTML("beforeend", cardHTML(s, status)));
   }
 
-  // Status filters (Live, Finished, Upcoming)
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const status = btn.getAttribute("data-status") || "";
-      setActive(buttons, btn);
+  // --- Fetch filter data ---
+  async function fetchFiltered() {
+    const query = new URLSearchParams();
+    if (currentStatus) query.append("status", currentStatus);
+    if (currentLeague) query.append("sport", currentLeague);
 
-      if (status === "") {
+    try {
+      const response = await fetch(`/scoreboard/filter/?${query.toString()}`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      });
+
+      if (!response.ok) throw new Error("Server error");
+
+      const { scores } = await response.json();
+
+      if (!scores) throw new Error("Invalid data format");
+
+      if (currentStatus === "live") {
+        showOnly(secLive);
+        renderTo(wrapLive, scores, currentStatus);
+      } else if (currentStatus === "finished") {
+        showOnly(secFinished);
+        renderTo(wrapFinished, scores, currentStatus);
+      } else if (currentStatus === "upcoming") {
+        showOnly(secUpcoming);
+        renderTo(wrapUpcoming, scores, currentStatus);
+      } else {
+        // all status ("") -> show all sections
         [secLive, secFinished, secUpcoming].forEach(s => s.classList.remove("hidden"));
-        window.location.href = window.location.pathname;
-        return;
+        showToast("Showing all matches ✅");
+        await fetch(`/scoreboard/filter/`, { headers: { "X-Requested-With": "XMLHttpRequest" } });
       }
 
-      fetch(/scoreboard/filter/?status=${encodeURIComponent(status)})
-        .then(r => r.json())
-        .then(({scores}) => {
-          if (status === "live")    { showOnly(secLive);     renderTo(wrapLive, scores, status); }
-          if (status === "finished"){ showOnly(secFinished); renderTo(wrapFinished, scores, status); }
-          if (status === "upcoming"){ showOnly(secUpcoming); renderTo(wrapUpcoming, scores, status); }
-        })
-        .catch(() => showToast("❌ Gagal mengambil data."));
+    } catch (error) {
+      console.error("Fetch error:", error);
+      showToast("❌ Gagal mengambil data. Cek koneksi atau URL.", true);
+    }
+  }
+
+  // === FILTER STATUS ===
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentStatus = btn.getAttribute("data-status") || "";
+      setActive(buttons, btn);
+      fetchFiltered();
     });
   });
 
-  // Sports filter (toast only – visual feedback)
+  // === FILTER SPORT ===
   leagueButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      const league = btn.getAttribute("data-league");
+      currentLeague = btn.getAttribute("data-league").toUpperCase() || ""; // server pakai iexact, aman
       setActive(leagueButtons, btn);
-      showToast(league ? ${league.toUpperCase()} filter applied ✅ : "Showing all sports 🏀⚽");
+      showToast(currentLeague ? `${currentLeague} filter applied ✅` : "Showing all sports 🏀⚽");
+      fetchFiltered();
     });
   });
 });
