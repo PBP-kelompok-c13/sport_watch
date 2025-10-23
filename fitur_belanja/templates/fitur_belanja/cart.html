@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{% url 'shop:list' %}" class="text-sm text-gray-600">&larr; Continue Shopping</a>
+
+<h1 class="text-3xl font-bold mt-3 mb-1">Shopping Cart</h1>
+<p class="text-gray-500 mb-6">{{ cart.item_count }} item in your cart</p>
+
+<div class="grid lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-4">
+    {% for it in items %}
+      <div class="bg-white rounded-xl p-4 flex items-center gap-4"
+           data-item-id="{{ it.id }}">
+        <div class="w-20 h-20 bg-gray-100 rounded overflow-hidden">
+          {% if it.product.thumbnail %}
+            <img src="{{ it.product.thumbnail }}" class="w-full h-full object-cover">
+          {% endif %}
+        </div>
+        <div class="flex-1">
+          <div class="font-semibold">{{ it.product.name }}</div>
+          <div class="text-sm text-gray-500">{{ it.unit_price }}</div>
+          <div class="mt-2 inline-flex items-center border rounded">
+            <button class="qty-minus px-3 py-1">−</button>
+            <input class="qty-input w-12 text-center border-l border-r py-1" value="{{ it.qty }}">
+            <button class="qty-plus px-3 py-1">+</button>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="font-semibold">Rp {{ it.subtotal }}</div>
+          <button class="text-red-600 text-sm mt-2 remove-item">Remove</button>
+        </div>
+      </div>
+    {% empty %}
+      <div class="bg-white rounded-xl p-10 text-center text-gray-500">
+        Cart kamu kosong.
+      </div>
+    {% endfor %}
+  </div>
+
+  <aside class="bg-white rounded-xl p-4 h-fit">
+    <h3 class="font-semibold mb-3">Order Summary</h3>
+    <div class="flex justify-between py-1">
+      <span>Subtotal</span><span>Rp {{ subtotal }}</span>
+    </div>
+    <div class="flex justify-between py-1">
+      <span>Shipping</span><span>Rp {{ shipping }}</span>
+    </div>
+    <hr class="my-3">
+    <div class="flex justify-between font-semibold">
+      <span>Total</span><span>Rp {{ total }}</span>
+    </div>
+    <button class="w-full mt-4 bg-blue-600 text-white rounded py-2">Proceed to Checkout</button>
+    <a href="{% url 'shop:list' %}" class="w-full mt-2 border rounded py-2 inline-block text-center">Continue Shopping</a>
+  </aside>
+</div>
+
+<script>
+  function getCsrf() {
+    const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+  }
+
+  // qty +/-
+  document.addEventListener('click', async (e) => {
+    const wrap = e.target.closest('[data-item-id]');
+    if (!wrap) return;
+
+    const id = wrap.dataset.itemId;
+    const input = wrap.querySelector('.qty-input');
+    if (e.target.closest('.qty-minus')) {
+      input.value = Math.max(1, (parseInt(input.value || '1') - 1));
+    }
+    if (e.target.closest('.qty-plus')) {
+      input.value = (parseInt(input.value || '1') + 1);
+    }
+    if (e.target.closest('.qty-minus') || e.target.closest('.qty-plus')) {
+      await fetch("{% url 'fitur_belanja:update_qty' %}", {
+        method: "POST",
+        headers: {"X-CSRFToken": getCsrf()},
+        body: new URLSearchParams({ item_id: id, qty: input.value })
+      });
+    }
+    if (e.target.closest('.remove-item')) {
+      const res = await fetch("{% url 'fitur_belanja:remove_item' %}", {
+        method: "POST",
+        headers: {"X-CSRFToken": getCsrf()},
+        body: new URLSearchParams({ item_id: id })
+      });
+      if (res.ok) wrap.remove();
+    }
+  });
+</script>
+{% endblock %}
