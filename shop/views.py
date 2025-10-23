@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required,  permission_required
 from django.core.paginator import Paginator
 from django.db.models import Q, F
@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q, F, Avg, Count 
+from django.core.exceptions import PermissionDenied
 
 def product_list(request):
     # filter dasar
@@ -146,18 +147,64 @@ def product_mini_json(request, pk):
 
 
 @login_required
-@permission_required('shop.change_product', raise_exception=True)
+@require_http_methods(["GET", "POST"])
 def product_edit(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    if request.method == "POST":
-        form = ProductForm(request.POST, instance=product)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Product updated.")
-            return redirect('shop:detail', slug=product.slug)
-    else:
-        form = ProductForm(instance=product)
-    return render(request, "shop/product_form.html", {"form": form, "mode": "edit", "product": product})
+
+    # izinkan owner ATAU user yang punya perm change_product
+    if not (request.user == product.created_by or request.user.has_perm("shop.change_product")):
+        raise PermissionDenied("You are not allowed to edit this product.")
+
+    # kalau mau batasi field untuk non-staff, bisa pakai PublicProductForm seperti di product_create
+    FormCls = ProductForm
+
+    if request.method == "GET":
+        form = FormCls(instance=product)
+        # jika dipanggil via AJAX -> kembalikan fragment (pakai partial yang sudah ada)
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            html = render_to_string(
+                "shop/_product_form.html",
+                {"form": form, "mode": "edit", "product": product},
+                request=request,
+            )
+            return JsonResponse({"html": html})
+        # fallback full page
+        return render(request, "shop/product_form.html", {"form": form, "mode": "edit", "product": product})
+
+    # POST (simpan perubahan)
+    form = FormCls(request.POST, instance=product)
+    if not form.is_valid():
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            html = render_to_string(
+                "shop/_product_form.html",
+                {"form": form, "mode": "edit", "product": product},
+                request=request,
+            )
+            return JsonResponse({"ok": False, "html": html}, status=400)
+        return render(request, "shop/product_form.html", {"form": form, "mode": "edit", "product": product})
+
+    p = form.save()
+
+    # jika AJAX, balas payload minimal untuk update kartu di grid
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({
+            "ok": True,
+            "product": {
+                "id": str(p.id),
+                "slug": p.slug,
+                "name": p.name,
+                "thumbnail": p.thumbnail or "",
+                "category": p.category.name if p.category_id else None,
+                "price": float(p.price),
+                "sale_price": float(p.sale_price) if p.sale_price is not None else None,
+                "in_stock": p.in_stock,
+                "owner": p.created_by.username if p.created_by_id else None,
+            }
+        })
+
+    messages.success(request, "Product updated.")
+    return redirect("shop:detail", slug=p.slug)
+
 
 @require_http_methods(["GET", "POST"])
 @login_required
@@ -293,3 +340,14 @@ def create_product(request):
     html = render_to_string("shop/_product_form.html", {"form": form}, request=request)
     return JsonResponse({"ok": False, "html": html}, status=400)
 
+
+@login_required
+@require_POST
+def product_delete(request, pk):
+   
+    product = get_object_or_404(Product, pk=pk)
+    if not (request.user.is_staff or product.created_by_id == request.user.id):
+        return JsonResponse({"ok": False, "error": "Forbidden"}, status=403)
+
+    product.delete()
+    return JsonResponse({"ok": True}, status=200)

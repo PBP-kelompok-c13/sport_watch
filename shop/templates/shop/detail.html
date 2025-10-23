@@ -85,6 +85,8 @@
 
 {% if user.is_authenticated %}
 <script>
+  window.showToast = window.showToast || function (msg) { console.log('toast:', msg); };
+
   // CSRF dari cookie
   function getCookie(name){
     const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');

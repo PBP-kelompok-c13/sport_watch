@@ -75,7 +75,7 @@
       </div>
 
       {% if show_member_price %}
-        <div class="text-xs text-green-700 mt-1">Member price visible</div>
+        <div class="text-xs text-green-700 mt-1">Member</div>
       {% endif %}
 
       <div class="mt-3">
@@ -99,6 +99,13 @@
             Add to Cart
           {% endif %}
         </button>
+        {% if user.is_authenticated and user.is_staff or user.is_authenticated and p.created_by_id == user.id %}
+          <div class="mt-2 flex gap-2">
+            <a href="{% url 'shop:edit' p.id %}" class="px-3 py-1 border rounded text-sm">Edit</a>
+            <button class="px-3 py-1 border rounded text-sm text-red-600"
+                    data-action="delete" data-id="{{ p.id }}">Delete</button>
+          </div>
+        {% endif %}
       </div>
     </div>
   {% endfor %}
@@ -133,6 +140,8 @@
 </div>
 
 <script>
+  window.showToast = window.showToast || function (msg) { console.log('toast:', msg); };
+
   //  AJAX Load More 
   const loadBtn = document.getElementById('loadMore');
   if (loadBtn) {
@@ -282,6 +291,44 @@
       showToast('Product created ✅', 'success');
     });
   }
+
+   // === CSRF helper (dipakai untuk DELETE) ===
+  function getCookie(name){
+    const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+  }
+  const csrfToken = getCookie('csrftoken');
+
+  // === Handler tombol Delete di kartu (delegation) ===
+  // EXPECT: tombol punya attribute data-action="delete" dan data-id="<uuid>"
+  document.addEventListener('click', async (e) => {
+    const delBtn = e.target.closest('[data-action="delete"]');
+    if (!delBtn) return;
+
+    const id = delBtn.getAttribute('data-id');
+    if (!id) return;
+
+    if (!confirm('Delete this product?')) return;
+
+    const res = await fetch(`/shop/${id}/delete/`, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
+      }
+    });
+
+    const ok = res.ok;
+    if (!ok) {
+      showToast('Failed to delete product', 'error');
+      return;
+    }
+
+    // Hapus kartu dari grid
+    const card = delBtn.closest('[data-product-id]');
+    if (card) card.remove();
+    showToast('Product deleted ✅', 'success');
+  });
 </script>
 {% include 'toast.html' %}
 

@@ -1,0 +1,545 @@
+# shop/migrations/0002_seed_products_fixed.py
+from decimal import Decimal
+from django.db import migrations
+from django.utils.text import slugify
+
+
+# ---------- Helpers (dipakai di forward migration) ----------
+def ensure_category(Category, slug, name=None, parent=None):
+    """
+    Buat category jika belum ada (berdasarkan slug).
+    """
+    obj, _ = Category.objects.get_or_create(
+        slug=slug,
+        defaults={"name": name or slug.replace("-", " ").title(), "parent": parent},
+    )
+    return obj
+
+
+def ensure_brand(Brand, name):
+    """
+    Buat brand jika belum ada (berdasarkan slug=name-slugified).
+    """
+    obj, _ = Brand.objects.get_or_create(
+        slug=slugify(name),
+        defaults={"name": name},
+    )
+    return obj
+
+
+def seed_products_forward(apps, schema_editor):
+    Product = apps.get_model("shop", "Product")
+    Category = apps.get_model("shop", "Category")
+    Brand = apps.get_model("shop", "Brand")
+
+    # Pastikan kategori & brand ada (idempotent)
+    for cslug, cname in [
+        ("accessories", "Accessories"),
+        ("apparel", "Apparel"),
+        ("equipment", "Equipment"),
+        ("footwears", "Footwears"),
+        ("jerseys", "Jerseys"),
+    ]:
+        ensure_category(Category, cslug, cname)
+
+    for bname in ["Adidas", "Asics", "Puma", "New Balance", "Nike"]:
+        ensure_brand(Brand, bname)
+
+    # ================== DATASET GABUNGAN ==================
+    # NOTE:
+    # - Item "OLD PRODUCTS" menggunakan THUMBNAIL lama (url spesifik).
+    # - Item "MORE PRODUCTS" menambah variasi. Jika produk sudah ada,
+    #   kita tidak akan overwrite thumbnail yang sudah ada.
+    items = [
+        # ---------- OLD PRODUCTS (keep thumbnails) ----------
+        # Accessories
+        {
+            "name": "Adidas Performance Socks (2-Pack)",
+            "category_slug": "accessories",
+            "brand_name": "Adidas",
+            "price": 129000,
+            "sale_price": None,
+            "stock": 80,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAA8QkYS58t1UAyBSMUOheeLSDv85UhV3ylg&s",
+            "description": "Kaos kaki olahraga 2-pack, breathable.",
+        },
+        {
+            "name": "Nike Brasilia Duffel Small",
+            "category_slug": "accessories",
+            "brand_name": "Nike",
+            "price": 549000,
+            "sale_price": 479000,
+            "stock": 40,
+            "thumbnail": "https://www.planetsports.asia/media/catalog/product/cache/5916ecf3714e9284afcad6b81e33eb02/0/1/01-NIKE-B24WBNIK5-NIKDM3976010-Black.jpg",
+            "description": "Tas gym kecil, kompartemen sepatu terpisah.",
+        },
+
+        # Apparel
+        {
+            "name": "Puma Club Fleece Hoodie",
+            "category_slug": "apparel",
+            "brand_name": "Puma",
+            "price": 749000,
+            "sale_price": 669000,
+            "stock": 30,
+            "thumbnail": "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_600,h_600/global/626730/01/mod02/fnd/IND/fmt/png/CLUB-DE-COURSE-Fleece-Relaxed-Fit-Hoodie",
+            "description": "Hoodie hangat untuk latihan & santai.",
+        },
+        {
+            "name": "Asics Pro Dri-FIT Tee",
+            "category_slug": "apparel",
+            "brand_name": "Asics",
+            "price": 349000,
+            "sale_price": 299000,
+            "stock": 50,
+            "thumbnail": "https://www.mistertennis.com/images/2024-media-10/2041a339-400_A.jpg",
+            "description": "Kaos latih ringan & cepat kering.",
+        },
+
+        # Equipment
+        {
+            "name": "New Balance Match Football Size 5",
+            "category_slug": "equipment",
+            "brand_name": "New Balance",
+            "price": 359000,
+            "sale_price": None,
+            "stock": 60,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6Qijwe419Wux_4KTetHCdvv8isuLya2Hn1A&s",
+            "description": "Bola sepak ukuran 5 untuk latihan & pertandingan.",
+        },
+        {
+            "name": "Nike Composite Basketball 7",
+            "category_slug": "equipment",
+            "brand_name": "Nike",
+            "price": 499000,
+            "sale_price": 449000,
+            "stock": 35,
+            "thumbnail": "https://down-id.img.susercontent.com/file/sg-11134201-22120-rtlx3u3ztmlv8f",
+            "description": "Bola basket composite grip mantap, size 7.",
+        },
+
+        # Footwears
+        {
+            "name": "Adidas Run Nova v1",
+            "category_slug": "footwears",
+            "brand_name": "Adidas",
+            "price": 1599000,
+            "sale_price": None,
+            "stock": 25,
+            "thumbnail": "https://img.ncrsport.com/img/storage/large/AEE9267-1.jpg",
+            "description": "Sepatu lari ringan dengan cushioning responsif.",
+        },
+        {
+            "name": "Puma Speed Trainer",
+            "category_slug": "footwears",
+            "brand_name": "Puma",
+            "price": 1899000,
+            "sale_price": 1699000,
+            "stock": 18,
+            "thumbnail": "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/384638/12/sv01/fnd/IDN/fmt/png/Sepatu-X-Ray-Speed-Trainers",
+            "description": "Trainer stabil untuk HIIT & gym.",
+        },
+        {
+            "name": "Asics Cushion Ride",
+            "category_slug": "footwears",
+            "brand_name": "Asics",
+            "price": 1399000,
+            "sale_price": None,
+            "stock": 22,
+            "thumbnail": "https://runners.ae/cdn/shop/files/ASICS-GLIDERIDE-MAX-SHOES-FOR-MEN-MONUMENT-BLUE-VANILLA-1011B891-402_6.jpg?v=1748933938&width=580",
+            "description": "Kenyamanan harian dengan midsole empuk.",
+        },
+
+        # Jerseys
+        {
+            "name": "Nike Team Replica Home Jersey",
+            "category_slug": "jerseys",
+            "brand_name": "Nike",
+            "price": 599000,
+            "sale_price": 529000,
+            "stock": 28,
+            "thumbnail": "https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto/3edb7009-57af-4070-9ab9-69e18d85670c/PSG+M+NK+DF+JSY+SS+STAD+HM.png",
+            "description": "Jersey replika home, bahan ringan breathable.",
+        },
+        {
+            "name": "Adidas Team Replica Away Jersey",
+            "category_slug": "jerseys",
+            "brand_name": "Adidas",
+            "price": 599000,
+            "sale_price": 529000,
+            "stock": 28,
+            "thumbnail": "https://soccerzoneusa.com/cdn/shop/files/preview-3_94e8e5aa-90e8-42d8-84d4-d771505ad8d6_2000x.webp?v=1710435848",
+            "description": "Jersey replika away, cutting atletis.",
+        },
+
+        # ---------- MORE PRODUCTS (tambahan variasi) ----------
+        # Accessories
+        {
+            "name": "Adidas Tennis Wristbands",
+            "category_slug": "accessories",
+            "brand_name": "Adidas",
+            "price": 99000,
+            "sale_price": 79000,
+            "stock": 120,
+            "thumbnail": "",
+            "description": "Whttps://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6_lNXf2OlakMYcMRH9LJIAmcfACezhqv_7w&sristband menyerap keringat untuk tenis & gym.",
+        },
+        {
+            "name": "Puma Classic Cap",
+            "category_slug": "accessories",
+            "brand_name": "Puma",
+            "price": 179000,
+            "sale_price": None,
+            "stock": 70,
+            "thumbnail": "https://images.tokopedia.net/img/cache/700/VqbcmM/2025/1/18/ce41d02f-a4c3-4c8b-ae1d-4bbe3c7329a1.jpg",
+            "description": "Topi klasik untuk harian & olahraga.",
+        },
+        {
+            "name": "Asics Performance Socks",
+            "category_slug": "accessories",
+            "brand_name": "Asics",
+            "price": 119000,
+            "sale_price": None,
+            "stock": 90,
+            "thumbnail": "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full/catalog-image/106/MTA-182981392/asics_kaos-kaki-lari-unisex-asics-performance-run-sock-crew-3013a977503-original_full01.webp",
+            "description": "Kaos kaki tebal, support arch & breathable.",
+        },
+        {
+            "name": "Nike Swoosh Headband",
+            "category_slug": "accessories",
+            "brand_name": "Nike",
+            "price": 99000,
+            "sale_price": 89000,
+            "stock": 110,
+            "thumbnail": "https://img.ncrsport.com/img/storage/large/N.NN.07.101.OS-1.jpg",
+            "description": "Headband elastis, menyerap keringat.",
+        },
+        {
+            "name": "New Balance Water Bottle 600ml",
+            "category_slug": "accessories",
+            "brand_name": "New Balance",
+            "price": 89000,
+            "sale_price": None,
+            "stock": 150,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqu3gSQko-WPvzhHXZ4ZkLUKsWC686-h9Flg&s",
+            "description": "Botol minum BPA-free, 600ml.",
+        },
+
+        # Apparel
+        {
+            "name": "Nike Dri-FIT Training Tee",
+            "category_slug": "apparel",
+            "brand_name": "Nike",
+            "price": 329000,
+            "sale_price": None,
+            "stock": 80,
+            "thumbnail": "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full/catalog-image/MTA-182018936/nike_nike_men_training_dri-fit_tee_pro_pakaian_fitness_pria_-hv4132-010-_full02_nbiqhse0.jpeg",
+            "description": "Kaos Dri-FIT ringan & cepat kering.",
+        },
+        {
+            "name": "Adidas Essentials 3-Stripes Tee",
+            "category_slug": "apparel",
+            "brand_name": "Adidas",
+            "price": 299000,
+            "sale_price": 259000,
+            "stock": 70,
+            "thumbnail": "https://bb-scm-prod-pim.oss-ap-southeast-5.aliyuncs.com/products/8d944b02f9dc25635b2bb9b084e3265d/helix/02-ADIDAS-AFAV6ADI5-ADIIB8150-Black.jpg?x-oss-process=image/format,webp",
+            "description": "Kaos ikonik 3-Stripes, regular fit.",
+        },
+        {
+            "name": "Puma Active Woven Shorts",
+            "category_slug": "apparel",
+            "brand_name": "Puma",
+            "price": 279000,
+            "sale_price": None,
+            "stock": 65,
+            "thumbnail": "https://bb-scm-prod-pim.oss-ap-southeast-5.aliyuncs.com/products/52dbcde38d408749e51fed8811916399/helix/01-PUMA-ARAHOPMA0-PMA586862-01-Black.jpg?x-oss-process=image/format,webp",
+            "description": "Celana pendek ringan untuk latihan.",
+        },
+        {
+            "name": "Asics 7in Run Shorts",
+            "category_slug": "apparel",
+            "brand_name": "Asics",
+            "price": 299000,
+            "sale_price": 269000,
+            "stock": 55,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSv7kA2c781j754kikE3VW_2EZlYRwIMV2Zkg&s",
+            "description": "Run shorts 7 inci, airy mesh panel.",
+        },
+        {
+            "name": "New Balance Q-Speed Singlet",
+            "category_slug": "apparel",
+            "brand_name": "New Balance",
+            "price": 319000,
+            "sale_price": None,
+            "stock": 45,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLZWXgz2cmQ2VXMYdHjaiWT4LIlKKnVrGDkQ&s",
+            "description": "Singlet lari ringan, cepat kering.",
+        },
+
+        # Equipment
+        {
+            "name": "Adidas Captain Armband",
+            "category_slug": "equipment",
+            "brand_name": "Adidas",
+            "price": 79000,
+            "sale_price": None,
+            "stock": 90,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVOGDpYqiCnx6Jo0cZ4KRdGWhVynnzxDCY8g&s",
+            "description": "Ban kapten elastis untuk sepak bola.",
+        },
+        {
+            "name": "Asics Yoga Mat 6mm",
+            "category_slug": "equipment",
+            "brand_name": "Asics",
+            "price": 399000,
+            "sale_price": 349000,
+            "stock": 40,
+            "thumbnail": "https://down-id.img.susercontent.com/file/id-11134207-7r98p-lqx1y67uax9576",
+            "description": "Mat yoga 6mm anti-slip.",
+        },
+        {
+            "name": "Puma Agility Ladder",
+            "category_slug": "equipment",
+            "brand_name": "Puma",
+            "price": 259000,
+            "sale_price": None,
+            "stock": 35,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHMGz4FMRvO2eSYqJCjyJGoiuNiG98OHoZbQ&s",
+            "description": "Tangga agility untuk latihan footwork.",
+        },
+        {
+            "name": "Nike Resistance Mini Bands",
+            "category_slug": "equipment",
+            "brand_name": "Nike",
+            "price": 229000,
+            "sale_price": 199000,
+            "stock": 60,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQh4VGztLuOgZafvfaz0xF1HXapz2OUBNE2Xw&s",
+            "description": "Mini bands 3-level resistance.",
+        },
+        {
+            "name": "New Balance Foam Roller",
+            "category_slug": "equipment",
+            "brand_name": "New Balance",
+            "price": 279000,
+            "sale_price": None,
+            "stock": 50,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_ugdr9e0ElQlxHMHQPm3wEF9pep2br8Sxyw&s",
+            "description": "Foam roller untuk recovery otot.",
+        },
+
+        # Footwears
+        {
+            "name": "Nike Downshifter 12",
+            "category_slug": "footwears",
+            "brand_name": "Nike",
+            "price": 999000,
+            "sale_price": 899000,
+            "stock": 28,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzNNIoK6uR7Kue0qXWxLg8pHiITgY5ccGiug&s",
+            "description": "Sepatu lari entry-level, nyaman & ringan.",
+        },
+        {
+            "name": "Adidas Runfalcon 3.0",
+            "category_slug": "footwears",
+            "brand_name": "Adidas",
+            "price": 1099000,
+            "sale_price": None,
+            "stock": 26,
+            "thumbnail": "https://www.adidas.co.id/media/catalog/product/h/p/hp7558_2_footwear_photography_side20lateral20view_grey.jpg",
+            "description": "Runfalcon 3.0 untuk lari harian.",
+        },
+        {
+            "name": "Puma Smash v2",
+            "category_slug": "footwears",
+            "brand_name": "Puma",
+            "price": 899000,
+            "sale_price": 799000,
+            "stock": 24,
+            "thumbnail": "https://www.adidas.co.id/media/catalog/product/h/p/hp7558_2_footwear_photography_side20lateral20view_grey.jpg",
+            "description": "Sneakers klasik Puma Smash v2.",
+        },
+        {
+            "name": "Asics GEL-Rocket 11",
+            "category_slug": "footwears",
+            "brand_name": "Asics",
+            "price": 1199000,
+            "sale_price": 1099000,
+            "stock": 20,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZFi-64n4aw9CV1W2mP_PRQn56v7G1dTswIA&s",
+            "description": "All-round indoor court shoes yang stabil.",
+        },
+        {
+            "name": "New Balance 411v3",
+            "category_slug": "footwears",
+            "brand_name": "New Balance",
+            "price": 999000,
+            "sale_price": None,
+            "stock": 22,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZFi-64n4aw9CV1W2mP_PRQn56v7G1dTswIA&s",
+            "description": "Walking shoes empuk dan tahan lama.",
+        },
+
+        # Jerseys
+        {
+            "name": "Puma Team Cup Training Jersey",
+            "category_slug": "jerseys",
+            "brand_name": "Puma",
+            "price": 349000,
+            "sale_price": 309000,
+            "stock": 34,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQedQrtKsJn1gyvNLVL268i_LejZDk1efNww&s",
+            "description": "Jersey training Puma Team Cup, dryCELL.",
+        },
+        {
+            "name": "New Balance Liverpool Home 23/24",
+            "category_slug": "jerseys",
+            "brand_name": "New Balance",
+            "price": 1099000,
+            "sale_price": 999000,
+            "stock": 18,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQedQrtKsJn1gyvNLVL268i_LejZDk1efNww&s",
+            "description": "Jersey replika home Liverpool 23/24.",
+        },
+        {
+            "name": "Nike Academy Pro Drill Top",
+            "category_slug": "jerseys",
+            "brand_name": "Nike",
+            "price": 699000,
+            "sale_price": 639000,
+            "stock": 27,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTv7VqsYu2AHGGtDRE_YtaBlXu3TZ1dE3bH6Q&s",
+            "description": "Top latihan slim-fit, bahan Dri-FIT.",
+        },
+        {
+            "name": "Asics Volleyball Team Jersey",
+            "category_slug": "jerseys",
+            "brand_name": "Asics",
+            "price": 379000,
+            "sale_price": None,
+            "stock": 26,
+            "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTv7VqsYu2AHGGtDRE_YtaBlXu3TZ1dE3bH6Q&s",
+            "description": "Jersey tim voli ringan & breathable.",
+        },
+        {
+            "name": "Adidas Entrada 22 Jersey",
+            "category_slug": "jerseys",
+            "brand_name": "Adidas",
+            "price": 329000,
+            "sale_price": 299000,
+            "stock": 30,
+            "thumbnail": "https://bb-scm-prod-pim.oss-ap-southeast-5.aliyuncs.com/products/c8702dd8b44d23f245a7e49d4b682e1c/helix/01-ADIDAS-AOAJYADI5-ADIHE1575-Navy.jpg?x-oss-process=image/format,webp",
+            "description": "Jersey Entrada 22 untuk latihan & pertandingan.",
+        },
+    ]
+    # =======================================================
+
+    # Upsert idempotent + JANGAN timpa thumbnail jika produk sudah ada
+    for it in items:
+        base_slug = slugify(it["name"])
+        slug = base_slug
+
+        # hindari bentrok slug (append -2, -3, ...)
+        i = 2
+        while Product.objects.filter(slug=slug).exclude(name=it["name"]).exists():
+            slug = f"{base_slug}-{i}"
+            i += 1
+
+        category = ensure_category(Category, it["category_slug"])
+        brand = ensure_brand(Brand, it["brand_name"])
+
+        # get_or_create dulu agar bisa cek & jaga thumbnail lama
+        obj, created = Product.objects.get_or_create(
+            slug=slug,
+            defaults={
+                "name": it["name"],
+                "category": category,
+                "brand": brand,
+                "description": it.get("description", ""),
+                "price": Decimal(str(it["price"])),
+                "sale_price": (
+                    Decimal(str(it["sale_price"])) if it.get("sale_price") is not None else None
+                ),
+                "currency": "IDR",
+                "stock": it.get("stock", 50),
+                "thumbnail": it.get("thumbnail") or "",
+                "is_featured": it.get("is_featured", False),
+                "status": "active",
+            },
+        )
+
+        if not created:
+            # update field lain, tapi JANGAN overwrite thumbnail kalau sudah ada
+            obj.name = it["name"]
+            obj.category = category
+            obj.brand = brand
+            obj.description = it.get("description", obj.description or "")
+            obj.price = Decimal(str(it["price"]))
+            obj.sale_price = (
+                Decimal(str(it["sale_price"])) if it.get("sale_price") is not None else None
+            )
+            obj.currency = "IDR"
+            obj.stock = it.get("stock", obj.stock or 50)
+            obj.is_featured = it.get("is_featured", obj.is_featured)
+            obj.status = "active"
+            if not obj.thumbnail:  # hanya isi jika masih kosong
+                obj.thumbnail = it.get("thumbnail") or ""
+            obj.save()
+
+
+def seed_products_reverse(apps, schema_editor):
+    """
+    Rollback: hapus produk-produk yang kita seed.
+    """
+    Product = apps.get_model("shop", "Product")
+    names = [
+        # old + more
+        "Adidas Performance Socks (2-Pack)",
+        "Nike Brasilia Duffel Small",
+        "Puma Club Fleece Hoodie",
+        "Asics Pro Dri-FIT Tee",
+        "New Balance Match Football Size 5",
+        "Nike Composite Basketball 7",
+        "Adidas Run Nova v1",
+        "Puma Speed Trainer",
+        "Asics Cushion Ride",
+        "Nike Team Replica Home Jersey",
+        "Adidas Team Replica Away Jersey",
+        "Adidas Tennis Wristbands",
+        "Puma Classic Cap",
+        "Asics Performance Socks",
+        "Nike Swoosh Headband",
+        "New Balance Water Bottle 600ml",
+        "Nike Dri-FIT Training Tee",
+        "Adidas Essentials 3-Stripes Tee",
+        "Puma Active Woven Shorts",
+        "Asics 7in Run Shorts",
+        "New Balance Q-Speed Singlet",
+        "Adidas Captain Armband",
+        "Asics Yoga Mat 6mm",
+        "Puma Agility Ladder",
+        "Nike Resistance Mini Bands",
+        "New Balance Foam Roller",
+        "Nike Downshifter 12",
+        "Adidas Runfalcon 3.0",
+        "Puma Smash v2",
+        "Asics GEL-Rocket 11",
+        "New Balance 411v3",
+        "Puma Team Cup Training Jersey",
+        "New Balance Liverpool Home 23/24",
+        "Nike Academy Pro Drill Top",
+        "Asics Volleyball Team Jersey",
+        "Adidas Entrada 22 Jersey",
+    ]
+    Product.objects.filter(name__in=names).delete()
+
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ("shop", "0001_initial"),
+    ]
+
+    operations = [
+        migrations.RunPython(seed_products_forward, reverse_code=seed_products_reverse),
+    ]
