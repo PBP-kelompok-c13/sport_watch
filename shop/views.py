@@ -55,6 +55,7 @@ def product_detail(request, slug):
         "show_member_price": request.user.is_authenticated,
     })
 
+#def product_featured
 
 #JSON endpoints
 
