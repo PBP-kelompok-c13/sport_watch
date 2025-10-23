@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('portal_berita', '0001_initial'),
+        ('portal_berita', '0002_remove_produk_kategori_remove_berita_ringkasan_and_more'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

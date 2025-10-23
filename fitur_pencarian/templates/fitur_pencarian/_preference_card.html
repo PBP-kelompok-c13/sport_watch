@@ -1,0 +1,45 @@
+<div class="border border-gray-200 rounded-lg p-4 shadow-sm hover:border-blue-300 transition preference-card" data-id="{{ preference.id }}">
+    <div class="flex items-start justify-between gap-2">
+        <div>
+            <h3 class="text-base font-semibold text-gray-900">{{ preference.label }}</h3>
+            <p class="text-xs text-gray-500">Terakhir diperbarui {{ preference.updated_at|date:"d M Y H:i" }}</p>
+        </div>
+        <div class="flex flex-col items-end gap-1 text-xs">
+            <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 uppercase">{{ preference.get_default_scope_display }}</span>
+            {% if preference.is_staff_only %}
+                <span class="px-2 py-1 rounded-full bg-purple-100 text-purple-700 uppercase">Staf</span>
+            {% endif %}
+            {% if preference.only_discount %}
+                <span class="px-2 py-1 rounded-full bg-green-100 text-green-700 uppercase">Diskon</span>
+            {% endif %}
+        </div>
+    </div>
+    {% if preference.description %}
+        <p class="text-sm text-gray-600 mt-3">{{ preference.description }}</p>
+    {% endif %}
+    <ul class="mt-3 space-y-1 text-sm text-gray-600">
+        {% if preference.default_news_category %}
+            <li>• Fokus berita: {{ preference.default_news_category.nama }}</li>
+        {% endif %}
+        {% if preference.default_product_category %}
+            <li>• Kategori produk: {{ preference.default_product_category.name }}</li>
+        {% endif %}
+        {% if preference.default_brand %}
+            <li>• Brand favorit: {{ preference.default_brand.name }}</li>
+        {% endif %}
+        {% if preference.min_price or preference.max_price %}
+            <li>• Rentang harga: {{ preference.min_price|default:"0" }} - {{ preference.max_price|default:"∞" }}</li>
+        {% endif %}
+    </ul>
+    <div class="flex items-center justify-between mt-4">
+        <button type="button" class="text-sm text-blue-600 hover:underline apply-preference" data-id="{{ preference.id }}">Gunakan preset</button>
+        {% if request.user.is_authenticated and preference.user == request.user %}
+            <div class="flex items-center gap-3 text-sm">
+                <span class="text-gray-400">Privasi: {{ preference.get_role_visibility_display }}</span>
+                <button type="button" class="text-gray-600 hover:text-blue-600 edit-preference" data-id="{{ preference.id }}">Edit</button>
+            </div>
+        {% else %}
+            <span class="text-xs text-gray-400">Dibuat oleh {{ preference.user.username }}</span>
+        {% endif %}
+    </div>
+</div>

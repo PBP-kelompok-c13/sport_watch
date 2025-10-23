@@ -1,0 +1,96 @@
+<form id="preference-form" method="post" class="space-y-4">
+    {% csrf_token %}
+    {% if preference %}
+        <input type="hidden" name="id" value="{{ preference.id }}">
+    {% endif %}
+    {% if form.non_field_errors %}
+        <div class="bg-red-50 border border-red-200 text-red-600 text-sm rounded-md p-3">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+    <div class="grid md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="id_label">{{ form.label.label }}</label>
+            {{ form.label }}
+            {% if form.label.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.label.errors|join:', ' }}</p>
+            {% endif %}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="id_default_scope">{{ form.default_scope.label }}</label>
+            {{ form.default_scope }}
+            {% if form.default_scope.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.default_scope.errors|join:', ' }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700" for="id_description">{{ form.description.label }}</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+            <p class="text-xs text-red-500 mt-1">{{ form.description.errors|join:', ' }}</p>
+        {% endif %}
+    </div>
+    <div class="grid md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="id_default_news_category">{{ form.default_news_category.label }}</label>
+            {{ form.default_news_category }}
+            {% if form.default_news_category.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.default_news_category.errors|join:', ' }}</p>
+            {% endif %}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="id_default_product_category">{{ form.default_product_category.label }}</label>
+            {{ form.default_product_category }}
+            {% if form.default_product_category.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.default_product_category.errors|join:', ' }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="id_default_brand">{{ form.default_brand.label }}</label>
+            {{ form.default_brand }}
+            {% if form.default_brand.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.default_brand.errors|join:', ' }}</p>
+            {% endif %}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="id_role_visibility">{{ form.role_visibility.label }}</label>
+            {{ form.role_visibility }}
+            {% if form.role_visibility.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.role_visibility.errors|join:', ' }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="id_min_price">{{ form.min_price.label }}</label>
+            {{ form.min_price }}
+            {% if form.min_price.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.min_price.errors|join:', ' }}</p>
+            {% endif %}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="id_max_price">{{ form.max_price.label }}</label>
+            {{ form.max_price }}
+            {% if form.max_price.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.max_price.errors|join:', ' }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="flex items-center gap-4">
+        <label class="inline-flex items-center gap-2">
+            {{ form.only_discount }}
+            <span class="text-sm text-gray-700">{{ form.only_discount.label }}</span>
+        </label>
+        <label class="inline-flex items-center gap-2">
+            {{ form.is_public }}
+            <span class="text-sm text-gray-700">{{ form.is_public.label }}</span>
+        </label>
+    </div>
+    <div class="flex items-center justify-end gap-3">
+        <button type="button" class="px-4 py-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100" id="cancel-preference">Batal</button>
+        <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">Simpan Preset</button>
+    </div>
+</form>
