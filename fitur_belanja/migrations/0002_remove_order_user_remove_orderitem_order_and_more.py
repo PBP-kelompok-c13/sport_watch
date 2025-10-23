@@ -150,5 +150,7 @@ class Migration(migrations.Migration):
         name='cartitem',
         unique_together={('cart', 'product')},
     ),
+
+    #testing
 ]
 
