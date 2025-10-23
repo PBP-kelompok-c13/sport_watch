@@ -85,62 +85,110 @@
 
 {% if user.is_authenticated %}
 <script>
+  // fallback kecil biar nggak error kalau showToast belum ada
   window.showToast = window.showToast || function (msg) { console.log('toast:', msg); };
 
   // CSRF dari cookie
   function getCookie(name){
-    const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+    var m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
     return m ? m.pop() : '';
   }
-  const csrfToken = getCookie('csrftoken');
+  var csrfToken = getCookie('csrftoken');
 
-  function renderStars(avg, max=5){
-    const f = Math.floor(avg), h = (avg - f) >= .5 ? 1 : 0, e = max - f - h;
+  function renderStars(avg, max){
+    if (typeof max === 'undefined') max = 5;
+    var f = Math.floor(avg);
+    var h = ((avg - f) >= 0.5) ? 1 : 0;
+    var e = max - f - h;
     return '★'.repeat(f) + (h ? '☆' : '') + '☆'.repeat(e);
   }
 
-  const form = document.getElementById('reviewForm');
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const fd = new FormData(form);
+  // ----- Submit Review 
+  var form = document.getElementById('reviewForm');
+  if (form) {
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var fd = new FormData(form);
 
-    const res = await fetch("{% url 'shop:create_review' product.id %}", {
-      method: "POST",
-      headers: { "X-Requested-With":"XMLHttpRequest", "X-CSRFToken": csrfToken },
-      body: fd
+      var res = await fetch("{% url 'shop:create_review' product.id %}", {
+        method: "POST",
+        headers: { "X-Requested-With":"XMLHttpRequest", "X-CSRFToken": csrfToken },
+        body: fd
+      });
+
+      var ct = res.headers.get('content-type') || '';
+      if (ct.indexOf('application/json') === -1) {
+        showToast("Sesi habis / error. Refresh halaman.", 'error');
+        return;
+      }
+
+      var data = await res.json();
+      if (!data.ok) {
+        showToast("Gagal submit review", 'error');
+        return;
+      }
+
+      // prepend review baru (pakai string concat, bukan backticks)
+      var box = document.createElement('div');
+      box.className = "bg-white p-4 rounded shadow";
+      box.innerHTML =
+        '<div class="text-sm text-gray-500">{{ request.user.username }} • ' + data.review.rating + '★</div>' +
+        (data.review.title ? '<div class="font-semibold">' + data.review.title + '</div>' : '') +
+        '<div class="text-gray-700">' + data.review.content + '</div>';
+
+      var list = document.getElementById('reviewList');
+      if (list && list.firstChild) list.insertBefore(box, list.firstChild);
+      else if (list) list.appendChild(box);
+
+      // update heading jumlah & bintang
+      var h2 = document.querySelector('h2');
+      if (h2) h2.innerHTML = 'Reviews (' + data.rating_count + ') — ' + renderStars(Number(data.rating_avg), 5);
+
+      form.reset();
+      showToast("Review submitted ✅", 'success');
     });
+  }
 
-    const ct = res.headers.get('content-type') || '';
-    if (!ct.includes('application/json')) {
-      showToast("Sesi habis / error. Refresh halaman.", 'error');
-      return;
-    }
+  // ----- Add-to-cart dari halaman detail (payload product_id di-quote)
+  (function () {
+    var btn = document.querySelector('button.mt-6:not([disabled])');
+    if (!btn) return;
 
-    const data = await res.json();
-    if (!data.ok) {
-      showToast("Gagal submit review", 'error');
-      return;
-    }
+    btn.addEventListener('click', function () {
+      var payload = { product_id: "{{ product.id }}", qty: 1 };
 
-    // prepend review baru
-    const box = document.createElement('div');
-    box.className = "bg-white p-4 rounded shadow";
-    box.innerHTML = `
-      <div class="text-sm text-gray-500">{{ request.user.username }} • ${data.review.rating}★</div>
-      ${data.review.title ? `<div class="font-semibold">${data.review.title}</div>` : ''}
-      <div class="text-gray-700">${data.review.content}</div>
-    `;
-    document.getElementById('reviewList').prepend(box);
+      fetch("{% url 'fitur_belanja:add_to_cart' %}", {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (r) {
+        if (!r.ok || !r.data || !r.data.ok) throw new Error((r.data && r.data.error) || 'Failed');
 
-    // update heading jumlah & bintang
-    const h2 = document.querySelector('h2');
-    if (h2) h2.innerHTML = `Reviews (${data.rating_count}) — ${renderStars(Number(data.rating_avg), 5)}`;
-
-    form.reset();
-    showToast("Review submitted ✅", 'success');
-  });
+        var badge = document.getElementById('cartBadge');
+        if (badge) {
+          badge.textContent = r.data.cart_count;
+          badge.classList.remove('hidden');
+        }
+        showToast('Added to cart ✅', 'success');
+      })
+      .catch(function () {
+        showToast('Failed to add to cart', 'error');
+      });
+    });
+  })();
 </script>
 {% endif %}
+
 
 {% include 'toast.html' %}
 {% endblock %}
