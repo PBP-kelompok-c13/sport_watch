@@ -20,6 +20,8 @@ class Scoreboard(models.Model):
     tim2 = models.CharField(max_length=50)
     skor_tim1 = models.IntegerField()
     skor_tim2 = models.IntegerField()
+    logo_tim1 = models.URLField(blank=True, null=True)
+    logo_tim2 = models.URLField(blank=True, null=True)
     # buat admin
     tanggal = models.DateTimeField(default=timezone.now)
     sport = models.CharField(max_length=10, choices=SPORT_CHOICES)

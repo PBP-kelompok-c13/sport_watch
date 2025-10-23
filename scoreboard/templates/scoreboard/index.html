@@ -85,7 +85,11 @@
 
             <div class="mt-3 flex items-center justify-between">
               <div class="flex items-center gap-2.5">
-                <div class="h-9 w-9 rounded bg-gray-100"></div>
+                {% if score.logo_tim1 %}
+                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async">
+                {% else %}
+                  <div class="h-9 w-9 rounded-full bg-gray-100"></div>
+                {% endif %}
                 <div class="text-base font-semibold text-gray-900">{{ score.tim1 }}</div>
               </div>
 
@@ -97,11 +101,15 @@
 
               <div class="flex items-center gap-2.5 justify-end">
                 <div class="text-base font-semibold text-gray-900 text-right">{{ score.tim2 }}</div>
-                <div class="h-9 w-9 rounded bg-gray-100"></div>
+                {% if score.logo_tim2 %}
+                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async">
+                {% else %}
+                  <div class="h-9 w-9 rounded-full bg-gray-100"></div>
+                {% endif %}
               </div>
             </div>
 
-            <p class="mt-2 text-xs text-gray-500">Crypto.com Arena • {{ score.tanggal }}</p>
+            <p class="mt-2 text-xs text-gray-500">{{ score.tanggal }}</p>
           </article>
         {% endfor %}
       </div>
@@ -113,7 +121,7 @@
         </div>
         <div class="mt-3 flex items-center justify-between max-w-md mx-auto">
           <div class="flex items-center gap-2.5">
-            <div class="h-9 w-9 rounded bg-gray-100"></div>
+            <div class="h-9 w-9 rounded-full bg-gray-100"></div>
             <div class="text-base font-semibold text-gray-400">Team A</div>
           </div>
           <div class="flex items-end gap-2">
@@ -123,7 +131,7 @@
           </div>
           <div class="flex items-center gap-2.5 justify-end">
             <div class="text-base font-semibold text-gray-400 text-right">Team B</div>
-            <div class="h-9 w-9 rounded bg-gray-100"></div>
+            <div class="h-9 w-9 rounded-full bg-gray-100"></div>
           </div>
         </div>
         <p class="mt-2 text-center text-xs text-gray-400">Nggak ada match live hari ini</p>
@@ -159,7 +167,11 @@
 
             <div class="mt-2.5 flex items-center justify-between">
               <div class="flex items-center gap-2.5">
-                <div class="h-8 w-8 rounded bg-gray-100"></div>
+                {% if score.logo_tim1 %}
+                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async"">
+                {% else %}
+                  <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+                {% endif %}
                 <div class="text-sm font-semibold text-gray-900">{{ score.tim1 }}</div>
               </div>
 
@@ -171,7 +183,11 @@
 
               <div class="flex items-center gap-2.5 justify-end">
                 <div class="text-sm font-semibold text-gray-900 text-right">{{ score.tim2 }}</div>
-                <div class="h-8 w-8 rounded bg-gray-100"></div>
+                {% if score.logo_tim2 %}
+                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async">
+                {% else %}
+                  <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+                {% endif %}
               </div>
             </div>
 
@@ -187,7 +203,7 @@
         </div>
         <div class="mt-2.5 flex items-center justify-between max-w-md mx-auto">
           <div class="flex items-center gap-2.5">
-            <div class="h-8 w-8 rounded bg-gray-100"></div>
+            <div class="h-8 w-8 rounded-full bg-gray-100"></div>
             <div class="text-sm font-semibold text-gray-400">Team A</div>
           </div>
           <div class="flex items-center gap-2">
@@ -197,7 +213,7 @@
           </div>
           <div class="flex items-center gap-2.5 justify-end">
             <div class="text-sm font-semibold text-gray-400 text-right">Team B</div>
-            <div class="h-8 w-8 rounded bg-gray-100"></div>
+            <div class="h-8 w-8 rounded-full bg-gray-100"></div>
           </div>
         </div>
         <p class="mt-2 text-center text-xs text-gray-400">Belum ada match yang selesai</p>
@@ -229,9 +245,19 @@
               <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 ring-4 ring-amber-50">SOON</span>
             </div>
             <div class="mt-2.5 flex items-center justify-center gap-2.5">
+              {% if score.logo_tim1 %}
+                <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-cover border border-gray-200">
+              {% else %}
+                <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+              {% endif %}
               <span class="text-sm font-semibold text-gray-900">{{ score.tim1 }}</span>
               <span class="text-gray-400 text-sm">vs</span>
               <span class="text-sm font-semibold text-gray-900">{{ score.tim2 }}</span>
+              {% if score.logo_tim2 %}
+                <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-cover border border-gray-200">
+              {% else %}
+                <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+              {% endif %}
             </div>
             <p class="mt-2 text-xs text-gray-500 text-center">{{ score.tanggal }}</p>
           </article>
@@ -270,7 +296,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentStatus = "";
   let currentLeague = "";
 
-  // --- Toast helper ---
   function showToast(msg, isError = false) {
     const toast = document.createElement("div");
     toast.textContent = msg;
@@ -281,7 +306,6 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => toast.remove(), 2200);
   }
 
-  // --- UI helper ---
   function setActive(group, btn) {
     group.forEach(b => b.classList.remove("bg-gray-900", "text-white"));
     btn.classList.add("bg-gray-900", "text-white");
@@ -299,7 +323,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return "";
   }
 
-  // league color helper
   function leagueBadgeClasses(code) {
     switch ((code || '').toUpperCase()) {
       case 'NBA': return 'bg-indigo-100 text-indigo-700';
@@ -309,6 +332,13 @@ document.addEventListener("DOMContentLoaded", function () {
       case 'NHL': return 'bg-slate-100 text-slate-700';
       default:    return 'bg-gray-100 text-gray-700';
     }
+  }
+
+  function teamLogo(logo, name) {
+    if (logo) {
+      return `<img src="${logo}" alt="${name}" class="h-9 w-9 rounded-full object-cover shadow-sm hover:scale-105 transition-transform">`;
+    }
+    return `<div class="h-9 w-9 rounded-full bg-gray-50"></div>`;
   }
 
   function cardHTML(s, status) {
@@ -322,7 +352,7 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         <div class="mt-3 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <div class="h-9 w-9 rounded bg-gray-100"></div>
+            ${teamLogo(s.logo_tim1, s.tim1)}
             <div class="text-base font-semibold text-gray-900">${s.tim1}</div>
           </div>
           <div class="flex items-end gap-2">
@@ -332,7 +362,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
           <div class="flex items-center gap-2.5 justify-end">
             <div class="text-base font-semibold text-gray-900 text-right">${s.tim2}</div>
-            <div class="h-9 w-9 rounded bg-gray-100"></div>
+            ${teamLogo(s.logo_tim2, s.tim2)}
           </div>
         </div>
         <p class="mt-2 text-xs text-gray-500">${s.tanggal}</p>
@@ -352,10 +382,12 @@ document.addEventListener("DOMContentLoaded", function () {
     data.forEach(s => targetWrap.insertAdjacentHTML("beforeend", cardHTML(s, status)));
   }
 
-  // --- Fetch filter data ---
   async function fetchFiltered() {
     const query = new URLSearchParams();
-    if (currentStatus) query.append("status", currentStatus);
+
+    const statusParam = currentStatus === 'finished' ? 'recent' : currentStatus;
+    if (statusParam) query.append("status", statusParam);
+
     if (currentLeague) query.append("sport", currentLeague);
 
     try {
@@ -366,22 +398,22 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!response.ok) throw new Error("Server error");
 
       const { scores } = await response.json();
-
       if (!scores) throw new Error("Invalid data format");
 
-      if (currentStatus === "live") {
+      if (statusParam === "live") {
         showOnly(secLive);
-        renderTo(wrapLive, scores, currentStatus);
-      } else if (currentStatus === "finished") {
+        renderTo(wrapLive, scores, "live");
+      } else if (statusParam === "recent") {
         showOnly(secFinished);
-        renderTo(wrapFinished, scores, currentStatus);
-      } else if (currentStatus === "upcoming") {
+        renderTo(wrapFinished, scores, "finished");
+      } else if (statusParam === "upcoming") {
         showOnly(secUpcoming);
-        renderTo(wrapUpcoming, scores, currentStatus);
+        renderTo(wrapUpcoming, scores, "upcoming");
       } else {
-        // all status ("") -> show all sections
+       
         [secLive, secFinished, secUpcoming].forEach(s => s.classList.remove("hidden"));
         showToast("Showing all matches ✅");
+    
         await fetch(`/scoreboard/filter/`, { headers: { "X-Requested-With": "XMLHttpRequest" } });
       }
 
@@ -403,7 +435,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // === FILTER SPORT ===
   leagueButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      currentLeague = btn.getAttribute("data-league").toUpperCase() || ""; // server pakai iexact, aman
+      currentLeague = (btn.getAttribute("data-league") || "").toUpperCase(); 
       setActive(leagueButtons, btn);
       showToast(currentLeague ? `${currentLeague} filter applied ✅` : "Showing all sports 🏀⚽");
       fetchFiltered();
