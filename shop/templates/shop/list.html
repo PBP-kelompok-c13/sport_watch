@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-1">Sports Merchandise</h1>
+<p class="text-gray-600 mb-6">Shop official team gear and premium sports equipment</p>
+
+<!-- Toolbar Search dan Sort -->
+<form method="get" class="flex items-center gap-3 mb-4">
+  <input name="q" value="{{ request.GET.q }}" placeholder="Search products..." class="flex-1 border rounded px-3 py-2">
+  <select name="sort" class="border rounded px-3 py-2">
+    <option value="featured"   {% if sort == 'featured' %}selected{% endif %}>Featured</option>
+    <option value="price_asc"  {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+    <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+  </select>
+  <button class="px-4 py-2 bg-blue-600 text-white rounded">Apply</button>
+</form>
+
+<!-- Add Product DI ATAS GRID  using modal -->
+{% if user.is_authenticated %}
+  <div class="mb-4 flex justify-end">
+    <button id="openCreateModal"
+       class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-black">
+      + Add Product
+    </button>
+  </div>
+{% endif %}
+
+<!-- Category chips -->
+<div class="flex flex-wrap gap-2 mb-6">
+  <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}"
+     class="px-3 py-1 rounded-full border {% if not active_cat %}bg-gray-200{% endif %}">All</a>
+  {% for c in categories %}
+    <a href="?category={{ c.slug }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}"
+       class="px-3 py-1 rounded-full border {% if active_cat == c.slug %}bg-gray-800 text-white{% endif %}">{{ c.name }}</a>
+  {% endfor %}
+</div>
+
+<p class="text-sm text-gray-500 mb-3">Showing {{ products|length }} of {{ page_obj.paginator.count }} products</p>
+
+<!-- State kosong-->
+{% if page_obj.paginator.count == 0 %}
+  <div class="bg-white rounded-xl p-10 text-center">
+    <p class="text-gray-600 mb-4">Belum ada produk untuk kategori/pencarian ini.</p>
+    {% if user.is_authenticated %}
+      <button id="openCreateModalEmpty" class="px-4 py-2 bg-gray-900 text-white rounded">
+        Add your first product
+      </button>
+    {% endif %}
+  </div>
+{% endif %}
+
+<!-- Grid -->
+<div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  {% for p in products %}
+    <div class="relative bg-white rounded-2xl shadow p-4" data-product-id="{{p.id}}">
+      {% if p.sale_price %}<span class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">Sale</span>{% endif %}
+      {% if not p.in_stock %}<span class="absolute top-2 right-2 px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>{% endif %}
+      <a href="{% url 'shop:detail' p.slug %}">
+        <div class="aspect-[16/10] bg-gray-100 rounded mb-4 overflow-hidden">
+          {% if p.thumbnail %}<img src="{{p.thumbnail}}" class="w-full h-full object-cover">{% endif %}
+        </div>
+        <div class="text-xs text-gray-500 mb-1">{{ p.category.name }}</div>
+        <h3 class="font-semibold mb-1 line-clamp-2">{{ p.name }}</h3>
+        <div class="text-xs text-gray-500">{% star_rating p.rating_avg 5 %} ({{ p.rating_count }})</div>
+      </a>
+
+      <!-- owner pemilik card -->
+      <div class="text-xs text-gray-500 mt-1">
+        {% if p.created_by_id %}by <span class="font-medium">{{ p.created_by.username }}</span>{% endif %}
+      </div>
+
+      <div class="flex items-end gap-2 mt-1">
+        <div class="text-xl font-bold">{{ p.final_price|price_idr }}</div>
+        {% if p.sale_price %}<div class="text-gray-400 line-through">{{ p.price|price_idr }}</div>{% endif %}
+      </div>
+
+      {% if show_member_price %}
+        <div class="text-xs text-green-700 mt-1">Member price visible</div>
+      {% endif %}
+
+      <div class="mt-3">
+        {# Owner tidak boleh add to cart #}
+        <button
+          class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full
+                 {% if not p.in_stock %}
+                    opacity-50 cursor-not-allowed
+                 {% elif user.is_authenticated and p.created_by_id == user.id %}
+                    opacity-50 cursor-not-allowed
+                 {% endif %}"
+          {% if not p.in_stock %}
+            disabled
+          {% elif user.is_authenticated and p.created_by_id == user.id %}
+            disabled
+          {% endif %}
+        >
+          {% if user.is_authenticated and p.created_by_id == user.id %}
+            Your product
+          {% else %}
+            Add to Cart
+          {% endif %}
+        </button>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Load More -->
+{% if page_obj.has_next %}
+  <div class="text-center mt-8">
+    <button id="loadMore" data-next="{{ page_obj.next_page_number }}" class="px-5 py-2 border rounded">Load More Products</button>
+  </div>
+{% endif %}
+
+
+
+<!--  Modal Create Product -->
+<div id="createModal" class="fixed inset-0 z-50 hidden">
+  <!-- backdrop -->
+  <div class="absolute inset-0 bg-black/40"></div>
+  <!-- dialog -->
+  <div class="absolute inset-0 flex items-start justify-center mt-16 px-4">
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">Create Product</h3>
+        <button id="closeCreateModalX" class="text-gray-500 hover:text-black">&times;</button>
+      </div>
+      <div id="createModalBody">
+        <!-- form fragment akan dimuat via AJAX GET /shop/create/ -->
+        <div class="text-sm text-gray-500">Loading form...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  //  AJAX Load More 
+  const loadBtn = document.getElementById('loadMore');
+  if (loadBtn) {
+    loadBtn.addEventListener('click', async () => {
+      const params = new URLSearchParams(window.location.search);
+      params.set('page', loadBtn.dataset.next);
+      const res = await fetch(`/shop/api/products/?${params.toString()}`);
+      const data = await res.json();
+      const grid = document.getElementById('grid');
+
+      data.results.forEach(p => {
+        //p.is_owner (boolean) & p.owner (username)
+        const ownerText = p.owner ? `by <span class="font-medium">${p.owner}</span>` : '';
+        const isOwner = !!p.is_owner; // fallback false jika tidak ada field-nya
+        const disable = (!p.in_stock || isOwner) ? 'disabled' : '';
+        const btnCls  = (!p.in_stock || isOwner) ? 'opacity-50 cursor-not-allowed' : '';
+        const btnText = isOwner ? 'Your product' : 'Add to Cart';
+
+        const el = document.createElement('div');
+        el.className = "relative bg-white rounded-2xl shadow p-4";
+        el.innerHTML = `
+          ${p.sale_price ? '<span class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">Sale</span>' : ''}
+          ${!p.in_stock ? '<span class="absolute top-2 right-2 px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>' : ''}
+          <a href="/shop/p/${p.slug}/">
+            <div class="aspect-[16/10] bg-gray-100 rounded mb-4 overflow-hidden">
+              ${p.thumbnail ? `<img src="${p.thumbnail}" class="w-full h-full object-cover">` : ''}
+            </div>
+            <div class="text-xs text-gray-500 mb-1">${p.category ?? ''}</div>
+            <h3 class="font-semibold mb-1 line-clamp-2">${p.name}</h3>
+          </a>
+          <div class="text-xs text-gray-500 mt-1">${ownerText}</div>
+          <div class="flex items-end gap-2 mt-1">
+            <div class="text-xl font-bold">Rp ${(p.sale_price ?? p.price).toLocaleString('id-ID')}</div>
+            ${p.sale_price ? `<div class="text-gray-400 line-through">Rp ${p.price.toLocaleString('id-ID')}</div>` : ''}
+          </div>
+          <div class="mt-3">
+            <button class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full ${btnCls}" ${disable}>${btnText}</button>
+          </div>`;
+        grid.appendChild(el);
+      });
+
+      if (data.has_next) loadBtn.dataset.next = String(parseInt(loadBtn.dataset.next) + 1);
+      else loadBtn.remove();
+    });
+  }
+
+  // mini toast helper 
+  
+
+  // ===== Event untuk integrasi CART (decoupled) =====
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.add-to-cart')) {
+      const card = e.target.closest('[data-product-id]');
+      if (!card) return;
+      const id = card.dataset.productId;
+      const name = card.querySelector('h3')?.textContent ?? '';
+      const price = card.querySelector('.font-bold')?.textContent ?? '';
+      document.dispatchEvent(new CustomEvent('product:added', { detail: { id, name, price }}));
+    }
+  });
+  document.addEventListener('product:added', (e) => { showToast(`Added: ${e.detail.name}`, 'success'); }); //TOAST SUKSES
+
+  // ===== Modal Create Product  =====
+  const modal = document.getElementById('createModal');
+  const modalBody = document.getElementById('createModalBody');
+  const openButtons = [
+  document.getElementById('openCreateModal'),
+  document.getElementById('openCreateModalEmpty')
+].filter(Boolean);
+
+  const closeX = document.getElementById('closeCreateModalX');
+
+  function openCreateModal() {
+    modal.classList.remove('hidden');
+    // Muat form fragment
+    fetch("{% url 'shop:create' %}", { headers: {"X-Requested-With": "XMLHttpRequest"} })
+      .then(r => r.json())
+      .then(({html}) => {
+        modalBody.innerHTML = html;
+        bindCreateFormHandlers(); // bind submit/cancel setelah fragment masuk
+      });
+  }
+  function closeCreateModal() {
+    modal.classList.add('hidden');
+    modalBody.innerHTML = '';
+  }
+
+  openButtons.forEach(btn => btn?.addEventListener('click', (e) => { e.preventDefault(); openCreateModal(); }));
+  closeX?.addEventListener('click', closeCreateModal);
+  // klik backdrop untuk close
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeCreateModal();
+  });
+
+  function bindCreateFormHandlers() {
+    const cancel = document.getElementById('closeCreateModal');
+    cancel?.addEventListener('click', closeCreateModal);
+
+    const form = document.getElementById('productCreateForm');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const res = await fetch("{% url 'shop:create' %}", {
+        method: "POST",
+        headers: {"X-Requested-With": "XMLHttpRequest"},
+        body: fd
+      });
+      const data = await res.json();
+
+      if (!data.ok && data.html) {
+        // render ulang form dengan error
+        modalBody.innerHTML = data.html;
+        bindCreateFormHandlers();
+        return;
+      }
+
+      //wukses maka tutup modalprepend kartu baru
+      closeCreateModal();
+      const p = data.product;
+      const ownerText = p.owner ? `by <span class="font-medium">${p.owner}</span>` : 'by <span class="font-medium">you</span>';
+      const grid = document.getElementById('grid');
+      const el = document.createElement('div');
+      el.className = "relative bg-white rounded-2xl shadow p-4";
+      el.setAttribute('data-product-id', p.id);
+      el.innerHTML = `
+        ${p.sale_price ? '<span class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">Sale</span>' : ''}
+        ${!p.in_stock ? '<span class="absolute top-2 right-2 px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>' : ''}
+        <a href="/shop/p/${p.slug}/">
+          <div class="aspect-[16/10] bg-gray-100 rounded mb-4 overflow-hidden">
+            ${p.thumbnail ? `<img src="${p.thumbnail}" class="w-full h-full object-cover">` : ''}
+          </div>
+          <div class="text-xs text-gray-500 mb-1">${p.category ?? ''}</div>
+          <h3 class="font-semibold mb-1 line-clamp-2">${p.name}</h3>
+        </a>
+        <div class="text-xs text-gray-500 mt-1">${ownerText}</div>
+        <div class="flex items-end gap-2 mt-1">
+          <div class="text-xl font-bold">Rp ${(p.sale_price ?? p.price).toLocaleString('id-ID')}</div>
+          ${p.sale_price ? `<div class="text-gray-400 line-through">Rp ${p.price.toLocaleString('id-ID')}</div>` : ''}
+        </div>
+        <div class="mt-3">
+          <!-- karena ini produk milik user yang baru create, tombol otomatis disabled -->
+          <button class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full opacity-50 cursor-not-allowed" disabled>
+            Your product
+          </button>
+        </div>`;
+      grid.prepend(el);
+      showToast('Product created ✅', 'success');
+    });
+  }
+</script>
+{% include 'toast.html' %}
+
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+{% block content %}
+<a href="{% url 'shop:list' %}" class="text-blue-600">&larr; Back to Shop</a>
+
+<div class="grid lg:grid-cols-2 gap-8 mt-4">
+  <div>
+    <div class="bg-white rounded-2xl overflow-hidden">
+      {% if product.thumbnail %}<img src="{{product.thumbnail}}" class="w-full">{% endif %}
+    </div>
+  </div>
+  <div>
+    <!-- kategori dan ow owner -->
+    <div class="text-sm text-gray-500">
+      {{ product.category.name }}
+      {% if product.created_by_id %} • by <span class="font-medium">{{ product.created_by.username }}</span>{% endif %}
+    </div>
+    <h1 class="text-3xl font-bold mt-1">{{ product.name }}</h1>
+
+    <div class="flex items-end gap-2 mt-3">
+      <div class="text-3xl font-bold">{{ product.final_price|price_idr }}</div>
+      {% if product.sale_price %}
+        <div class="text-gray-400 line-through">{{ product.price|price_idr }}</div>
+      {% endif %}
+      {% if product.sale_price %}<span class="px-2 py-1 bg-red-500 text-white text-xs rounded">Sale - {{ product.discount_percent }}%</span>{% endif %}
+      {% if not product.in_stock %}<span class="px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>{% endif %}
+    </div>
+
+    <p class="mt-4 text-gray-700">{{ product.description }}</p>
+
+    {% if show_member_price %}
+      <div class="mt-2 text-green-700 text-sm">Member benefit: akses harga promo & review.</div>
+    {% endif %}
+
+    <button
+      class="mt-6 px-6 py-3 bg-blue-600 text-white rounded
+             {% if not product.in_stock %}opacity-50 cursor-not-allowed
+             {% elif user.is_authenticated and product.created_by_id == user.id %}opacity-50 cursor-not-allowed
+             {% endif %}"
+      {% if not product.in_stock %}
+        disabled
+      {% elif user.is_authenticated and product.created_by_id == user.id %}
+        disabled
+      {% endif %}
+    >
+      {% if user.is_authenticated and product.created_by_id == user.id %}
+        Your product
+      {% else %}
+        Add to Cart
+      {% endif %}
+    </button>
+  </div>
+</div>
+
+<!-- Reviews using ajaz-->
+<div class="mt-10">
+  <h2 class="text-xl font-semibold mb-3">
+    Reviews ({{ product.rating_count }}) — {% star_rating product.rating_avg 5 %}
+  </h2>
+
+  {% if user.is_authenticated %}
+  <form id="reviewForm" class="bg-white p-4 rounded-lg shadow mb-6">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="px-4 py-2 bg-gray-900 text-white rounded">Submit Review</button>
+  </form>
+  {% else %}
+  <div class="bg-yellow-50 border border-yellow-200 text-sm p-3 rounded mb-6">
+    Login untuk menulis review.
+  </div>
+  {% endif %}
+
+  <div id="reviewList" class="space-y-4">
+    {% for r in reviews %}
+      <div class="bg-white p-4 rounded shadow">
+        <div class="text-sm text-gray-500">{{ r.user.username }} • {{ r.rating }}★</div>
+        {% if r.title %}<div class="font-semibold">{{ r.title }}</div>{% endif %}
+        <div class="text-gray-700">{{ r.content }}</div>
+      </div>
+    {% empty %}
+      <p class="text-gray-500">Belum ada review.</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% if user.is_authenticated %}
+<script>
+  // CSRF dari cookie
+  function getCookie(name){
+    const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+  }
+  const csrfToken = getCookie('csrftoken');
+
+  function renderStars(avg, max=5){
+    const f = Math.floor(avg), h = (avg - f) >= .5 ? 1 : 0, e = max - f - h;
+    return '★'.repeat(f) + (h ? '☆' : '') + '☆'.repeat(e);
+  }
+
+  const form = document.getElementById('reviewForm');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+
+    const res = await fetch("{% url 'shop:create_review' product.id %}", {
+      method: "POST",
+      headers: { "X-Requested-With":"XMLHttpRequest", "X-CSRFToken": csrfToken },
+      body: fd
+    });
+
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) {
+      showToast("Sesi habis / error. Refresh halaman.", 'error');
+      return;
+    }
+
+    const data = await res.json();
+    if (!data.ok) {
+      showToast("Gagal submit review", 'error');
+      return;
+    }
+
+    // prepend review baru
+    const box = document.createElement('div');
+    box.className = "bg-white p-4 rounded shadow";
+    box.innerHTML = `
+      <div class="text-sm text-gray-500">{{ request.user.username }} • ${data.review.rating}★</div>
+      ${data.review.title ? `<div class="font-semibold">${data.review.title}</div>` : ''}
+      <div class="text-gray-700">${data.review.content}</div>
+    `;
+    document.getElementById('reviewList').prepend(box);
+
+    // update heading jumlah & bintang
+    const h2 = document.querySelector('h2');
+    if (h2) h2.innerHTML = `Reviews (${data.rating_count}) — ${renderStars(Number(data.rating_avg), 5)}`;
+
+    form.reset();
+    showToast("Review submitted ✅", 'success');
+  });
+</script>
+{% endif %}
+
+{% include 'toast.html' %}
+{% endblock %}

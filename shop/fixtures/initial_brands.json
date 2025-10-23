@@ -1,0 +1,12 @@
+[
+  {"model":"shop.brand","fields":{"name":"Nike","slug":"nike",
+   "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}},
+  {"model":"shop.brand","fields":{"name":"Adidas","slug":"adidas",
+   "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}},
+  {"model":"shop.brand","fields":{"name":"Puma","slug":"puma",
+   "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}},
+  {"model":"shop.brand","fields":{"name":"New Balance","slug":"new-balance",
+   "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}},
+  {"model":"shop.brand","fields":{"name":"Asics","slug":"asics",
+   "created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z"}}
+]
