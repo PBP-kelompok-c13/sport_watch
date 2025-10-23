@@ -55,6 +55,9 @@ def delete_score(request, pk):
 def filter_scores(request):
     status = request.GET.get('status')
     sport = request.GET.get('sport')
+    
+    if status == 'finished':
+        status = 'recent'
 
     data = Scoreboard.objects.all()
 
@@ -73,6 +76,8 @@ def filter_scores(request):
             'tanggal': s.tanggal.strftime('%Y-%m-%d %H:%M') if hasattr(s.tanggal, 'strftime') else str(s.tanggal),
             'sport': s.sport,
             'status': s.status,
+            'logo_tim1': getattr(s, 'logo_tim1', None),
+            'logo_tim2': getattr(s, 'logo_tim2', None),
         }
         for s in data
     ]
