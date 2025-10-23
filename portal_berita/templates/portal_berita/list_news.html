@@ -2,12 +2,24 @@
 
 {% block content %}
 <div class="container mx-auto">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">News List</h1>
-
+    {% if featured_news %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div class="col-span-1">
+            {% if featured_news.thumbnail %}
+            <img src="{{ featured_news.thumbnail }}" alt="{{ featured_news.judul }}" class="w-full h-auto object-cover rounded-lg shadow-md">
+            {% endif %}
+        </div>
+        <div class="col-span-1 flex flex-col justify-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">{{ featured_news.judul }}</h1>
+            <p class="text-gray-600 mb-4">{{ featured_news.konten|truncatewords:50 }}</p>
+            <a href="{% url 'portal_berita:detail_news' featured_news.id %}" class="text-blue-500 hover:text-blue-700 font-semibold">Read More</a>
+        </div>
     </div>
+    {% endif %}
+
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Berita Utama</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for news_item in news_list %}
+        {% for news_item in other_news %}
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             {% if news_item.thumbnail %}
             <img src="{{ news_item.thumbnail }}" alt="{{ news_item.judul }}" class="w-full h-48 object-cover">
@@ -16,6 +28,7 @@
                 <h2 class="text-xl font-bold text-gray-800 mb-2">{{ news_item.judul }}</h2>
                 <p class="text-gray-600 text-sm mb-4">{{ news_item.deskripsi }}</p>
                 <a href="{% url 'portal_berita:detail_news' news_item.id %}" class="text-blue-500 hover:text-blue-700 font-semibold">Read More</a>
+                <span class="text-gray-500 ml-4">{{ news_item.comment_count }} comments</span>
                 {% if user.is_staff %}
                 <a href="{% url 'portal_berita:edit_news' news_item.id %}" class="text-green-500 hover:text-green-700 font-semibold ml-4">Edit</a>
                 {% endif %}

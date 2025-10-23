@@ -1,0 +1,19 @@
+<div class="comment-thread ml-4 pl-4 border-l-2 border-gray-200">
+    {% for reply in comment.replies.all %}
+        <div class="comment mt-4">
+            <p class="text-sm text-gray-500">{{ reply.user.username }} - {{ reply.created_at|timesince }} ago</p>
+            <p class="text-gray-700">{{ reply.content }}</p>
+            <a href="#" class="reply-btn text-sm text-blue-500">Reply</a>
+            <div class="reply-form hidden mt-2">
+                <form method="post" action="{% url 'portal_berita:detail_news' news.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" value="{{ reply.id }}">
+                                            {{ comment_form.content }}                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mt-2">Submit Reply</button>
+                </form>
+            </div>
+            {% if reply.replies.all %}
+                {% include 'portal_berita/comment_thread.html' with comment=reply %}
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
