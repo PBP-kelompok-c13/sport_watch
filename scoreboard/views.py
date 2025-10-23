@@ -76,6 +76,7 @@ def filter_scores(request):
             'tanggal': s.tanggal.strftime('%Y-%m-%d %H:%M') if hasattr(s.tanggal, 'strftime') else str(s.tanggal),
             'sport': s.sport,
             'status': s.status,
+            'sport_display': s.get_sport_display(), 
             'logo_tim1': getattr(s, 'logo_tim1', None),
             'logo_tim2': getattr(s, 'logo_tim2', None),
         }

@@ -86,7 +86,7 @@
             <div class="mt-3 flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                 {% if score.logo_tim1 %}
-                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-9 w-9 rounded-full object-cover border border-gray-200">
+                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async">
                 {% else %}
                   <div class="h-9 w-9 rounded-full bg-gray-100"></div>
                 {% endif %}
@@ -102,7 +102,7 @@
               <div class="flex items-center gap-2.5 justify-end">
                 <div class="text-base font-semibold text-gray-900 text-right">{{ score.tim2 }}</div>
                 {% if score.logo_tim2 %}
-                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-9 w-9 rounded-full object-cover border border-gray-200">
+                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async">
                 {% else %}
                   <div class="h-9 w-9 rounded-full bg-gray-100"></div>
                 {% endif %}
@@ -168,7 +168,7 @@
             <div class="mt-2.5 flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                 {% if score.logo_tim1 %}
-                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-cover border border-gray-200">
+                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async"">
                 {% else %}
                   <div class="h-8 w-8 rounded-full bg-gray-100"></div>
                 {% endif %}
@@ -184,7 +184,7 @@
               <div class="flex items-center gap-2.5 justify-end">
                 <div class="text-sm font-semibold text-gray-900 text-right">{{ score.tim2 }}</div>
                 {% if score.logo_tim2 %}
-                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-cover border border-gray-200">
+                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async">
                 {% else %}
                   <div class="h-8 w-8 rounded-full bg-gray-100"></div>
                 {% endif %}
@@ -336,9 +336,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function teamLogo(logo, name) {
     if (logo) {
-      return `<img src="${logo}" alt="${name}" class="h-9 w-9 rounded-full object-cover border border-gray-200">`;
+      return `<img src="${logo}" alt="${name}" class="h-9 w-9 rounded-full object-cover shadow-sm hover:scale-105 transition-transform">`;
     }
-    return `<div class="h-9 w-9 rounded-full bg-gray-100"></div>`;
+    return `<div class="h-9 w-9 rounded-full bg-gray-50"></div>`;
   }
 
   function cardHTML(s, status) {
