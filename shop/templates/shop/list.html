@@ -4,15 +4,13 @@
 <h1 class="text-3xl font-bold mb-1">Sports Merchandise</h1>
 <p class="text-gray-600 mb-6">Shop official team gear and premium sports equipment</p>
 
-<!-- Toolbar Search dan Sort -->
+<!-- Toolbar sortting and filtering -->
 <form method="get" class="flex items-center gap-3 mb-4">
-  <input name="q" value="{{ request.GET.q }}" placeholder="Search products..." class="flex-1 border rounded px-3 py-2">
-  <select name="sort" class="border rounded px-3 py-2">
+  <select name="sort" class="border rounded px-3 py-2" onchange="this.form.submit()">
     <option value="featured"   {% if sort == 'featured' %}selected{% endif %}>Featured</option>
     <option value="price_asc"  {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
     <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
   </select>
-  <button class="px-4 py-2 bg-blue-600 text-white rounded">Apply</button>
 </form>
 
 <!-- Add Product DI ATAS GRID  using modal -->
@@ -25,12 +23,13 @@
   </div>
 {% endif %}
 
-<!-- Category chips -->
+<!-- Category -->
 <div class="flex flex-wrap gap-2 mb-6">
-  <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}"
+  <a href="?{% if sort %}sort={{ sort }}&{% endif %}"
      class="px-3 py-1 rounded-full border {% if not active_cat %}bg-gray-200{% endif %}">All</a>
+
   {% for c in categories %}
-    <a href="?category={{ c.slug }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}"
+    <a href="?category={{ c.slug }}{% if sort %}&sort={{ sort }}{% endif %}"
        class="px-3 py-1 rounded-full border {% if active_cat == c.slug %}bg-gray-800 text-white{% endif %}">{{ c.name }}</a>
   {% endfor %}
 </div>
@@ -153,9 +152,9 @@
       const grid = document.getElementById('grid');
 
       data.results.forEach(p => {
-        //p.is_owner (boolean) & p.owner (username)
+      //const isOwner 
         const ownerText = p.owner ? `by <span class="font-medium">${p.owner}</span>` : '';
-        const isOwner = !!p.is_owner; // fallback false jika tidak ada field-nya
+        const isOwner = !!p.is_owner; //fallback false jika tidak ada field-nya
         const disable = (!p.in_stock || isOwner) ? 'disabled' : '';
         const btnCls  = (!p.in_stock || isOwner) ? 'opacity-50 cursor-not-allowed' : '';
         const btnText = isOwner ? 'Your product' : 'Add to Cart';
@@ -191,7 +190,7 @@
   // mini toast helper 
   
 
-  // ===== Event untuk integrasi CART (decoupled) =====
+  //  Event untuk integrasi CART 
   document.addEventListener('click', (e) => {
     if (e.target.closest('.add-to-cart')) {
       const card = e.target.closest('[data-product-id]');
@@ -204,7 +203,7 @@
   });
   document.addEventListener('product:added', (e) => { showToast(`Added: ${e.detail.name}`, 'success'); }); //TOAST SUKSES
 
-  // ===== Modal Create Product  =====
+  //MODAL CREATEP RODUCT
   const modal = document.getElementById('createModal');
   const modalBody = document.getElementById('createModalBody');
   const openButtons = [
@@ -216,12 +215,12 @@
 
   function openCreateModal() {
     modal.classList.remove('hidden');
-    // Muat form fragment
+    //Muat form fragment
     fetch("{% url 'shop:create' %}", { headers: {"X-Requested-With": "XMLHttpRequest"} })
       .then(r => r.json())
       .then(({html}) => {
         modalBody.innerHTML = html;
-        bindCreateFormHandlers(); // bind submit/cancel setelah fragment masuk
+        bindCreateFormHandlers(); //bind submit/cancel setelah fragment masuk
       });
   }
   function closeCreateModal() {
@@ -292,15 +291,14 @@
     });
   }
 
-   // === CSRF helper (dipakai untuk DELETE) ===
+   //  
   function getCookie(name){
     const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
     return m ? m.pop() : '';
   }
   const csrfToken = getCookie('csrftoken');
 
-  // === Handler tombol Delete di kartu (delegation) ===
-  // EXPECT: tombol punya attribute data-action="delete" dan data-id="<uuid>"
+ 
   document.addEventListener('click', async (e) => {
     const delBtn = e.target.closest('[data-action="delete"]');
     if (!delBtn) return;
@@ -324,7 +322,7 @@
       return;
     }
 
-    // Hapus kartu dari grid
+    //Hapus kartu dari grid
     const card = delBtn.closest('[data-product-id]');
     if (card) card.remove();
     showToast('Product deleted ✅', 'success');

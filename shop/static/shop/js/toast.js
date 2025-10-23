@@ -3,13 +3,13 @@
   const el = document.getElementById('toast');
   const text = document.getElementById('toast-text');
 
-  // If toast container isn't on the page, provide a no-op.
+  // If toast container is not on a page maka provide a no op.
   if (!el || !text) {
     window.showToast = function () {};
     return;
   }
 
-  // Set background color based on type
+  
   function setStyle(type) {
     el.classList.remove('bg-green-600','bg-blue-600','bg-red-600','bg-yellow-600','text-white');
     el.classList.add('text-white');
@@ -28,17 +28,17 @@
       setStyle(type);
       text.textContent = message || '';
 
-      // Show: unhide then remove opacity/translate for the transition
+      
       el.classList.remove('hidden');
-      // next frame so transition runs
+     
       requestAnimationFrame(() => {
         el.classList.remove('opacity-0', 'translate-y-5');
       });
 
-      // Reset previous timer
+     
       clearTimeout(hideTimer);
       hideTimer = setTimeout(() => {
-        // Hide with transition, then set hidden
+       
         el.classList.add('opacity-0', 'translate-y-5');
         setTimeout(() => el.classList.add('hidden'), 300);
       }, durationMs);

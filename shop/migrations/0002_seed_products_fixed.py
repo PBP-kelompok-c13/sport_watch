@@ -4,11 +4,9 @@ from django.db import migrations
 from django.utils.text import slugify
 
 
-# ---------- Helpers (dipakai di forward migration) ----------
+
 def ensure_category(Category, slug, name=None, parent=None):
-    """
-    Buat category jika belum ada (berdasarkan slug).
-    """
+ 
     obj, _ = Category.objects.get_or_create(
         slug=slug,
         defaults={"name": name or slug.replace("-", " ").title(), "parent": parent},
@@ -17,9 +15,7 @@ def ensure_category(Category, slug, name=None, parent=None):
 
 
 def ensure_brand(Brand, name):
-    """
-    Buat brand jika belum ada (berdasarkan slug=name-slugified).
-    """
+   
     obj, _ = Brand.objects.get_or_create(
         slug=slugify(name),
         defaults={"name": name},
@@ -32,7 +28,7 @@ def seed_products_forward(apps, schema_editor):
     Category = apps.get_model("shop", "Category")
     Brand = apps.get_model("shop", "Brand")
 
-    # Pastikan kategori & brand ada (idempotent)
+   
     for cslug, cname in [
         ("accessories", "Accessories"),
         ("apparel", "Apparel"),
@@ -45,14 +41,9 @@ def seed_products_forward(apps, schema_editor):
     for bname in ["Adidas", "Asics", "Puma", "New Balance", "Nike"]:
         ensure_brand(Brand, bname)
 
-    # ================== DATASET GABUNGAN ==================
-    # NOTE:
-    # - Item "OLD PRODUCTS" menggunakan THUMBNAIL lama (url spesifik).
-    # - Item "MORE PRODUCTS" menambah variasi. Jika produk sudah ada,
-    #   kita tidak akan overwrite thumbnail yang sudah ada.
+   
     items = [
-        # ---------- OLD PRODUCTS (keep thumbnails) ----------
-        # Accessories
+      
         {
             "name": "Adidas Performance Socks (2-Pack)",
             "category_slug": "accessories",
@@ -118,7 +109,7 @@ def seed_products_forward(apps, schema_editor):
             "description": "Bola basket composite grip mantap, size 7.",
         },
 
-        # Footwears
+        #footwear
         {
             "name": "Adidas Run Nova v1",
             "category_slug": "footwears",
@@ -150,7 +141,7 @@ def seed_products_forward(apps, schema_editor):
             "description": "Kenyamanan harian dengan midsole empuk.",
         },
 
-        # Jerseys
+        #jerseys
         {
             "name": "Nike Team Replica Home Jersey",
             "category_slug": "jerseys",
@@ -172,7 +163,7 @@ def seed_products_forward(apps, schema_editor):
             "description": "Jersey replika away, cutting atletis.",
         },
 
-        # ---------- MORE PRODUCTS (tambahan variasi) ----------
+        
         # Accessories
         {
             "name": "Adidas Tennis Wristbands",
@@ -225,7 +216,7 @@ def seed_products_forward(apps, schema_editor):
             "description": "Botol minum BPA-free, 600ml.",
         },
 
-        # Apparel
+        #Apparell
         {
             "name": "Nike Dri-FIT Training Tee",
             "category_slug": "apparel",
@@ -277,7 +268,7 @@ def seed_products_forward(apps, schema_editor):
             "description": "Singlet lari ringan, cepat kering.",
         },
 
-        # Equipment
+        #equipment
         {
             "name": "Adidas Captain Armband",
             "category_slug": "equipment",
@@ -329,7 +320,7 @@ def seed_products_forward(apps, schema_editor):
             "description": "Foam roller untuk recovery otot.",
         },
 
-        # Footwears
+        
         {
             "name": "Nike Downshifter 12",
             "category_slug": "footwears",
@@ -381,7 +372,7 @@ def seed_products_forward(apps, schema_editor):
             "description": "Walking shoes empuk dan tahan lama.",
         },
 
-        # Jerseys
+      
         {
             "name": "Puma Team Cup Training Jersey",
             "category_slug": "jerseys",
@@ -433,14 +424,11 @@ def seed_products_forward(apps, schema_editor):
             "description": "Jersey Entrada 22 untuk latihan & pertandingan.",
         },
     ]
-    # =======================================================
-
-    # Upsert idempotent + JANGAN timpa thumbnail jika produk sudah ada
+   
     for it in items:
         base_slug = slugify(it["name"])
         slug = base_slug
 
-        # hindari bentrok slug (append -2, -3, ...)
         i = 2
         while Product.objects.filter(slug=slug).exclude(name=it["name"]).exists():
             slug = f"{base_slug}-{i}"
@@ -449,7 +437,7 @@ def seed_products_forward(apps, schema_editor):
         category = ensure_category(Category, it["category_slug"])
         brand = ensure_brand(Brand, it["brand_name"])
 
-        # get_or_create dulu agar bisa cek & jaga thumbnail lama
+        
         obj, created = Product.objects.get_or_create(
             slug=slug,
             defaults={
@@ -470,7 +458,7 @@ def seed_products_forward(apps, schema_editor):
         )
 
         if not created:
-            # update field lain, tapi JANGAN overwrite thumbnail kalau sudah ada
+        
             obj.name = it["name"]
             obj.category = category
             obj.brand = brand
@@ -483,18 +471,16 @@ def seed_products_forward(apps, schema_editor):
             obj.stock = it.get("stock", obj.stock or 50)
             obj.is_featured = it.get("is_featured", obj.is_featured)
             obj.status = "active"
-            if not obj.thumbnail:  # hanya isi jika masih kosong
+            if not obj.thumbnail:  #Hanya isi jika masih kosong
                 obj.thumbnail = it.get("thumbnail") or ""
             obj.save()
 
 
 def seed_products_reverse(apps, schema_editor):
-    """
-    Rollback: hapus produk-produk yang kita seed.
-    """
+ 
     Product = apps.get_model("shop", "Product")
     names = [
-        # old + more
+       
         "Adidas Performance Socks (2-Pack)",
         "Nike Brasilia Duffel Small",
         "Puma Club Fleece Hoodie",

@@ -193,8 +193,6 @@ class Review(TimeStampedUUIDModel):
         return f"{self.product.name} - {self.rating}★ by {self.user}"
 
     #setelah checkout selesai
-
-
 # Fitur Pencarian bisa memanfaatkan index di Product(price, status, is_featured) dan field slug/name/brand/category.
 
 # Fitur Belanja  tinggal pakai Product.reserve(qty) saat checkout. atau validasi product.in_stock.

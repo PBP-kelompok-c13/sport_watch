@@ -155,12 +155,12 @@ def product_edit(request, pk):
     if not (request.user == product.created_by or request.user.has_perm("shop.change_product")):
         raise PermissionDenied("You are not allowed to edit this product.")
 
-    # kalau mau batasi field untuk non-staff, bisa pakai PublicProductForm seperti di product_create
+  
     FormCls = ProductForm
 
     if request.method == "GET":
         form = FormCls(instance=product)
-        # jika dipanggil via AJAX -> kembalikan fragment (pakai partial yang sudah ada)
+   
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             html = render_to_string(
                 "shop/_product_form.html",
@@ -171,7 +171,7 @@ def product_edit(request, pk):
         # fallback full page
         return render(request, "shop/product_form.html", {"form": form, "mode": "edit", "product": product})
 
-    # POST (simpan perubahan)
+    #simpan changes
     form = FormCls(request.POST, instance=product)
     if not form.is_valid():
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -185,7 +185,7 @@ def product_edit(request, pk):
 
     p = form.save()
 
-    # jika AJAX, balas payload minimal untuk update kartu di grid
+    # jika ajax balas payload minimal untuk update kartu di grid
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({
             "ok": True,
@@ -237,7 +237,7 @@ def product_create(request):
         return render(request, "shop/product_form.html", {"form": form, "mode": "create"})
 
     p = form.save(commit=False)
-    # paksa nilai aman untuk user biasa
+    #paksa nilai aman untuk user biasa
     if not request.user.is_staff:
         p.is_featured = False
         if hasattr(p, "status"):
@@ -311,7 +311,7 @@ def create_product(request):
         if _is_ajax(request):
             html = render_to_string("shop/_product_form.html", {"form": form}, request=request)
             return JsonResponse({"html": html})
-        # fallback full page (not used by modal, but nice to have)
+        #fallback full page 
         return render(request, "shop/create.html", {"form": form})
 
     # POST
@@ -321,7 +321,7 @@ def create_product(request):
         product.created_by = request.user
         product.status = "active"
         product.save()
-        # build minimal payload used by JS to prepend a new card
+      
         payload = {
             "id": str(product.id),
             "name": product.name,
