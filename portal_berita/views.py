@@ -29,7 +29,7 @@ def detail_news(request, id):
     news = get_object_or_404(Berita, id=id)
     news.increment_views()
 
-    comments = Comment.objects.filter(berita=news).order_by('-created_at')
+    comments = Comment.objects.filter(berita=news, parent=None).order_by('-created_at')
 
     if request.method == 'POST':
         if not request.user.is_authenticated:
