@@ -46,21 +46,21 @@ class SearchPreference(TimeStampedModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="search_preferences",
+        related_name="search_preferences_news",
     )
     default_product_category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="search_preferences",
+        related_name="search_preferences_product",
     )
     default_brand = models.ForeignKey(
         Brand,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="search_preferences",
+        related_name="search_preferences_brand",
     )
     min_price = models.DecimalField(
         max_digits=12, decimal_places=2, null=True, blank=True

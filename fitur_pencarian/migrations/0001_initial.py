@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("portal_berita", "0003_alter_berita_kategori"),
+        ("portal_berita", "0001_initial"),
         ("shop", "0001_initial"),
     ]
 
