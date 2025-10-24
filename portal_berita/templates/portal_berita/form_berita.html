@@ -8,10 +8,16 @@
         <div>
             <label for="{{ form.judul.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.judul.label }}</label>
             {{ form.judul }}
+            {% if form.judul.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.judul.errors.0 }}</p>
+            {% endif %}
         </div>
         <div>
             <label for="{{ form.konten.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.konten.label }}</label>
             {{ form.konten }}
+            {% if form.konten.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.konten.errors.0 }}</p>
+            {% endif %}
         </div>
         <div>
             <div class="flex justify-between items-center">
@@ -19,22 +25,37 @@
                 <a href="{% url 'portal_berita:add_category' %}" class="text-sm text-blue-500 hover:text-blue-700">+ Add Category</a>
             </div>
             {{ form.kategori }}
+            {% if form.kategori.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.kategori.errors.0 }}</p>
+            {% endif %}
         </div>
         <div>
             <label for="{{ form.thumbnail.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.thumbnail.label }}</label>
             {{ form.thumbnail }}
+            {% if form.thumbnail.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.thumbnail.errors.0 }}</p>
+            {% endif %}
         </div>
         <div>
             <label for="{{ form.sumber.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.sumber.label }}</label>
             {{ form.sumber }}
+            {% if form.sumber.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.sumber.errors.0 }}</p>
+            {% endif %}
         </div>
         <div>
             <label for="{{ form.penulis.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.penulis.label }}</label>
             {{ form.penulis }}
+            {% if form.penulis.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.penulis.errors.0 }}</p>
+            {% endif %}
         </div>
         <div class="flex items-center">
             {{ form.is_published }}
             <label for="{{ form.is_published.id_for_label }}" class="ml-2 block text-sm text-gray-900">{{ form.is_published.label }}</label>
+            {% if form.is_published.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.is_published.errors.0 }}</p>
+            {% endif %}
         </div>
         <div>
             <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit</button>
@@ -66,14 +87,5 @@ document.getElementById('news-form').addEventListener('submit', function(e) {
         }
     })
     .catch(error => console.error('Error:', error));
-});
-
-// Add Tailwind classes to form fields
-const fields = document.querySelectorAll('#news-form input, #news-form textarea, #news-form select');
-fields.forEach(field => {
-    if (field.type !== 'checkbox') {
-        field.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'shadow-sm', 'focus:border-indigo-300', 'focus:ring', 'focus:ring-indigo-200', 'focus:ring-opacity-50');
-    }
-});
 </script>
 {% endblock %}

@@ -5,7 +5,13 @@
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Add Category</h1>
     <form method="post" class="space-y-6">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div>
+            <label for="{{ form.nama.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.nama.label }}</label>
+            {{ form.nama }}
+            {% if form.nama.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.nama.errors.0 }}</p>
+            {% endif %}
+        </div>
         <div>
             <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Save Category</button>
         </div>

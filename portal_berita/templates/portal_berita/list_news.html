@@ -1,44 +1,205 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="container mx-auto">
-    {% if featured_news %}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-        <div class="col-span-1">
-            {% if featured_news.thumbnail %}
-            <img src="{{ featured_news.thumbnail }}" alt="{{ featured_news.judul }}" class="w-full h-auto object-cover rounded-lg shadow-md">
+<style>
+    .gradient-overlay {
+        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%);
+    }
+    .sidebar-fixed {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 2rem; /* Adjust as needed for spacing from top */
+        align-self: flex-start;
+    }
+    /* Category tag colors - adjust as needed based on your categories */
+    .category-technology { @apply bg-blue-600; }
+    .category-business { @apply bg-green-600; }
+    .category-sports { @apply bg-purple-600; }
+    .category-world { @apply bg-red-600; }
+    .category-science { @apply bg-teal-600; }
+    .category-entertainment { @apply bg-yellow-600; }
+    /* Default if no specific category match */
+    .category-default { @apply bg-gray-600; }
+</style>
+
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:flex lg:space-x-8">
+
+    <!-- Main News Feed (Left Column) -->
+    <main class="{% if most_popular_news or live_scores or featured_products %}lg:w-2/3{% else %}lg:w-full{% endif %} mb-10 lg:mb-0">
+        {% if featured_news %}
+        <!-- Hero Story -->
+        <section class="mb-12">
+            <article class="relative bg-white rounded-xl shadow-lg overflow-hidden group transform transition duration-300 hover:scale-[1.005]">
+                <img src="{{ featured_news.thumbnail|default:'/static/images/default_news_thumbnail.jpg' }}" alt="{{ featured_news.judul }}" class="w-full h-96 object-cover object-center">
+                <div class="absolute inset-0 gradient-overlay"></div>
+                <div class="absolute bottom-0 left-0 p-6 sm:p-8 md:p-10 text-white w-full">
+                    {% if featured_news.kategori %}
+                    <span class="inline-block text-white text-xs font-bold px-3 py-1 rounded-full mb-3 category-{{ featured_news.kategori.get_category_class }}">
+                        {{ featured_news.kategori.nama|upper }}
+                    </span>
+                    {% endif %}
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-3 group-hover:text-red-200 transition duration-300"><a href="{% url 'portal_berita:detail_news' featured_news.id %}">{{ featured_news.judul }}</a></h1>
+                    <p class="text-lg sm:text-xl font-medium mb-4 hidden md:block">{{ featured_news.konten|truncatewords:30 }}</p>
+                    <div class="flex items-center text-sm text-gray-200">
+                        {% if featured_news.tanggal_dibuat %}
+                        <span>{{ featured_news.tanggal_dibuat|date:"F d, Y" }}</span>
+                        <span class="mx-3">&bull;</span>
+                        {% endif %}
+                        <span><a href="{% url 'portal_berita:detail_news' featured_news.id %}#comments" class="hover:text-red-400">{{ featured_news.comment_count }} Comments</a></span>
+                    </div>
+                </div>
+            </article>
+        </section>
+        {% endif %}
+
+        <!-- Grid-arranged Articles -->
+        <section>
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">Latest Updates</h2>
+            <div id="news-container" class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+
+                {% for news_item in other_news %}
+                <article class="bg-white rounded-xl shadow-md overflow-hidden transform transition duration-300 hover:scale-[1.02] hover:shadow-lg">
+                    <img src="{{ news_item.thumbnail|default:'/static/images/default_news_thumbnail.jpg' }}" alt="{{ news_item.judul }}" class="w-full h-48 object-cover object-center">
+                    <div class="p-5">
+                        {% if news_item.kategori %}
+                        <span class="inline-block text-white text-xs font-bold px-3 py-1 rounded-full mb-2 category-{{ news_item.kategori.get_category_class }}">
+                            {{ news_item.kategori.nama|upper }}
+                        </span>
+                        {% endif %}
+                        <h3 class="text-lg font-bold leading-snug mb-2 hover:text-blue-800 transition duration-300"><a href="{% url 'portal_berita:detail_news' news_item.id %}">{{ news_item.judul }}</a></h3>
+                        <p class="text-gray-600 text-sm mb-3">{{ news_item.konten|truncatewords:15 }}</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            {% if news_item.tanggal_dibuat %}
+                            <span>{{ news_item.tanggal_dibuat|timesince }} ago</span>
+                            <span class="mx-2">&bull;</span>
+                            {% endif %}
+                            <span><a href="{% url 'portal_berita:detail_news' news_item.id %}#comments" class="hover:text-blue-500">{{ news_item.comment_count }} Comments</a></span>
+                        </div>
+                    </div>
+                </article>
+                {% empty %}
+                <div class="col-span-full text-center py-10">
+                    <p class="text-gray-500 text-lg">No other news available.</p>
+                </div>
+                {% endfor %}
+
+            </div>
+
+            {% if other_news.has_next %}
+            <div class="text-center mt-8">
+                <button id="load-more-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg">
+                    Load More News
+                </button>
+            </div>
             {% endif %}
+        </section>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let offset = {{ other_news.end_index|default:0 }}; // Initial offset based on already displayed news
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        const newsContainer = document.getElementById('news-container');
+
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', function() {
+                fetch(`{% url 'portal_berita:load_more_news' %}?offset=${offset}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.news.forEach(news_item => {
+                            const article = `
+                                <article class="bg-white rounded-xl shadow-md overflow-hidden transform transition duration-300 hover:scale-[1.02] hover:shadow-lg">
+                                    <img src="${news_item.thumbnail}" alt="${news_item.judul}" class="w-full h-48 object-cover object-center">
+                                    <div class="p-5">
+                                        <span class="inline-block text-white text-xs font-bold px-3 py-1 rounded-full mb-2 category-${news_item.kategori_class}">
+                                            ${news_item.kategori_nama.toUpperCase()}
+                                        </span>
+                                        <h3 class="text-lg font-bold leading-snug mb-2 hover:text-blue-800 transition duration-300"><a href="${news_item.detail_url}">${news_item.judul}</a></h3>
+                                        <p class="text-gray-600 text-sm mb-3">${news_item.konten_truncated}</p>
+                                        <div class="flex items-center text-xs text-gray-500">
+                                            <span>${news_item.tanggal_dibuat_timesince} ago</span>
+                                            <span class="mx-2">&bull;</span>
+                                            <span><a href="${news_item.detail_url}#comments" class="hover:text-blue-500">${news_item.comment_count} Comments</a></span>
+                                        </div>
+                                    </div>
+                                </article>
+                            `;
+                            newsContainer.insertAdjacentHTML('beforeend', article);
+                        });
+
+                        offset += data.news.length;
+
+                        if (!data.has_more) {
+                            loadMoreBtn.style.display = 'none';
+                        }
+                    })
+                    .catch(error => console.error('Error loading more news:', error));
+            });
+        }
+    });
+</script>
+
+    </main>
+
+    <!-- Right-Side Sidebar -->
+    {% if most_popular_news or live_scores or featured_products %}
+    <aside class="lg:w-1/3 mt-10 lg:mt-0">
+        <div class="sidebar-fixed w-full space-y-8">
+
+            <!-- Most Popular Section -->
+            {% if most_popular_news %}
+            <section class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-5">Most Popular</h3>
+                <ul class="space-y-4">
+                    {% for news in most_popular_news %}
+                    <li class="flex items-start space-x-3 group">
+                        <span class="text-lg font-bold text-red-600">{{ forloop.counter|stringformat:"02d" }}</span>
+                        <img src="{{ news.thumbnail|default:'/static/images/default_news_thumbnail.jpg' }}" alt="{{ news.judul }}" class="w-16 h-16 object-cover rounded-md flex-shrink-0">
+                        <div>
+                            <a href="{% url 'portal_berita:detail_news' news.id %}" class="text-gray-800 font-semibold hover:text-red-600 transition duration-300">{{ news.judul }}</a>
+                            <p class="text-sm text-gray-500">{% if news.tanggal_dibuat %}{{ news.tanggal_dibuat|timesince }} ago{% endif %}</p>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+
+            <!-- Scoreboard Card -->
+            {% if live_scores %}
+            <section class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-5">Live Scores</h3>
+                <div class="space-y-4">
+                    {% for score in live_scores %}
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium text-gray-700">{{ score.tim1 }} vs {{ score.tim2 }} ({{ score.sport }})</span>
+                        <span class="font-bold text-lg text-red-600">{{ score.skor_tim1 }} - {{ score.skor_tim2 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Shop Section -->
+            {% if featured_products %}
+            <section class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-5">Shop Our Gear</h3>
+                <div class="space-y-4">
+                    {% for product in featured_products %}
+                    <div class="flex items-center space-x-4 group">
+                        <img src="{{ product.thumbnail|default:'/static/images/default_product_thumbnail.jpg' }}" alt="{{ product.name }}" class="w-16 h-16 object-cover rounded-md flex-shrink-0">
+                        <div>
+                            <a href="#" class="font-semibold text-gray-800 hover:text-red-600 transition duration-300">{{ product.name }}</a>
+                            <p class="text-sm text-gray-600">${{ product.final_price }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
         </div>
-        <div class="col-span-1 flex flex-col justify-center">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">{{ featured_news.judul }}</h1>
-            <p class="text-gray-600 mb-4">{{ featured_news.konten|truncatewords:50 }}</p>
-            <a href="{% url 'portal_berita:detail_news' featured_news.id %}" class="text-blue-500 hover:text-blue-700 font-semibold">Read More</a>
-        </div>
-    </div>
+    </aside>
     {% endif %}
 
-    <h2 class="text-3xl font-bold text-gray-800 mb-6">Berita Utama</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for news_item in other_news %}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            {% if news_item.thumbnail %}
-            <img src="{{ news_item.thumbnail }}" alt="{{ news_item.judul }}" class="w-full h-48 object-cover">
-            {% endif %}
-            <div class="p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-2">{{ news_item.judul }}</h2>
-                <p class="text-gray-600 text-sm mb-4">{{ news_item.deskripsi }}</p>
-                <a href="{% url 'portal_berita:detail_news' news_item.id %}" class="text-blue-500 hover:text-blue-700 font-semibold">Read More</a>
-                <span class="text-gray-500 ml-4">{{ news_item.comment_count }} comments</span>
-                {% if user.is_staff %}
-                <a href="{% url 'portal_berita:edit_news' news_item.id %}" class="text-green-500 hover:text-green-700 font-semibold ml-4">Edit</a>
-                {% endif %}
-            </div>
-        </div>
-        {% empty %}
-            <div class="col-span-3 text-center">
-                <p class="text-gray-500 text-lg">No news</p>
-            </div>
-        {% endfor %}
-    </div>
 </div>
 {% endblock %}
