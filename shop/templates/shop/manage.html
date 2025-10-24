@@ -1,0 +1,41 @@
+{# templates/shop/manage.html #}
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Manage Products</h1>
+
+<div class="mb-4">
+  <a href="{% url 'shop:create' %}" class="px-3 py-2 bg-blue-600 text-white rounded">+ New Product</a>
+</div>
+
+<table class="w-full text-sm">
+  <thead>
+    <tr class="text-left border-b">
+      <th class="py-2">Name</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>Stock</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in products %}
+    <tr class="border-b">
+      <td class="py-2">{{ p.name }}</td>
+      <td>{{ p.category }}</td>
+      <td>{{ p.final_price }}</td>
+      <td>{{ p.stock }}</td>
+      <td class="text-right">
+        <a href="{% url 'shop:edit' p.id %}" class="px-2 py-1 border rounded">Edit</a>
+        <form action="{% url 'shop:delete' p.id %}" method="post" class="inline"
+              onsubmit="return confirm('Delete this product?')">
+          {% csrf_token %}
+          <button class="px-2 py-1 border rounded text-red-600">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+      <tr><td colspan="5" class="py-6 text-center text-gray-500">No products.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Manage Shop</h1>
+
+<div class="grid md:grid-cols-2 gap-8">
+  <!-- Brands -->
+  <section>
+    <h2 class="font-semibold text-lg mb-3">Brands</h2>
+    <form method="post" class="mb-3">
+      {% csrf_token %}
+      <input type="hidden" name="create_brand" value="1">
+      {{ brand_form.as_p }}
+      <button class="px-3 py-1 bg-blue-600 text-white rounded">Add Brand</button>
+    </form>
+    <ul class="divide-y bg-white rounded-xl">
+      {% for b in brands %}
+        <li class="p-3 flex justify-between">
+          <span>{{ b.name }}</span>
+          <span class="space-x-2">
+            <a class="text-blue-600" href="{% url 'shop:brand_edit' b.pk %}">Edit</a>
+            <a class="text-red-600" href="{% url 'shop:brand_delete' b.pk %}">Delete</a>
+          </span>
+        </li>
+      {% empty %}<li class="p-3">No brands.</li>{% endfor %}
+    </ul>
+  </section>
+
+  <!-- Categories -->
+  <section>
+    <h2 class="font-semibold text-lg mb-3">Categories</h2>
+    <form method="post" class="mb-3">
+      {% csrf_token %}
+      <input type="hidden" name="create_category" value="1">
+      {{ category_form.as_p }}
+      <button class="px-3 py-1 bg-blue-600 text-white rounded">Add Category</button>
+    </form>
+    <ul class="divide-y bg-white rounded-xl">
+      {% for c in categories %}
+        <li class="p-3 flex justify-between">
+          <span>{{ c.name }}{% if c.parent %} <span class="text-gray-500">→ {{ c.parent.name }}</span>{% endif %}</span>
+          <span class="space-x-2">
+            <a class="text-blue-600" href="{% url 'shop:category_edit' c.pk %}">Edit</a>
+            <a class="text-red-600" href="{% url 'shop:category_delete' c.pk %}">Delete</a>
+          </span>
+        </li>
+      {% empty %}<li class="p-3">No categories.</li>{% endfor %}
+    </ul>
+  </section>
+</div>
+
+<!-- Quick link to product management table -->
+<div class="mt-8">
+  <a href="{% url 'shop:manage_products' %}" class="px-4 py-2 bg-gray-900 text-white rounded">Manage Products</a>
+</div>
+
+<!-- Latest reviews -->
+<div class="mt-10">
+  <h2 class="font-semibold text-lg mb-3">Recent Reviews</h2>
+  <div class="space-y-2">
+    {% for r in reviews %}
+      <div class="bg-white p-3 rounded flex justify-between">
+        <div>
+          <div class="text-sm text-gray-500">{{ r.user.username }} on <b>{{ r.product.name }}</b> — {{ r.rating }}★</div>
+          {% if r.title %}<div class="font-semibold">{{ r.title }}</div>{% endif %}
+          <div>{{ r.content }}</div>
+        </div>
+        <a class="text-red-600" href="{% url 'shop:review_delete' r.pk %}">Delete</a>
+      </div>
+    {% empty %}<div class="text-gray-500">No reviews.</div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

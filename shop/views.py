@@ -6,8 +6,8 @@ from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbid
 from django.contrib.auth.decorators import login_required,  permission_required
 from django.core.paginator import Paginator
 from django.db.models import Q, F
-from .models import Product, Category, Review
-from .forms import ReviewForm, ProductForm
+from .models import Product, Category, Review, Brand
+from .forms import ReviewForm, ProductForm, BrandForm, CategoryForm
 from django.views.decorators.http import require_GET, require_POST
 from django.utils.timezone import localtime
 from django.contrib import messages
@@ -18,6 +18,8 @@ from django.db.models import Q, F, Avg, Count
 from django.core.exceptions import PermissionDenied
 from django.db.models.functions import Coalesce
 from django.db.models import DecimalField, F
+from django.contrib.admin.views.decorators import staff_member_required
+from django.db import transaction
 
 def product_list(request):
     qs = Product.objects.filter(status="active").select_related("category","brand")
@@ -375,3 +377,124 @@ def product_delete(request, pk):
 
     product.delete()
     return JsonResponse({"ok": True}, status=200)
+
+
+# Staf
+@staff_member_required
+def manage_shop(request):
+    if request.method == "POST":
+        if "create_brand" in request.POST:
+            bform = BrandForm(request.POST)
+            if bform.is_valid():
+                bform.save()
+                messages.success(request, "Brand created.")
+                return redirect("shop:manage_shop")
+        if "create_category" in request.POST:
+            cform = CategoryForm(request.POST)
+            if cform.is_valid():
+                cform.save()
+                messages.success(request, "Category created.")
+                return redirect("shop:manage_shop")
+
+    ctx = {
+        "brands": Brand.objects.order_by("name"),
+        "categories": Category.objects.select_related("parent").order_by("name"),
+        "reviews": Review.objects.select_related("product", "user").order_by("-created_at")[:50],
+        "brand_form": BrandForm(),
+        "category_form": CategoryForm(),
+    }
+    return render(request, "shop/manage_shop.html", ctx)
+
+@staff_member_required
+def manage_products(request):
+    qs = Product.objects.all().select_related("category", "brand", "created_by").order_by("-created_at")
+    return render(request, "shop/manage_products.html", {"products": qs})
+
+@staff_member_required
+def admin_product_create(request):
+    form = ProductForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        p = form.save(commit=False)
+        p.created_by = request.user
+        p.save()
+        messages.success(request, "Product created.")
+        return redirect("shop:manage_products")
+    return render(request, "shop/product_form.html", {"form": form, "mode": "create"})
+
+@staff_member_required
+def admin_product_edit(request, pk):
+    p = get_object_or_404(Product, pk=pk)
+    form = ProductForm(request.POST or None, instance=p)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Product updated.")
+        return redirect("shop:manage_products")
+    return render(request, "shop/product_form.html", {"form": form, "mode": "edit", "product": p})
+
+@staff_member_required
+@require_POST
+def admin_product_delete(request, pk):
+    p = get_object_or_404(Product, pk=pk)
+    p.delete()
+    messages.success(request, "Product deleted.")
+    return redirect("shop:manage_products")
+
+# Brands
+@staff_member_required
+def brand_edit(request, pk):
+    obj = get_object_or_404(Brand, pk=pk)
+    form = BrandForm(request.POST or None, instance=obj)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Brand updated.")
+        return redirect("shop:manage_shop")
+    return render(request, "shop/simple_form.html", {"title": "Edit Brand", "form": form})
+
+@staff_member_required
+def brand_delete(request, pk):
+    get_object_or_404(Brand, pk=pk).delete()
+    messages.success(request, "Brand deleted.")
+    return redirect("shop:manage_shop")
+
+# Categories
+@staff_member_required
+def category_edit(request, pk):
+    obj = get_object_or_404(Category, pk=pk)
+    form = CategoryForm(request.POST or None, instance=obj)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Category updated.")
+        return redirect("shop:manage_shop")
+    return render(request, "shop/simple_form.html", {"title": "Edit Category", "form": form})
+
+@staff_member_required
+def category_delete(request, pk):
+    cat = get_object_or_404(Category, pk=pk)
+
+    #Uncategorixe fallback
+    fallback, _ = Category.objects.get_or_create(
+        slug="uncategorized",
+        defaults={"name": "Uncategorized", "parent": None},
+    )
+    if fallback.pk == cat.pk:
+        messages.error(request, "Kategori default tidak boleh dihapus.")
+        return redirect("shop:manage_shop")
+
+    
+    with transaction.atomic():
+     
+        Product.objects.filter(category=cat).update(category=fallback)
+
+        Category.objects.filter(parent=cat).update(parent=fallback)
+
+        cat.delete()
+
+    messages.success(request, "Category deleted. Semua produk dipindahkan ke 'Uncategorized'.")
+    return redirect("shop:manage_shop")
+
+# Reviews
+@staff_member_required
+def review_delete(request, pk):
+    get_object_or_404(Review, pk=pk).delete()
+    messages.success(request, "Review deleted.")
+    return redirect("shop:manage_shop")
