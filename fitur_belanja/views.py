@@ -28,24 +28,34 @@ def shopping(request):
 
 @require_POST
 def add_to_cart(request):
-    pid = int(request.POST.get("product_id", "0") or 0)
+    import uuid
+    pid = request.POST.get("product_id")
     qty = int(request.POST.get("qty", "1") or 1)
+
+    try:
+        pid = uuid.UUID(pid)
+    except (ValueError, TypeError):
+        return JsonResponse({"ok": False, "error": "Invalid product ID"}, status=400)
+
     product = get_object_or_404(Product, id=pid)
 
-    # tidak boleh beli produk sendiri dan tidak boleh bila out of stock
     if (request.user.is_authenticated and product.created_by_id == request.user.id) or not product.in_stock:
         return JsonResponse({"ok": False, "error": "Not allowed"}, status=400)
 
     cart = cart_from_request(request)
+    
     with transaction.atomic():
         item, created = CartItem.objects.select_for_update().get_or_create(
-            cart=cart, product=product,
-            defaults={"qty": 0, "unit_price": product.final_price}
+            cart=cart, 
+            product=product,
+            defaults={"qty": qty, "unit_price": product.final_price}  # ✅ qty: qty (bukan 0)
         )
-        item.qty += qty
-        # cache harga terbaru saat add
-        item.unit_price = product.final_price
-        item.save()
+        
+        # ✅ Hanya tambah qty jika item SUDAH ADA
+        if not created:
+            item.qty += qty
+            item.unit_price = product.final_price
+            item.save()
 
     return JsonResponse({"ok": True, "cart_count": cart.item_count})
 
@@ -65,7 +75,20 @@ def remove_item(request):
     cart = cart_from_request(request)
     item = get_object_or_404(CartItem, id=item_id, cart=cart)
     item.delete()
-    return JsonResponse({"ok": True, "cart_count": cart.item_count})
+
+    #Hitung ulang subtotal dan total setelah item dihapus
+    items = CartItem.objects.filter(cart=cart)
+    subtotal = sum(i.subtotal for i in items)
+    shipping = 0
+    total = subtotal + shipping
+
+    return JsonResponse({
+        "ok": True,
+        "cart_count": cart.item_count,
+        "subtotal": subtotal,
+        "total": total,
+    })
+
 
 @require_POST
 def clear_cart(request):

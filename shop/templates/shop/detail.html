@@ -6,15 +6,20 @@
 <div class="grid lg:grid-cols-2 gap-8 mt-4">
   <div>
     <div class="bg-white rounded-2xl overflow-hidden">
-      {% if product.thumbnail %}<img src="{{product.thumbnail}}" class="w-full">{% endif %}
+      {% if product.thumbnail %}
+        <img src="{{ product.thumbnail }}" class="w-full">
+      {% endif %}
     </div>
   </div>
-  <div>
-    <!-- kategori dan ow owner -->
+
+  <div data-product-id="{{ product.id }}">
     <div class="text-sm text-gray-500">
       {{ product.category.name }}
-      {% if product.created_by_id %} • by <span class="font-medium">{{ product.created_by.username }}</span>{% endif %}
+      {% if product.created_by_id %}
+        • by <span class="font-medium">{{ product.created_by.username }}</span>
+      {% endif %}
     </div>
+
     <h1 class="text-3xl font-bold mt-1">{{ product.name }}</h1>
 
     <div class="flex items-end gap-2 mt-3">
@@ -22,8 +27,12 @@
       {% if product.sale_price %}
         <div class="text-gray-400 line-through">{{ product.price|price_idr }}</div>
       {% endif %}
-      {% if product.sale_price %}<span class="px-2 py-1 bg-red-500 text-white text-xs rounded">Sale - {{ product.discount_percent }}%</span>{% endif %}
-      {% if not product.in_stock %}<span class="px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>{% endif %}
+      {% if product.sale_price %}
+        <span class="px-2 py-1 bg-red-500 text-white text-xs rounded">Sale - {{ product.discount_percent }}%</span>
+      {% endif %}
+      {% if not product.in_stock %}
+        <span class="px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>
+      {% endif %}
     </div>
 
     <p class="mt-4 text-gray-700">{{ product.description }}</p>
@@ -32,15 +41,13 @@
       <div class="mt-2 text-green-700 text-sm">Member benefit: akses harga promo & review.</div>
     {% endif %}
 
+    <!-- ✅ Tambahkan class & data agar tombol terdeteksi JS -->
     <button
-      class="mt-6 px-6 py-3 bg-blue-600 text-white rounded
-             {% if not product.in_stock %}opacity-50 cursor-not-allowed
-             {% elif user.is_authenticated and product.created_by_id == user.id %}opacity-50 cursor-not-allowed
-             {% endif %}"
-      {% if not product.in_stock %}
+      class="mt-6 px-6 py-3 bg-blue-600 text-white rounded add-to-cart"
+      data-product-id="{{ product.id }}"
+      {% if not product.in_stock or (user.is_authenticated and product.created_by_id == user.id) %}
         disabled
-      {% elif user.is_authenticated and product.created_by_id == user.id %}
-        disabled
+        class="opacity-50 cursor-not-allowed"
       {% endif %}
     >
       {% if user.is_authenticated and product.created_by_id == user.id %}
@@ -52,7 +59,7 @@
   </div>
 </div>
 
-<!-- Reviews using ajaz-->
+<!-- Reviews -->
 <div class="mt-10">
   <h2 class="text-xl font-semibold mb-3">
     Reviews ({{ product.rating_count }}) — {% star_rating product.rating_avg 5 %}
@@ -85,85 +92,68 @@
 
 {% if user.is_authenticated %}
 <script>
-  window.showToast = window.showToast || function (msg) { console.log('toast:', msg); };
+//window.showToast = window.showToast || function (msg, type="info") { alert(msg); };
 
-  // CSRF dari cookie
-  function getCookie(name){
-    const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
-    return m ? m.pop() : '';
-  }
-  const csrfToken = getCookie('csrftoken');
+// Ambil CSRF dari cookie
+const getCookie = name => document.cookie.split('; ')
+  .find(row => row.startsWith(name + '='))?.split('=')[1];
+const CSRF = getCookie('csrftoken') || '';
 
-  function renderStars(avg, max=5){
-    const f = Math.floor(avg), h = (avg - f) >= .5 ? 1 : 0, e = max - f - h;
-    return '★'.repeat(f) + (h ? '☆' : '') + '☆'.repeat(e);
-  }
-
-  const form = document.getElementById('reviewForm');
-  form?.addEventListener('submit', async (e) => {
+// ================== Review ==================
+const form = document.getElementById("reviewForm");
+if (form) {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
-
     const res = await fetch("{% url 'shop:create_review' product.id %}", {
       method: "POST",
-      headers: { "X-Requested-With":"XMLHttpRequest", "X-CSRFToken": csrfToken },
+      headers: { "X-CSRFToken": CSRF },
       body: fd
     });
-
-    const ct = res.headers.get('content-type') || '';
-    if (!ct.includes('application/json')) {
-      showToast("Sesi habis / error. Refresh halaman.", 'error');
-      return;
-    }
-
     const data = await res.json();
-    if (!data.ok) {
-      showToast("Gagal submit review", 'error');
-      return;
+    if (res.ok && data.ok) {
+      showToast("Ulasan berhasil dikirim!", "success");
+      location.reload();
+    } else {
+      showToast(data.error || "Gagal mengirim ulasan.", "error");
     }
+  });
+}
 
-    // prepend review baru
-    const box = document.createElement('div');
-    box.className = "bg-white p-4 rounded shadow";
-    box.innerHTML = `
-      <div class="text-sm text-gray-500">{{ request.user.username }} • ${data.review.rating}★</div>
-      ${data.review.title ? `<div class="font-semibold">${data.review.title}</div>` : ''}
-      <div class="text-gray-700">${data.review.content}</div>
-    `;
-    document.getElementById('reviewList').prepend(box);
+// ================== Add to Cart ==================
+async function addToCart(productId, qty=1){
+  const fd = new FormData();
+  fd.append("product_id", productId);
+  fd.append("qty", qty);
 
-    // update heading jumlah & bintang
-    const h2 = document.querySelector('h2');
-    if (h2) h2.innerHTML = `Reviews (${data.rating_count}) — ${renderStars(Number(data.rating_avg), 5)}`;
+  const res = await fetch("{% url 'fitur_belanja:add_to_cart' %}", {
+    method: "POST",
+    headers: {"X-CSRFToken": getCookie("csrftoken")},
+    body: fd
+  });
 
-    form.reset();
-    showToast("Review submitted ✅", 'success');
+  const data = await res.json();
+  if (!res.ok || !data.ok) throw new Error(data.error || "Failed");
 
-    
-  const CSRF = (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop() || '');
-  async function addToCart(productId, qty=1){
-    const res = await fetch("{% url 'fitur_belanja:add_to_cart' %}", {
-      method:"POST",
-      headers:{"X-Requested-With":"XMLHttpRequest","X-CSRFToken": CSRF,"Content-Type":"application/json"},
-      body: JSON.stringify({product_id: productId, qty})
-    });
-    const data = await res.json();
-    if (!res.ok || !data.ok) throw new Error(data.error || "Failed");
-    const b = document.getElementById('cartBadge');
-    if (b){ b.textContent = data.cart_count; b.classList.remove('hidden'); }
-    if (window.showToast) showToast("Added to cart ✅", "success");
+  const badge = document.getElementById('cartBadge');
+  if (badge){
+    badge.textContent = data.cart_count;
+    badge.classList.remove('hidden');
   }
+  showToast("Added to cart ✅", "success");
+}
 
-  
+// ✅ Pastikan event listener hanya dipasang satu kali
+if (!window.addToCartListenerAttached) {
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.add-to-cart');
     if (!btn) return;
-    const card = btn.closest('[data-product-id]');
-    if (!card) return;
-    try { await addToCart(card.dataset.productId, 1); }
-    catch { if (window.showToast) showToast("Failed to add to cart", "error"); }
+    const productId = btn.dataset.productId;
+    await addToCart(productId, 1);
   });
-  });
+  window.addToCartListenerAttached = true;
+}
+
 </script>
 {% endif %}
 

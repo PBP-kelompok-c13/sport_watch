@@ -9,7 +9,8 @@
   <div class="lg:col-span-2 space-y-4">
     {% for it in items %}
       <div class="bg-white rounded-xl p-4 flex items-center gap-4"
-           data-item-id="{{ it.id }}">
+          data-item-id="{{ it.id }}"
+          data-unit-price="{{ it.unit_price }}">
         <div class="w-20 h-20 bg-gray-100 rounded overflow-hidden">
           {% if it.product.thumbnail %}
             <img src="{{ it.product.thumbnail }}" class="w-full h-full object-cover">
@@ -25,7 +26,7 @@
           </div>
         </div>
         <div class="text-right">
-          <div class="font-semibold">Rp {{ it.subtotal }}</div>
+          <div class="font-semibold item-subtotal">Rp {{ it.subtotal }}</div>
           <button class="text-red-600 text-sm mt-2 remove-item">Remove</button>
         </div>
       </div>
@@ -39,14 +40,14 @@
   <aside class="bg-white rounded-xl p-4 h-fit">
     <h3 class="font-semibold mb-3">Order Summary</h3>
     <div class="flex justify-between py-1">
-      <span>Subtotal</span><span>Rp {{ subtotal }}</span>
+      <span>Subtotal</span><span data-subtotal>Rp {{ subtotal }}</span>
     </div>
     <div class="flex justify-between py-1">
-      <span>Shipping</span><span>Rp {{ shipping }}</span>
+      <span>Shipping</span><span data-shipping data-shipping="{{ shipping }}">Rp {{ shipping }}</span>
     </div>
     <hr class="my-3">
     <div class="flex justify-between font-semibold">
-      <span>Total</span><span>Rp {{ total }}</span>
+      <span>Total</span><span data-total>Rp {{ total }}</span>
     </div>
     <button class="w-full mt-4 bg-blue-600 text-white rounded py-2">Proceed to Checkout</button>
     <a href="{% url 'shop:list' %}" class="w-full mt-2 border rounded py-2 inline-block text-center">Continue Shopping</a>
@@ -54,39 +55,126 @@
 </div>
 
 <script>
-  function getCsrf() {
-    const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
-    return m ? m.pop() : '';
-  }
+function getCsrf() {
+  const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+  return m ? m.pop() : '';
+}
 
-  // qty +/-
+// Format angka jadi Rp dengan locale indonesia (dipakai hanya untuk tampilan)
+function formatRp(num) {
+  if (isNaN(num)) return 'Rp 0';
+  return 'Rp ' + Number(num).toLocaleString('id-ID');
+}
+
+// Hitung ulang subtotal tiap item dan total keseluruhan, serta update DOM
+function updateTotals() {
+  let subtotal = 0;
+  document.querySelectorAll('[data-item-id]').forEach(item => {
+    const unit = parseFloat(item.dataset.unitPrice || '0');
+    const qtyInput = item.querySelector('.qty-input');
+    const qty = Math.max(1, parseInt(qtyInput?.value || '1'));
+    const itemSubtotal = unit * qty;
+    subtotal += itemSubtotal;
+
+    // update tampilan subtotal untuk item ini (elemen dengan class item-subtotal)
+    const subEl = item.querySelector('.item-subtotal');
+    if (subEl) subEl.textContent = formatRp(itemSubtotal);
+  });
+
+  // ambil shipping dari data attribute (fallback 0)
+  const shippingEl = document.querySelector('[data-shipping]');
+  const shipping = shippingEl ? parseFloat(shippingEl.dataset.shipping || '0') : 0;
+
+  // update ringkasan order
+  const subDom = document.querySelector('[data-subtotal]');
+  const totalDom = document.querySelector('[data-total]');
+  if (subDom) subDom.textContent = formatRp(subtotal);
+  if (totalDom) totalDom.textContent = formatRp(subtotal + shipping);
+}
+
+// pasang listener satu kali
+if (!window.__cart_listeners_attached) {
   document.addEventListener('click', async (e) => {
     const wrap = e.target.closest('[data-item-id]');
-    if (!wrap) return;
+    // jika klik bukan di dalam item, pengecekan lainnya:
+    // - tombol delete bisa ada di dalam wrap (remove-item)
+    // - tombol qty-plus/qty-minus juga
+    if (!wrap) {
+      // juga cek jika tombol remove ada di page tapi tidak berada dalam data-item-id wrapper
+      return;
+    }
 
     const id = wrap.dataset.itemId;
     const input = wrap.querySelector('.qty-input');
+
+    // minus
     if (e.target.closest('.qty-minus')) {
       input.value = Math.max(1, (parseInt(input.value || '1') - 1));
     }
+
+    // plus
     if (e.target.closest('.qty-plus')) {
       input.value = (parseInt(input.value || '1') + 1);
     }
+
+    // jika qty berubah (plus atau minus), kirim update ke server lalu update totals lokal
     if (e.target.closest('.qty-minus') || e.target.closest('.qty-plus')) {
-      await fetch("{% url 'fitur_belanja:update_qty' %}", {
-        method: "POST",
-        headers: {"X-CSRFToken": getCsrf()},
-        body: new URLSearchParams({ item_id: id, qty: input.value })
-      });
+      try {
+        const res = await fetch("{% url 'fitur_belanja:update_qty' %}", {
+          method: "POST",
+          headers: {"X-CSRFToken": getCsrf()},
+          body: new URLSearchParams({ item_id: id, qty: input.value })
+        });
+        // kita tidak bergantung pada isi response untuk menampilkan subtotal,
+        // cukup hitung ulang di klien agar responsive
+        if (!res.ok) {
+          console.error('Failed update qty', await res.text());
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        updateTotals();
+      }
     }
+
+    // hapus item
     if (e.target.closest('.remove-item')) {
-      const res = await fetch("{% url 'fitur_belanja:remove_item' %}", {
-        method: "POST",
-        headers: {"X-CSRFToken": getCsrf()},
-        body: new URLSearchParams({ item_id: id })
-      });
-      if (res.ok) wrap.remove();
+      try {
+        const res = await fetch("{% url 'fitur_belanja:remove_item' %}", {
+          method: "POST",
+          headers: {"X-CSRFToken": getCsrf()},
+          body: new URLSearchParams({ item_id: id })
+        });
+        if (res.ok) {
+          // hapus DOM item
+          wrap.remove();
+          // update badge cart_count jika endpoint kembali memberikan cart_count
+          try {
+            const data = await res.json().catch(()=>{});
+            if (data && data.cart_count !== undefined) {
+              const badge = document.getElementById('cartBadge');
+              if (badge) {
+                badge.textContent = data.cart_count;
+                if (data.cart_count == 0) badge.classList.add('hidden');
+              }
+            }
+          } catch(e) { /* ignore */ }
+
+          updateTotals();
+        } else {
+          console.error('Failed to remove item', await res.text());
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
   });
+
+  window.__cart_listeners_attached = true;
+}
+
+// panggil sekali saat load utk memastikan tampilan sinkron
+document.addEventListener('DOMContentLoaded', updateTotals);
 </script>
+
 {% endblock %}
