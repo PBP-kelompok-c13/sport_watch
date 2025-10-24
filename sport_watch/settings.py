@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'portal_berita',
     'scoreboard',
     'fitur_belanja',
+    'fitur_pencarian',
     #'shop', ini gak jadi yaa shop nya direpclace dengna di bawah
     'shop.apps.ShopConfig',
     'fitur_pencarian',
@@ -75,10 +76,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                'fitur_belanja.context_processors.cart_badge',
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'sport_watch.wsgi.application'
 

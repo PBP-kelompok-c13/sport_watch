@@ -210,7 +210,7 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 ---
 ### 4. **Shop (`shop`)**
 
-**Penanggung jawab:** Dzaki Abrar Fatihul Ihsan
+**Penanggung jawab:** Edward Jeremy Worang
 
 **Deskripsi Modul:** Halaman khusus untuk melihat dan membeli merchandise olahraga.
 
@@ -218,8 +218,8 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 
 * **Backend:**
 
-  * Model produk (nama, harga, stok, kategori).
-  * Model transaksi / keranjang belanja.
+  * Model produk (nama, harga, stok, kategori, review).
+  * Filtering dan rating system.
 * **Frontend:**
 
   * Template daftar produk (grid view).
@@ -229,7 +229,7 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 
 ### 5. **Fitur Belanja (`fitur-belanja`)**
 
-**Penanggung jawab:** Edward Jeremy Worang
+**Penanggung jawab:** Dzaki Abrar Fatihul Ihsan
 
 **Deskripsi Modul:** Mengatur logika pembelian & checkout.
 
@@ -239,7 +239,7 @@ Buka browser dan kunjungi `http://127.0.0.1:8000`
 * Hapus produk dari keranjang.
 * Hitung total harga.
 * Simulasi checkout (dummy payment).
-
+* Halaman checkout.
 ---
 
 **Link Figma:**

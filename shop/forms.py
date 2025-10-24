@@ -40,3 +40,24 @@ class ReviewForm(forms.ModelForm):
             "title": forms.TextInput(attrs={"class": "border rounded p-2 w-full"}),
             "content": forms.Textarea(attrs={"rows": 3, "class": "border rounded p-2 w-full"}),
         }
+
+
+
+class BrandForm(forms.ModelForm):
+    class Meta:
+        model = Brand
+        fields = ["name", "slug"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "slug": forms.TextInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
+        }
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ["name", "slug", "parent"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "slug": forms.TextInput(attrs={"class": "border rounded px-3 py-2 w-full"}),
+            "parent": forms.Select(attrs={"class": "border rounded px-3 py-2 w-full"}),
+        }

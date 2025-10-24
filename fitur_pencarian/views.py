@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Count, Q
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
@@ -19,7 +20,9 @@ from .models import SearchPreference, SearchLog
 def _get_available_preferences(user):
     """Return presets that the current user is allowed to access."""
 
-    base_q = Q(is_public=True, role_visibility=SearchPreference.RoleVisibility.ALL)
+    base_q = Q(
+        is_public=True, role_visibility=SearchPreference.RoleVisibility.ALL
+    )
     if user.is_authenticated:
         base_q |= Q(user=user)
         if user.is_staff:
@@ -80,8 +83,6 @@ def _apply_preference_to_data(cleaned_data, preference):
         cleaned_data["min_price"] = preference.min_price
     if not cleaned_data.get("max_price") and preference.max_price is not None:
         cleaned_data["max_price"] = preference.max_price
-    if not cleaned_data.get("only_discount"):
-        cleaned_data["only_discount"] = preference.only_discount
     return cleaned_data
 
 
@@ -252,8 +253,9 @@ def ajax_search_results(request):
 
 @login_required
 @require_GET
-def ajax_preference_form(request):
-    preference_id = request.GET.get("id")
+def ajax_preference_form(request, id=None):
+    # id bisa dari path param (kwargs) atau dari querystring (?id=...)
+    preference_id = id or request.GET.get("id")
     preference = None
     if preference_id:
         preference = get_object_or_404(SearchPreference, pk=preference_id, user=request.user)
@@ -265,22 +267,42 @@ def ajax_preference_form(request):
     )
     return JsonResponse({"form": html})
 
-
 @login_required
 @require_POST
-def ajax_preference_submit(request):
-    preference_id = request.POST.get("id")
+def ajax_preference_submit(request, id=None):
+    # id bisa dari path param (kwargs) atau dari POST body (id=...)
+    preference_id = id or request.POST.get("id")
     instance = None
     if preference_id:
         instance = get_object_or_404(SearchPreference, pk=preference_id, user=request.user)
+
     form = SearchPreferenceForm(request.POST, instance=instance, user=request.user)
+
+    # **PENTING**: set user SEBELUM validasi agar validate_unique(user, label) jalan
+    form.instance.user = request.user
+
     if form.is_valid():
         preference = form.save(commit=False)
-        preference.user = request.user
+        preference.user = request.user  # redundant tapi aman
+
+        # jaga privasi dia sendiri (logika ini sebenarnya tidak perlu karena user sama)
         if not preference.is_public and preference.user != request.user:
             preference.is_public = False
-        preference.save()
+
+        try:
+            preference.save()
+        except IntegrityError:
+            # contoh: label sudah dipakai user yang sama → kembalikan error form (400)
+            form.add_error("label", "Label sudah digunakan untuk preset lain di akun Anda.")
+            html = render_to_string(
+                "fitur_pencarian/_preference_form.html",
+                {"form": form, "preference": instance},
+                request=request,
+            )
+            return JsonResponse({"form": html, "errors": form.errors}, status=400)
+
         form.save_m2m()
+
         html = render_to_string(
             "fitur_pencarian/_preference_card.html",
             {"preference": preference, "request": request},
@@ -304,6 +326,18 @@ def ajax_preference_submit(request):
     )
     return JsonResponse({"form": html, "errors": form.errors}, status=400)
 
+@login_required
+@require_POST
+def ajax_preference_delete(request):
+    preference_id = request.POST.get("id")
+    if not preference_id:
+        return JsonResponse({"error": "Preset tidak ditemukan."}, status=400)
+
+    preference = get_object_or_404(
+        SearchPreference, pk=preference_id, user=request.user
+    )
+    preference.delete()
+    return JsonResponse({"message": "Preset pencarian berhasil dihapus."})
 
 @require_GET
 def ajax_recent_searches(request):

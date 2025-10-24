@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils.text import slugify
 
 User = get_user_model()
 
@@ -14,6 +15,10 @@ class KategoriBerita(models.Model):
 
     def __str__(self):
         return self.nama
+
+    def get_category_class(self):
+        """Returns a slugified version of the category name for use as a CSS class."""
+        return slugify(self.nama)
 
 
 class Berita(models.Model):

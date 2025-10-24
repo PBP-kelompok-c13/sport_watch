@@ -99,6 +99,11 @@ class SearchForm(forms.Form):
         self.fields["product_category"].queryset = Category.objects.order_by("name")
         self.fields["brand"].queryset = Brand.objects.order_by("name")
 
+        # ganti label kosong default "---------" → custom
+        self.fields["news_category"].empty_label = "All News"
+        self.fields["product_category"].empty_label = "All Products"
+        self.fields["brand"].empty_label = "All Brands"  # opsional, biar konsisten
+
     def clean(self):
         cleaned = super().clean()
         min_price = cleaned.get("min_price")
@@ -192,40 +197,52 @@ class SearchPreferenceForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         self.request_user = user
         super().__init__(*args, **kwargs)
-        self.fields["default_news_category"].queryset = KategoriBerita.objects.order_by(
-            "nama"
-        )
-        self.fields["default_product_category"].queryset = Category.objects.order_by(
-            "name"
-        )
+        self.fields["default_news_category"].queryset = KategoriBerita.objects.order_by("nama")
+        self.fields["default_product_category"].queryset = Category.objects.order_by("name")
         self.fields["default_brand"].queryset = Brand.objects.order_by("name")
-        if not (user and user.is_staff):
-            # non staff tidak boleh membuat preset khusus staf
+
+        # ganti label kosong default "---------" → custom
+        self.fields["default_news_category"].empty_label = "All News"
+        self.fields["default_product_category"].empty_label = "All Products"
+        self.fields["default_brand"].empty_label = "All Brands"  # opsional
+
+        if not user or not user.is_staff:
             self.fields["role_visibility"].choices = [
-                (
-                    SearchPreference.RoleVisibility.ALL.value,
-                    SearchPreference.RoleVisibility.ALL.label,
-                )
+                choice
+                for choice in self.fields["role_visibility"].choices
+                if choice[0] != SearchPreference.RoleVisibility.STAFF
             ]
-            self.fields["role_visibility"].initial = (
-                SearchPreference.RoleVisibility.ALL.value
-            )
         else:
             self.fields["role_visibility"].choices = SearchPreference.RoleVisibility.choices
 
+
     def clean(self):
-        cleaned = super().clean()
-        min_price = cleaned.get("min_price")
-        max_price = cleaned.get("max_price")
+        cleaned_data = super().clean()
+        min_price = cleaned_data.get("min_price")
+        max_price = cleaned_data.get("max_price")
         if min_price and max_price and min_price > max_price:
             raise forms.ValidationError(
                 "Harga minimum tidak boleh lebih besar dari harga maksimum."
             )
-        role_visibility = cleaned.get("role_visibility")
-        if role_visibility == SearchPreference.RoleVisibility.STAFF and not (
-            self.request_user and self.request_user.is_staff
+
+        visibility = cleaned_data.get("role_visibility")
+        is_public = cleaned_data.get("is_public")
+
+        if visibility == SearchPreference.RoleVisibility.PRIVATE:
+            cleaned_data["is_public"] = False
+        elif not is_public:
+            cleaned_data["role_visibility"] = SearchPreference.RoleVisibility.PRIVATE
+            visibility = SearchPreference.RoleVisibility.PRIVATE
+
+        if (
+            cleaned_data.get("role_visibility")
+            == SearchPreference.RoleVisibility.STAFF
+            and self.request_user
+            and not self.request_user.is_staff
         ):
-            raise forms.ValidationError(
-                "Anda tidak memiliki izin untuk membuat preset khusus staf."
+            self.add_error(
+                "role_visibility",
+                "Hanya staf yang dapat membuat preset dengan visibilitas staf.",
             )
-        return cleaned
+
+        return cleaned_data

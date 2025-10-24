@@ -1,51 +1,25 @@
-{% extends 'base.html' %}
-{% block title %}Keranjang Belanja - Sport Watch{% endblock %}
-
+{% extends "base.html" %}
 {% block content %}
-<div class="container mx-auto px-6 py-8">
-  <h1 class="text-3xl font-bold mb-6 text-center">Keranjang Belanja</h1>
+<h1 class="text-2xl font-bold mb-4">Your cart</h1>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-    <!-- List Barang -->
-    <div class="md:col-span-2 bg-white shadow rounded-lg p-6">
-      {% for item in cart_items %}
-      <div class="flex justify-between border-b py-4">
+{% if items %}
+  <div class="space-y-3">
+    {% for it in items %}
+      <div class="bg-white p-4 rounded shadow flex justify-between">
         <div>
-          <h2 class="text-lg font-semibold">{{ item.name_snapshot }}</h2>
-          <p class="text-gray-600">Rp {{ item.price_snapshot|floatformat:0 }}</p>
-          <a href="{% url 'fitur_belanja:remove_from_cart' item.id %}" class="text-red-500 text-sm hover:text-red-700">
-            Hapus
-          </a>
+          <div class="font-medium">{{ it.product.name }}</div>
+          <div class="text-sm text-gray-500">Qty: {{ it.qty }}</div>
         </div>
-        <div class="text-right">
-          <span class="block">Jumlah: {{ item.qty }}</span>
-          <span class="font-semibold">Subtotal: Rp {{ item.price_snapshot|floatformat:0 }}</span>
+        <div class="font-semibold">
+          Rp {{ it.subtotal|floatformat:0 }}
         </div>
       </div>
-      {% empty %}
-      <p class="text-gray-500 text-center">Keranjang kosong.</p>
-      {% endfor %}
-    </div>
-
-    <!-- Ringkasan -->
-    <div class="bg-gray-50 shadow rounded-lg p-6">
-      <h3 class="text-xl font-semibold mb-4">Ringkasan Belanja</h3>
-      <div class="flex justify-between mb-2">
-        <span>Subtotal</span>
-        <span>Rp {{ subtotal|floatformat:0 }}</span>
-      </div>
-      <hr class="my-2" />
-      <div class="flex justify-between font-bold text-lg">
-        <span>Total</span>
-        <span>Rp {{ total|floatformat:0 }}</span>
-      </div>
-
-      <!-- Tombol Checkout -->
-      <a href="{% url 'fitur_belanja:checkout' %}" 
-         class="block bg-blue-600 text-white text-center py-3 rounded mt-6 hover:bg-blue-700">
-        Lanjut ke Checkout
-      </a>
-    </div>
+    {% endfor %}
   </div>
-</div>
+  <div class="mt-4 text-right text-xl">
+    Total: <span class="font-bold">Rp {{ cart.total|floatformat:0 }}</span>
+  </div>
+{% else %}
+  <p class="text-gray-600">Your cart is empty.</p>
+{% endif %}
 {% endblock %}

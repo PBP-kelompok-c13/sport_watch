@@ -218,18 +218,18 @@
         </div>
     </div>
 </div>
-
 <script>
     window.SportWatchSearch = {
         endpoints: {
             results: "{% url 'fitur_pencarian:ajax_search_results' %}",
             preferenceForm: "{% url 'fitur_pencarian:ajax_preference_form' %}",
             preferenceSubmit: "{% url 'fitur_pencarian:ajax_preference_submit' %}",
+            preferenceDelete: "{% url 'fitur_pencarian:ajax_preference_delete' %}",
             recent: "{% url 'fitur_pencarian:ajax_recent_searches' %}",
-            analytics: "{% url 'fitur_pencarian:ajax_search_analytics' %}",
+            analytics: "{% url 'fitur_pencarian:ajax_search_analytics' %}"
         },
-        isAuthenticated: {{ request.user.is_authenticated|yesno:"true,false" }},
-        isStaff: {{ request.user.is_staff|yesno:"true,false" }},
+        isAuthenticated: "{{ request.user.is_authenticated|yesno:'true,false' }}" === 'true',
+        isStaff: "{{ request.user.is_staff|yesno:'true,false' }}" === 'true'
     };
 </script>
 <script src="{% static 'fitur_pencarian/js/search.js' %}" defer></script>

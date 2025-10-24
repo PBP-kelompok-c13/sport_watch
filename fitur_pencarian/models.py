@@ -29,6 +29,7 @@ class SearchPreference(TimeStampedModel):
     class RoleVisibility(models.TextChoices):
         ALL = "all", "Semua Pengguna"
         STAFF = "staff", "Staf Saja"
+        PRIVATE = "private", "Pribadi"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
@@ -89,6 +90,10 @@ class SearchPreference(TimeStampedModel):
     @property
     def is_staff_only(self) -> bool:
         return self.role_visibility == self.RoleVisibility.STAFF
+
+    @property
+    def is_private(self) -> bool:
+        return self.role_visibility == self.RoleVisibility.PRIVATE
 
 
 class SearchLog(TimeStampedModel):

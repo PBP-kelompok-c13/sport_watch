@@ -6,7 +6,6 @@
 
 <!-- Toolbar Search dan Sort -->
 <form method="get" class="flex items-center gap-3 mb-4">
-  <input name="q" value="{{ request.GET.q }}" placeholder="Search products..." class="flex-1 border rounded px-3 py-2">
   <select name="sort" class="border rounded px-3 py-2">
     <option value="featured"   {% if sort == 'featured' %}selected{% endif %}>Featured</option>
     <option value="price_asc"  {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
@@ -75,7 +74,7 @@
       </div>
 
       {% if show_member_price %}
-        <div class="text-xs text-green-700 mt-1">Member price visible</div>
+        <div class="text-xs text-green-700 mt-1">Member</div>
       {% endif %}
 
       <div class="mt-3">
@@ -99,6 +98,13 @@
             Add to Cart
           {% endif %}
         </button>
+        {% if user.is_authenticated and user.is_staff or user.is_authenticated and p.created_by_id == user.id %}
+          <div class="mt-2 flex gap-2">
+            <a href="{% url 'shop:edit' p.id %}" class="px-3 py-1 border rounded text-sm">Edit</a>
+            <button class="px-3 py-1 border rounded text-sm text-red-600"
+                    data-action="delete" data-id="{{ p.id }}">Delete</button>
+          </div>
+        {% endif %}
       </div>
     </div>
   {% endfor %}
@@ -133,6 +139,8 @@
 </div>
 
 <script>
+  window.showToast = window.showToast || function (msg) { console.log('toast:', msg); };
+
   //  AJAX Load More 
   const loadBtn = document.getElementById('loadMore');
   if (loadBtn) {
@@ -144,15 +152,17 @@
       const grid = document.getElementById('grid');
 
       data.results.forEach(p => {
-        //p.is_owner (boolean) & p.owner (username)
+      //const isOwner 
         const ownerText = p.owner ? `by <span class="font-medium">${p.owner}</span>` : '';
-        const isOwner = !!p.is_owner; // fallback false jika tidak ada field-nya
+        const isOwner = !!p.is_owner; //fallback false jika tidak ada field-nya
         const disable = (!p.in_stock || isOwner) ? 'disabled' : '';
         const btnCls  = (!p.in_stock || isOwner) ? 'opacity-50 cursor-not-allowed' : '';
         const btnText = isOwner ? 'Your product' : 'Add to Cart';
 
         const el = document.createElement('div');
         el.className = "relative bg-white rounded-2xl shadow p-4";
+        el.setAttribute('data-product-id', p.id);            
+
         el.innerHTML = `
           ${p.sale_price ? '<span class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">Sale</span>' : ''}
           ${!p.in_stock ? '<span class="absolute top-2 right-2 px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>' : ''}
@@ -170,10 +180,15 @@
           </div>
           <div class="mt-3">
             <button class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full ${btnCls}" ${disable}>${btnText}</button>
+            ${isOwner ? `
+              <div class="mt-2 flex gap-2">
+                <a href="/shop/${p.id}/edit/" class="px-3 py-1 border rounded text-sm">Edit</a>
+                <button class="px-3 py-1 border rounded text-sm text-red-600" data-action="delete" data-id="${p.id}">Delete</button>
+              </div>` : ``}
           </div>`;
         grid.appendChild(el);
       });
-
+          
       if (data.has_next) loadBtn.dataset.next = String(parseInt(loadBtn.dataset.next) + 1);
       else loadBtn.remove();
     });
@@ -182,20 +197,46 @@
   // mini toast helper 
   
 
-  // ===== Event untuk integrasi CART (decoupled) =====
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('.add-to-cart')) {
-      const card = e.target.closest('[data-product-id]');
-      if (!card) return;
-      const id = card.dataset.productId;
-      const name = card.querySelector('h3')?.textContent ?? '';
-      const price = card.querySelector('.font-bold')?.textContent ?? '';
-      document.dispatchEvent(new CustomEvent('product:added', { detail: { id, name, price }}));
-    }
-  });
-  document.addEventListener('product:added', (e) => { showToast(`Added: ${e.detail.name}`, 'success'); }); //TOAST SUKSES
+  //  Event untuk integrasi CART 
+  // helper csrf
+function getCsrf(){
+  const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+  return m ? m.pop() : '';
+}
 
-  // ===== Modal Create Product  =====
+// kirim ke server (form-encoded)
+async function addToCart(productId, qty=1){
+  const form = new URLSearchParams();
+  form.set('product_id', productId);
+  form.set('qty', String(qty));
+
+  const res = await fetch("{% url 'fitur_belanja:add_to_cart' %}", {
+    method: "POST",
+    headers: { "X-CSRFToken": getCsrf() },
+    body: form
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.ok) throw new Error(data.error || "Failed");
+
+  const badge = document.getElementById('cartBadge');
+  if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
+  showToast('Added to cart ✅', 'success');
+}
+
+// satu-satunya listener tombol Add to Cart
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.add-to-cart');
+  if (!btn) return;
+  const card = btn.closest('[data-product-id]');
+  if (!card) return;
+
+  try { await addToCart(card.dataset.productId, 1); }
+  catch { showToast('Failed to add to cart', 'error'); }
+});
+
+
+  //MODAL CREATEP RODUCT
   const modal = document.getElementById('createModal');
   const modalBody = document.getElementById('createModalBody');
   const openButtons = [
@@ -207,12 +248,12 @@
 
   function openCreateModal() {
     modal.classList.remove('hidden');
-    // Muat form fragment
+    //Muat form fragment
     fetch("{% url 'shop:create' %}", { headers: {"X-Requested-With": "XMLHttpRequest"} })
       .then(r => r.json())
       .then(({html}) => {
         modalBody.innerHTML = html;
-        bindCreateFormHandlers(); // bind submit/cancel setelah fragment masuk
+        bindCreateFormHandlers(); //bind submit/cancel setelah fragment masuk
       });
   }
   function closeCreateModal() {
@@ -258,30 +299,96 @@
       el.className = "relative bg-white rounded-2xl shadow p-4";
       el.setAttribute('data-product-id', p.id);
       el.innerHTML = `
-        ${p.sale_price ? '<span class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">Sale</span>' : ''}
-        ${!p.in_stock ? '<span class="absolute top-2 right-2 px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>' : ''}
-        <a href="/shop/p/${p.slug}/">
-          <div class="aspect-[16/10] bg-gray-100 rounded mb-4 overflow-hidden">
-            ${p.thumbnail ? `<img src="${p.thumbnail}" class="w-full h-full object-cover">` : ''}
-          </div>
-          <div class="text-xs text-gray-500 mb-1">${p.category ?? ''}</div>
-          <h3 class="font-semibold mb-1 line-clamp-2">${p.name}</h3>
-        </a>
-        <div class="text-xs text-gray-500 mt-1">${ownerText}</div>
-        <div class="flex items-end gap-2 mt-1">
-          <div class="text-xl font-bold">Rp ${(p.sale_price ?? p.price).toLocaleString('id-ID')}</div>
-          ${p.sale_price ? `<div class="text-gray-400 line-through">Rp ${p.price.toLocaleString('id-ID')}</div>` : ''}
+      ${p.sale_price ? '<span class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">Sale</span>' : ''}
+      ${!p.in_stock ? '<span class="absolute top-2 right-2 px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>' : ''}
+      <a href="/shop/p/${p.slug}/">
+        <div class="aspect-[16/10] bg-gray-100 rounded mb-4 overflow-hidden">
+          ${p.thumbnail ? `<img src="${p.thumbnail}" class="w-full h-full object-cover">` : ''}
         </div>
-        <div class="mt-3">
-          <!-- karena ini produk milik user yang baru create, tombol otomatis disabled -->
-          <button class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full opacity-50 cursor-not-allowed" disabled>
-            Your product
-          </button>
-        </div>`;
+        <div class="text-xs text-gray-500 mb-1">${p.category ?? ''}</div>
+        <h3 class="font-semibold mb-1 line-clamp-2">${p.name}</h3>
+      </a>
+      <div class="text-xs text-gray-500 mt-1">${ownerText}</div>
+      <div class="flex items-end gap-2 mt-1">
+        <div class="text-xl font-bold">Rp ${(p.sale_price ?? p.price).toLocaleString('id-ID')}</div>
+        ${p.sale_price ? `<div class="text-gray-400 line-through">Rp ${p.price.toLocaleString('id-ID')}</div>` : ''}
+      </div>
+      <div class="mt-3">
+        <button class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full opacity-50 cursor-not-allowed" disabled>
+          Your product
+        </button>
+        <div class="mt-2 flex gap-2">
+          <a href="/shop/${p.id}/edit/" class="px-3 py-1 border rounded text-sm">Edit</a>
+          <button class="px-3 py-1 border rounded text-sm text-red-600" data-action="delete" data-id="${p.id}">Delete</button>
+        </div>
+      </div>`;
+
       grid.prepend(el);
       showToast('Product created ✅', 'success');
     });
   }
+
+   //  
+  function getCookie(name){
+    const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+  }
+  const csrfToken = getCookie('csrftoken');
+
+ 
+  document.addEventListener('click', async (e) => {
+    const delBtn = e.target.closest('[data-action="delete"]');
+    if (!delBtn) return;
+
+    const id = delBtn.getAttribute('data-id');
+    if (!id) return;
+
+    if (!confirm('Delete this product?')) return;
+
+    const res = await fetch(`/shop/${id}/delete/`, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
+      }
+    });
+
+    const ok = res.ok;
+    if (!ok) {
+      showToast('Failed to delete product', 'error');
+      return;
+    }
+
+    //Hapus kartu dari grid
+    const card = delBtn.closest('[data-product-id]');
+    if (card) card.remove();
+    showToast('Product deleted ✅', 'success');
+  });
+
+   // helper csrf
+  const CSRF = (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop() || '');
+  async function addToCart(productId, qty=1){
+    const res = await fetch("{% url 'fitur_belanja:add_to_cart' %}", {
+      method:"POST",
+      headers:{"X-Requested-With":"XMLHttpRequest","X-CSRFToken": CSRF,"Content-Type":"application/json"},
+      body: JSON.stringify({product_id: productId, qty})
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || "Failed");
+    const b = document.getElementById('cartBadge');
+    if (b){ b.textContent = data.cart_count; b.classList.remove('hidden'); }
+    if (window.showToast) showToast("Added to cart ✅", "success");
+  }
+
+  // tombol pada kartu (butuh data-product-id di wrapper kartu)
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.add-to-cart');
+    if (!btn) return;
+    const card = btn.closest('[data-product-id]');
+    if (!card) return;
+    try { await addToCart(card.dataset.productId, 1); }
+    catch { if (window.showToast) showToast("Failed to add to cart", "error"); }
+  });
 </script>
 {% include 'toast.html' %}
 

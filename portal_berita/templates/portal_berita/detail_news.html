@@ -2,9 +2,7 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-    {% if news.thumbnail %}
-    <img src="{{ news.thumbnail }}" alt="{{ news.judul }}" class="w-full h-96 object-cover">
-    {% endif %}
+    <img src="{{ news.thumbnail|default:'/static/images/default_news_thumbnail.jpg' }}" alt="{{ news.judul|default:'News Thumbnail' }}" class="w-full h-96 object-cover">
     <div class="p-6">
         <h1 class="text-4xl font-bold text-gray-800 mb-2">{{ news.judul }}</h1>
         <p class="text-sm text-gray-500 mb-4">By {{ news.penulis.username }} on {{ news.tanggal_dibuat|date:"F d, Y" }}</p>
@@ -65,7 +63,7 @@
                 <p class="text-gray-600">Please <a href="{% url 'portal_berita:login' %}" class="text-blue-500 hover:underline">log in</a> to reply.</p>
                 {% endif %}
             </div>
-            {% include 'portal_berita/comment_thread.html' with comment=comment %}
+            {% include 'portal_berita/comment_thread.html' with comment=comment news=news %}
         </div>
         {% endfor %}
     </div>

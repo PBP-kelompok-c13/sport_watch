@@ -10,9 +10,12 @@ from django.contrib import messages
 from django.core import serializers
 import json
 from datetime import datetime
+from django.utils.timesince import timesince
 
-from portal_berita.forms import BeritaForm, KategoriBeritaForm, CommentForm
+from portal_berita.forms import BeritaForm, KategoriBeritaForm, CommentForm, CustomAuthenticationForm, CustomUserCreationForm
 from portal_berita.models import Berita, KategoriBerita, Comment
+from scoreboard.models import Scoreboard
+from shop.models import Product
 
 def is_admin(user):
     return user.is_staff
@@ -59,7 +62,7 @@ def detail_news(request, id):
 
 def register_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, 'Account created successfully! Please log in.')
@@ -67,12 +70,12 @@ def register_view(request):
         else:
             messages.error(request, 'Error creating account. Please check your input.')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, "portal_berita/register.html", {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = CustomAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
@@ -86,7 +89,7 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid username or password.')
     else:
-        form = AuthenticationForm()
+        form = CustomAuthenticationForm()
     return render(request, "portal_berita/login.html", {'form': form})
 
 @login_required
@@ -95,20 +98,70 @@ def logout_view(request):
     messages.info(request, 'You have been logged out.')
     return redirect('portal_berita:login')
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 def list_news(request):
     all_news = Berita.objects.filter(is_published=True).order_by('-tanggal_dibuat')
     featured_news = None
-    other_news = []
+    other_news_list = []
 
     if all_news.exists():
         featured_news = all_news.first()
-        other_news = all_news[1:]
+        other_news_list = all_news[1:]
+
+    # Paginate other_news_list
+    paginator = Paginator(other_news_list, 6)  # Show 6 news items per page
+    page = request.GET.get('page', 1)
+    try:
+        other_news = paginator.page(page)
+    except PageNotAnInteger:
+        other_news = paginator.page(1)
+    except EmptyPage:
+        other_news = paginator.page(paginator.num_pages)
+
+    most_popular_news = Berita.objects.filter(is_published=True).order_by('-views')[:5]
+    live_scores = Scoreboard.objects.filter(status__in=['live', 'recent']).order_by('-tanggal')[:3]
+    featured_products = Product.objects.filter(is_featured=True, status='active')[:3]
 
     context = {
         'featured_news': featured_news,
-        'other_news': other_news
+        'other_news': other_news,
+        'most_popular_news': most_popular_news,
+        'live_scores': live_scores,
+        'featured_products': featured_products,
+        'has_next_page': other_news.has_next(),
+        'next_page_number': other_news.next_page_number() if other_news.has_next() else None,
     }
     return render(request, 'portal_berita/list_news.html', context)
+
+def load_more_news(request):
+    offset = int(request.GET.get('offset', 0))
+    limit = 6  # Number of news items to load per request
+
+    all_news = Berita.objects.filter(is_published=True).order_by('-tanggal_dibuat')
+    # Exclude the featured news if it exists
+    if all_news.exists():
+        all_news = all_news[1:] # Skip the first one (featured)
+
+    news_to_load = all_news[offset:offset + limit]
+    
+    data = []
+    for news_item in news_to_load:
+        data.append({
+            'id': news_item.id,
+            'thumbnail': news_item.thumbnail if news_item.thumbnail else '/static/images/default_news_thumbnail.jpg',
+            'kategori_nama': news_item.kategori.nama if news_item.kategori else 'Default',
+            'kategori_class': news_item.kategori.get_category_class() if news_item.kategori else 'default',
+            'judul': news_item.judul,
+            'konten_truncated': news_item.konten[:100] + '...' if len(news_item.konten) > 100 else news_item.konten,
+            'tanggal_dibuat_timesince': timesince(news_item.tanggal_dibuat),
+            'comment_count': news_item.comment_count,
+            'detail_url': reverse('portal_berita:detail_news', args=[news_item.id]),
+        })
+    
+    has_more = (offset + limit) < len(all_news)
+
+    return JsonResponse({'news': data, 'has_more': has_more})
 
 @csrf_exempt
 @user_passes_test(is_admin)
