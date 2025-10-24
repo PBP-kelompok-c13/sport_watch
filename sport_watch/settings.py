@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-62m-8_o)rt)x05conpnf$#j7zo!rdt5mho$4@j6y)w=iq9_f79
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 
-DEBUG = True
+DEBUG = not PRODUCTION
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "faiz-yusuf-sportwatch.pbp.cs.ui.ac.id",]
 
@@ -148,16 +148,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# ✅ Always define STATIC_ROOT for collectstatic
+# Always collect to 'staticfiles' in every environment
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# ✅ Only use STATICFILES_DIRS in DEBUG mode
 if DEBUG:
     STATICFILES_DIRS = [
-        BASE_DIR / 'static',  # Your development static directory
+        BASE_DIR / 'static',
     ]
-else:
-    STATIC_ROOT = BASE_DIR / 'static' # merujuk ke /static root project pada mode production
 
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
