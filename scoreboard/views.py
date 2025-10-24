@@ -22,12 +22,12 @@ def index(request):
     }
     return render(request, 'scoreboard/index.html', context)
 
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def scoreboard_management(request):
     scores = Scoreboard.objects.all().order_by('-tanggal')
     return render(request, 'scoreboard/scoreboard_management.html', {'scores': scores})
 
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def create_score(request):
     form = ScoreBoardForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -35,7 +35,7 @@ def create_score(request):
         return redirect('scoreboard:scoreboard_management')
     return render(request, 'scoreboard/score_form.html', {'form': form, 'title': 'Add New Score'})
 
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def edit_score(request, pk):
     item = get_object_or_404(Scoreboard, pk=pk)
     form = ScoreBoardForm(request.POST or None, instance=item)
@@ -44,7 +44,7 @@ def edit_score(request, pk):
         return redirect('scoreboard:scoreboard_management')
     return render(request, 'scoreboard/score_form.html', {'form': form, 'title': 'Edit Score'})
 
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='/accounts/login/')
 def delete_score(request, pk):
     item = get_object_or_404(Scoreboard, pk=pk)
     if request.method == 'POST':
