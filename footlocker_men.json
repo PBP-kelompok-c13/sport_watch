@@ -214,23 +214,5 @@
         "brand": "Wish List",
         "category": "Men's Shoes",
         "description": "Product URL: https://www.footlocker.id/new-balance-530-unisex-sneakers-white-254971-254971.html"
-    },
-    {
-        "name": "",
-        "price": 0.0,
-        "image_url": "N/A",
-        "product_url": "N/A",
-        "brand": "N/A",
-        "category": "Men's Shoes",
-        "description": "Product URL: N/A"
-    },
-    {
-        "name": "",
-        "price": 0.0,
-        "image_url": "N/A",
-        "product_url": "N/A",
-        "brand": "Tambah Ke KeranjangTambah Ke KeranjangRemove This Item",
-        "category": "Men's Shoes",
-        "description": "Product URL: N/A"
     }
 ]
