@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("fitur_pencarian", "0001_initial"),
+        ("fitur_pencarian", "0002_alter_searchpreference_default_brand_and_more"),
     ]
 
     operations = [

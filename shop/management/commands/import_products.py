@@ -32,15 +32,22 @@ class Command(BaseCommand):
 
         for item in products_data:
             name = item.get('name', 'Unknown Product')
-            price_str = item.get('price', '0')
+            if not name or name == 'Unknown Product':
+                continue
+
+            price_val = item.get('price', '0')
             image_url = item.get('image_url', '')
             product_url = item.get('product_url', '')
 
             try:
                 # Clean and convert price to Decimal
+                price_str = str(price_val)
                 price = Decimal(price_str.replace('Rp.', '').replace('.', '').strip())
-            except ValueError:
+            except (ValueError, TypeError):
                 price = Decimal('0.00')
+
+            if price == Decimal('0.00'):
+                continue
 
             # Attempt to infer brand from product name
             brand_name_inferred = "Unknown Brand"
