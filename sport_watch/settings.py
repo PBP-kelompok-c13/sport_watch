@@ -48,8 +48,10 @@ INSTALLED_APPS = [
     'portal_berita',
     'scoreboard',
     'fitur_belanja',
+    'fitur_pencarian',
     #'shop', ini gak jadi yaa shop nya direpclace dengna di bawah
-    'shop.apps.ShopConfig'
+    'shop.apps.ShopConfig',
+    'fitur_pencarian',
 ]
 
 MIDDLEWARE = [
