@@ -307,9 +307,16 @@ def ajax_preference_submit(request, id=None):
             "fitur_pencarian/_preference_card.html",
             {"preference": preference, "request": request},
         )
+        action = "updated" if instance else "created"
+        message = (
+            "Preset pencarian berhasil diperbarui."
+            if action == "updated"
+            else "Preset pencarian berhasil dibuat."
+        )
         return JsonResponse(
             {
-                "message": "Preset pencarian berhasil disimpan.",
+                "message": message,
+                "action": action,
                 "preference": {
                     "id": str(preference.id),
                     "label": preference.label,

@@ -218,6 +218,23 @@
         </div>
     </div>
 </div>
+<div id="delete-confirm-modal" class="hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="text-lg font-semibold text-gray-900">Hapus preset pencarian?</h2>
+            <button type="button" id="close-delete-modal" class="text-gray-500 hover:text-gray-700">×</button>
+        </div>
+        <p id="delete-modal-message" class="text-sm text-gray-600">
+            Apakah kamu yakin ingin menghapus preset ini? Tindakan ini tidak dapat dibatalkan.
+        </p>
+        <div class="modal-actions">
+            <button type="button" id="cancel-delete-btn" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition">Batal</button>
+            <button type="button" id="confirm-delete-btn" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition">Hapus</button>
+        </div>
+    </div>
+</div>
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
 <script>
     window.SportWatchSearch = {
         endpoints: {

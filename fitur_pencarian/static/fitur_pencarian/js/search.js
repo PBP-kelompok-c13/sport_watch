@@ -21,10 +21,48 @@
         const preferenceList = document.getElementById('preference-list');
         const openPreferenceBtn = document.getElementById('open-preference-modal');
         const modal = document.getElementById('preference-modal');
+        const deleteModal = document.getElementById('delete-confirm-modal');
+        const deleteMessageEl = document.getElementById('delete-modal-message');
+        const deleteCloseBtn = document.getElementById('close-delete-modal');
+        const deleteCancelBtn = document.getElementById('cancel-delete-btn');
+        const deleteConfirmBtn = document.getElementById('confirm-delete-btn');
+        const deleteConfirmDefaultText = deleteConfirmBtn ? deleteConfirmBtn.textContent : '';
+        const toastContainer = document.getElementById('toast-container');
         const analyticsPanel = document.getElementById('analytics-panel');
 
         const queryInput = form.querySelector('input[name="query"]');
         const scopeSelect = form.querySelector('select[name="search_in"]');
+
+        function showToast(message, type = 'success') {
+            if (!toastContainer || !message) return;
+
+            const toast = document.createElement('div');
+            const typeClass = type === 'error' ? 'toast-error' : 'toast-success';
+            toast.className = 'toast ' + typeClass;
+            toast.setAttribute('role', 'status');
+            toast.textContent = message;
+
+            toastContainer.appendChild(toast);
+
+            requestAnimationFrame(function () {
+                toast.classList.add('show');
+            });
+
+            function removeToast() {
+                toast.classList.remove('show');
+                setTimeout(function () {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 200);
+            }
+
+            const timeoutId = setTimeout(removeToast, 4000);
+            toast.addEventListener('click', function () {
+                clearTimeout(timeoutId);
+                removeToast();
+            });
+        }
 
         function showFeedback(message, type = 'success') {
             if (!feedback) return;
@@ -42,6 +80,47 @@
         function hideFeedback() {
             if (!feedback) return;
             feedback.classList.add('hidden');
+        }
+
+        function getCookie(name) {
+            const value = '; ' + document.cookie;
+            const parts = value.split('; ' + name + '=');
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return '';
+        }
+
+        let pendingDeleteId = null;
+        let pendingDeleteCard = null;
+
+        function openDeleteModal(id, card) {
+            if (!deleteModal) return;
+
+            pendingDeleteId = id;
+            pendingDeleteCard = card || null;
+
+            if (deleteMessageEl) {
+                const label = card && card.dataset ? card.dataset.label : '';
+                deleteMessageEl.textContent = label
+                    ? 'Apakah kamu yakin ingin menghapus preset "' + label + '"? Tindakan ini tidak dapat dibatalkan.'
+                    : 'Apakah kamu yakin ingin menghapus preset ini? Tindakan ini tidak dapat dibatalkan.';
+            }
+
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            if (!deleteModal) return;
+
+            deleteModal.classList.remove('active');
+            deleteModal.classList.add('hidden');
+            pendingDeleteId = null;
+            pendingDeleteCard = null;
+
+            if (deleteConfirmBtn) {
+                deleteConfirmBtn.disabled = false;
+                deleteConfirmBtn.textContent = deleteConfirmDefaultText || 'Hapus';
+            }
         }
 
         function renderNewsItems(items) {
@@ -182,14 +261,6 @@
         }
 
         if (preferenceList) {
-            // Helper: ambil CSRF dari cookie (untuk POST delete)
-            function getCookie(name) {
-                const value = `; ${document.cookie}`;
-                const parts = value.split(`; ${name}=`);
-                if (parts.length === 2) return parts.pop().split(';').shift();
-                return '';
-            }
-
             preferenceList.addEventListener('click', function (event) {
                 const targetEl = event.target;
                 if (!targetEl) return;
@@ -219,14 +290,25 @@
                 if (deleteBtn) {
                     const id = deleteBtn.dataset.id;
                     if (!id) return;
+                    const card = deleteBtn.closest('.preference-card');
+                    openDeleteModal(id, card);
+                    return;
+                }
+            });
 
-                    if (!confirm('Hapus preset ini? Tindakan ini tidak dapat dibatalkan.')) {
-                        return;
-                    }
+            if (deleteConfirmBtn) {
+                deleteConfirmBtn.addEventListener('click', function () {
+                    if (!pendingDeleteId) return;
+
+                    const id = pendingDeleteId;
+                    const card = pendingDeleteCard;
 
                     const formData = new FormData();
                     formData.append('id', id);
                     formData.append('csrfmiddlewaretoken', getCookie('csrftoken') || '');
+
+                    deleteConfirmBtn.disabled = true;
+                    deleteConfirmBtn.textContent = 'Menghapus...';
 
                     fetch(config.endpoints.preferenceDelete, {
                         method: 'POST',
@@ -234,21 +316,23 @@
                         headers: { 'X-Requested-With': 'XMLHttpRequest' },
                         credentials: 'same-origin'
                     })
-                        .then(async (res) => {
+                        .then(async function (res) {
                             let data = {};
                             try { data = await res.json(); } catch (e) {}
                             return { ok: res.ok, data };
                         })
-                        .then(({ ok, data }) => {
+                        .then(function ({ ok, data }) {
                             if (!ok) {
+                                deleteConfirmBtn.disabled = false;
+                                deleteConfirmBtn.textContent = deleteConfirmDefaultText || 'Hapus';
                                 showFeedback(data.error || 'Gagal menghapus preset.', 'error');
                                 return;
                             }
-                            // Hapus kartu di list
-                            const card = deleteBtn.closest('.preference-card');
-                            if (card) card.remove();
 
-                            // Hapus option di <select> & reset jika sedang dipilih
+                            if (card) {
+                                card.remove();
+                            }
+
                             if (preferenceSelect) {
                                 const opt = preferenceSelect.querySelector('option[value="' + id + '"]');
                                 if (opt) opt.remove();
@@ -257,13 +341,37 @@
                                 }
                             }
 
-                            showFeedback(data.message || 'Preset pencarian berhasil dihapus.', 'success');
+                            const message = data.message || 'Preset pencarian berhasil dihapus.';
+                            closeDeleteModal();
+                            showFeedback(message, 'success');
+                            showToast(message, 'success');
                         })
-                        .catch(() => {
+                        .catch(function () {
+                            deleteConfirmBtn.disabled = false;
+                            deleteConfirmBtn.textContent = deleteConfirmDefaultText || 'Hapus';
                             showFeedback('Tidak dapat menghapus preset saat ini.', 'error');
                         });
+                });
+            }
+        }
 
-                    return;
+        if (deleteCancelBtn) {
+            deleteCancelBtn.addEventListener('click', function () {
+                closeDeleteModal();
+            });
+        }
+
+        if (deleteCloseBtn) {
+            deleteCloseBtn.addEventListener('click', function () {
+                closeDeleteModal();
+            });
+        }
+
+        if (deleteModal) {
+            deleteModal.addEventListener('click', function (event) {
+                const target = event.target;
+                if (target && target.classList && target.classList.contains('modal-overlay')) {
+                    closeDeleteModal();
                 }
             });
         }
@@ -427,7 +535,9 @@
                         ensurePreferenceOption(data.preference);
                     }
 
-                    showFeedback(data.message || 'Preset berhasil disimpan.', 'success');
+                    const successMessage = data.message || 'Preset berhasil disimpan.';
+                    showFeedback(successMessage, 'success');
+                    showToast(successMessage, 'success');
                     closePreferenceModal();
                 } catch (error) {
                     showFeedback('Tidak dapat menyimpan preset saat ini.', 'error');
