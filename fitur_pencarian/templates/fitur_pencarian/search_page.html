@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Fitur Pencarian - Sport Watch{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'fitur_pencarian/css/search.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8" id="search-module">
+    <header class="bg-white shadow rounded-lg p-6 flex flex-col gap-2">
+        <h1 class="text-3xl font-bold text-gray-900">Temukan Segalanya di SportWatch</h1>
+        <p class="text-gray-600">Cari berita olahraga terkini, produk incaran, atau simpan preset pencarian favoritmu.</p>
+    </header>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+        <section class="lg:col-span-2 bg-white rounded-lg shadow p-6 space-y-6">
+            <form id="search-form" class="space-y-4" data-results-url="{% url 'fitur_pencarian:ajax_search_results' %}">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="id_query" class="block text-sm font-medium text-gray-700">{{ search_form.query.label }}</label>
+                        {{ search_form.query }}
+                    </div>
+                    <div>
+                        <label for="id_search_in" class="block text-sm font-medium text-gray-700">{{ search_form.search_in.label }}</label>
+                        {{ search_form.search_in }}
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="id_news_category" class="block text-sm font-medium text-gray-700">{{ search_form.news_category.label }}</label>
+                        {{ search_form.news_category }}
+                    </div>
+                    <div>
+                        <label for="id_product_category" class="block text-sm font-medium text-gray-700">{{ search_form.product_category.label }}</label>
+                        {{ search_form.product_category }}
+                    </div>
+                    <div>
+                        <label for="id_brand" class="block text-sm font-medium text-gray-700">{{ search_form.brand.label }}</label>
+                        {{ search_form.brand }}
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="id_min_price" class="block text-sm font-medium text-gray-700">{{ search_form.min_price.label }}</label>
+                        {{ search_form.min_price }}
+                    </div>
+                    <div>
+                        <label for="id_max_price" class="block text-sm font-medium text-gray-700">{{ search_form.max_price.label }}</label>
+                        {{ search_form.max_price }}
+                    </div>
+                    <div class="flex items-center space-x-2 pt-6">
+                        {{ search_form.only_discount }}
+                        <span class="text-sm text-gray-700">{{ search_form.only_discount.label }}</span>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="preference-select" class="block text-sm font-medium text-gray-700">Preset pencarian</label>
+                        <select id="preference-select" name="preference" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">Tanpa preset</option>
+                            {% for preference in preferences %}
+                                <option value="{{ preference.id }}">{{ preference.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex items-end justify-end gap-3">
+                        <button type="button" id="open-preference-modal" data-form-url="{% url 'fitur_pencarian:ajax_preference_form' %}" class="inline-flex items-center px-4 py-2 rounded-md border border-blue-500 text-blue-600 hover:bg-blue-50 transition">
+                            Buat / Edit Preset
+                        </button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition">
+                            Cari Sekarang
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="search-feedback" class="hidden bg-blue-50 border border-blue-100 rounded-md p-4 text-blue-700"></div>
+
+            <div class="space-y-4" id="search-results">
+                <div id="search-summary" class="text-gray-600 text-sm">
+                    Mulai pencarian untuk melihat hasil yang sesuai dengan filter kamu.
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                            <span>Berita</span>
+                            <span class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium bg-blue-100 text-blue-700 rounded-full" id="news-count">0</span>
+                        </h2>
+                        <div id="news-results" class="space-y-3 min-h-[120px]">
+                            <p class="text-gray-500 text-sm">Belum ada hasil berita.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                            <span>Produk</span>
+                            <span class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium bg-green-100 text-green-700 rounded-full" id="product-count">0</span>
+                        </h2>
+                        <div id="product-results" class="space-y-3 min-h-[120px]">
+                            <p class="text-gray-500 text-sm">Belum ada hasil produk.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="space-y-6">
+            <div class="bg-white rounded-lg shadow p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900">Preset Saya</h2>
+                    {% if request.user.is_authenticated %}
+                        <span class="text-xs text-gray-500">Tersimpan otomatis di akun</span>
+                    {% else %}
+                        <span class="text-xs text-red-500">Login untuk menyimpan preset</span>
+                    {% endif %}
+                </div>
+                <div id="preference-list" class="space-y-3" data-submit-url="{% url 'fitur_pencarian:ajax_preference_submit' %}">
+                    {% for preference in preferences %}
+                        {% include "fitur_pencarian/_preference_card.html" %}
+                    {% empty %}
+                        <p class="text-sm text-gray-500">Belum ada preset tersedia.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6 space-y-4">
+                <h2 class="text-lg font-semibold text-gray-900">Riwayat Pencarian</h2>
+                <ul id="recent-searches" class="space-y-2 text-sm text-gray-600">
+                    {% if recent_searches %}
+                        {% for item in recent_searches %}
+                            <li class="flex items-center justify-between bg-gray-50 rounded px-3 py-2">
+                                <span class="truncate">{{ item.query|default:"(tanpa kata kunci)" }} · {{ item.scope|title }}</span>
+                                <button type="button" class="text-blue-600 hover:underline recent-search" data-query="{{ item.query }}" data-scope="{{ item.scope }}">Gunakan</button>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="text-gray-500">Belum ada pencarian terbaru.</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            {% if request.user.is_staff %}
+            <div class="bg-white rounded-lg shadow p-6 space-y-3" id="analytics-panel">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900">Analitik Pencarian</h2>
+                    <span class="text-xs text-gray-500">Hanya staf</span>
+                </div>
+                <p id="analytics-loading" class="text-sm text-gray-500">Menyiapkan data analitik...</p>
+                <div id="analytics-content" class="hidden space-y-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide">Top Query</h3>
+                        <ul id="analytics-top-queries" class="mt-2 space-y-1 text-sm text-gray-600"></ul>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide">Distribusi Scope</h3>
+                        <ul id="analytics-scope" class="mt-2 space-y-1 text-sm text-gray-600"></ul>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if trending_news %}
+            <div class="bg-white rounded-lg shadow p-6 space-y-4">
+                <h2 class="text-lg font-semibold text-gray-900">Trending di Berita</h2>
+                <ul class="space-y-3 text-sm">
+                    {% for berita in trending_news %}
+                        <li>
+                            <a href="{% url 'portal_berita:detail_news' berita.id %}" class="block p-3 rounded-md border border-gray-100 hover:border-blue-300 hover:bg-blue-50 transition">
+                                <p class="font-medium text-gray-800">{{ berita.judul }}</p>
+                                <p class="text-xs text-gray-500">
+                                    {% if berita.kategori %}
+                                        {{ berita.kategori.nama }} ·
+                                    {% else %}
+                                        Umum ·
+                                    {% endif %}
+                                    {{ berita.views }} kali dibaca
+                                </p>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </aside>
+    </div>
+
+    {% if featured_products %}
+    <section class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Produk Pilihan SportWatch</h2>
+            <a href="{% url 'shop:list' %}" class="text-sm text-blue-600 hover:underline">Lihat semua produk</a>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+            {% for product in featured_products %}
+                <div class="border border-gray-200 rounded-lg p-4 flex flex-col gap-2 hover:shadow transition">
+                    {% if product.thumbnail %}
+                        <img src="{{ product.thumbnail }}" alt="{{ product.name }}" class="h-40 w-full object-cover rounded">
+                    {% endif %}
+                    <h3 class="font-semibold text-gray-800">{{ product.name }}</h3>
+                    <p class="text-sm text-gray-500">{{ product.category.name }}</p>
+                    <p class="text-lg font-bold text-green-600">{{ product.currency }} {{ product.final_price }}</p>
+                    <a href="{% url 'shop:detail' product.slug %}" class="text-sm text-blue-600 hover:underline">Lihat detail</a>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<div id="preference-modal" class="hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="text-lg font-semibold text-gray-900">Kelola Preset Pencarian</h2>
+            <button type="button" id="close-preference-modal" class="text-gray-500 hover:text-gray-700">×</button>
+        </div>
+        <div id="preference-form-container">
+            {% include "fitur_pencarian/_preference_form.html" with form=preference_form preference=None %}
+        </div>
+    </div>
+</div>
+<script>
+    window.SportWatchSearch = {
+        endpoints: {
+            results: "{% url 'fitur_pencarian:ajax_search_results' %}",
+            preferenceForm: "{% url 'fitur_pencarian:ajax_preference_form' %}",
+            preferenceSubmit: "{% url 'fitur_pencarian:ajax_preference_submit' %}",
+            preferenceDelete: "{% url 'fitur_pencarian:ajax_preference_delete' %}",
+            recent: "{% url 'fitur_pencarian:ajax_recent_searches' %}",
+            analytics: "{% url 'fitur_pencarian:ajax_search_analytics' %}"
+        },
+        isAuthenticated: "{{ request.user.is_authenticated|yesno:'true,false' }}" === 'true',
+        isStaff: "{{ request.user.is_staff|yesno:'true,false' }}" === 'true'
+    };
+</script>
+<script src="{% static 'fitur_pencarian/js/search.js' %}" defer></script>
+{% endblock %}
