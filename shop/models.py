@@ -50,7 +50,7 @@ class Category(TimeStampedUUIDModel):
 
 
 class Brand(TimeStampedUUIDModel):
-    name = models.CharField(max_length=80)
+    name = models.CharField(max_length=80, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
     logo_url = models.URLField(blank=True)
@@ -62,15 +62,8 @@ class Brand(TimeStampedUUIDModel):
         return self.name
 
     def save(self, *args, **kwargs):
-        base_slug = slugify(self.slug or self.name) or "brand"
-        candidate = base_slug
-        suffix = 1
-
-        while Brand.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
-            suffix += 1
-            candidate = f"{base_slug}-{suffix}"
-
-        self.slug = candidate
+        if not self.slug:
+            self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
 
