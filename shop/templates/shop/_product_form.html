@@ -63,7 +63,12 @@
   </div>
 
   <div class="mt-6 flex gap-3">
-    <button class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+  <button class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+  {% if mode == "create" %}
     <button type="button" id="closeCreateModal" class="px-4 py-2 border rounded">Cancel</button>
-  </div>
+  {% else %}
+    <button type="button" class="px-4 py-2 border rounded" onclick="history.back()">Cancel</button>
+  {% endif %}
+</div>
+
 </form>

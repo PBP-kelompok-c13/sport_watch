@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required,  permission_required
 from django.core.paginator import Paginator
 from django.db.models import Q, F
@@ -15,20 +15,31 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q, F, Avg, Count 
+from django.core.exceptions import PermissionDenied
+from django.db.models.functions import Coalesce
+from django.db.models import DecimalField, F
 
 def product_list(request):
-    # filter dasar
     qs = Product.objects.filter(status="active").select_related("category","brand")
     cat = request.GET.get("category")
-    sort = request.GET.get("sort")  # sorting atau featured
-    q   = request.GET.get("q")      #MODULE SEARCH REFERENSI SINI
+    sort = request.GET.get("sort")
+    q   = request.GET.get("q")
 
     if cat: qs = qs.filter(category__slug=cat)
     if q:   qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
 
-    if sort == "price_asc":   qs = qs.order_by("sale_price","price")
-    elif sort == "price_desc":qs = qs.order_by(F("sale_price").desc(nulls_last=True), F("price").desc())
-    elif sort == "featured":  qs = qs.order_by("-is_featured","-created_at")
+    
+    qs = qs.annotate(effective_price=Coalesce("sale_price", "price", output_field=DecimalField()))
+
+    if sort == "price_asc":
+        qs = qs.order_by("effective_price", "-created_at")
+    elif sort == "price_desc":
+        qs = qs.order_by(F("effective_price").desc(), "-created_at")
+    elif sort == "featured":
+        # hanya feature
+        qs = qs.filter(is_featured=True).order_by("-created_at")
+    else:
+        qs = qs.order_by("-created_at")
 
     paginator = Paginator(qs, 6)  # 6 cards first
     page_obj = paginator.get_page(request.GET.get("page"))
@@ -54,6 +65,7 @@ def product_detail(request, slug):
         "show_member_price": request.user.is_authenticated,
     })
 
+#def product_featured
 
 #JSON endpoints
 
@@ -146,18 +158,64 @@ def product_mini_json(request, pk):
 
 
 @login_required
-@permission_required('shop.change_product', raise_exception=True)
+@require_http_methods(["GET", "POST"])
 def product_edit(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    if request.method == "POST":
-        form = ProductForm(request.POST, instance=product)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Product updated.")
-            return redirect('shop:detail', slug=product.slug)
-    else:
-        form = ProductForm(instance=product)
-    return render(request, "shop/product_form.html", {"form": form, "mode": "edit", "product": product})
+
+    # izinkan owner ATAU user yang punya perm change_product
+    if not (request.user == product.created_by or request.user.has_perm("shop.change_product")):
+        raise PermissionDenied("You are not allowed to edit this product.")
+
+  
+    FormCls = ProductForm
+
+    if request.method == "GET":
+        form = FormCls(instance=product)
+   
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            html = render_to_string(
+                "shop/_product_form.html",
+                {"form": form, "mode": "edit", "product": product},
+                request=request,
+            )
+            return JsonResponse({"html": html})
+        # fallback full page
+        return render(request, "shop/product_form.html", {"form": form, "mode": "edit", "product": product})
+
+    #simpan changes
+    form = FormCls(request.POST, instance=product)
+    if not form.is_valid():
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            html = render_to_string(
+                "shop/_product_form.html",
+                {"form": form, "mode": "edit", "product": product},
+                request=request,
+            )
+            return JsonResponse({"ok": False, "html": html}, status=400)
+        return render(request, "shop/product_form.html", {"form": form, "mode": "edit", "product": product})
+
+    p = form.save()
+
+    # jika ajax balas payload minimal untuk update kartu di grid
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({
+            "ok": True,
+            "product": {
+                "id": str(p.id),
+                "slug": p.slug,
+                "name": p.name,
+                "thumbnail": p.thumbnail or "",
+                "category": p.category.name if p.category_id else None,
+                "price": float(p.price),
+                "sale_price": float(p.sale_price) if p.sale_price is not None else None,
+                "in_stock": p.in_stock,
+                "owner": p.created_by.username if p.created_by_id else None,
+            }
+        })
+
+    messages.success(request, "Product updated.")
+    return redirect("shop:detail", slug=p.slug)
+
 
 @require_http_methods(["GET", "POST"])
 @login_required
@@ -169,7 +227,8 @@ def product_create(request):
         class Meta(ProductForm.Meta):
             fields = [
                 "name","category","brand","description",
-                "price","sale_price","currency","stock","thumbnail"
+                "price","sale_price","currency","stock","thumbnail",
+                "is_featured",  
             ]
 
     FormCls = PublicProductForm if not request.user.is_staff else ProductForm
@@ -190,7 +249,7 @@ def product_create(request):
         return render(request, "shop/product_form.html", {"form": form, "mode": "create"})
 
     p = form.save(commit=False)
-    # paksa nilai aman untuk user biasa
+    #paksa nilai aman untuk user biasa
     if not request.user.is_staff:
         p.is_featured = False
         if hasattr(p, "status"):
@@ -220,14 +279,26 @@ def product_create(request):
 
 
 def products_json(request):
-    qs = Product.objects.filter(status="active")
-    cat = request.GET.get("category")
-    q   = request.GET.get("q")
+    qs   = Product.objects.filter(status="active").select_related("category","created_by")
+    cat  = request.GET.get("category")
+    q    = request.GET.get("q")
+    sort = request.GET.get("sort")
     page = int(request.GET.get("page", 1))
+
     if cat: qs = qs.filter(category__slug=cat)
     if q:   qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
 
-    paginator = Paginator(qs.order_by("-created_at"), 6)
+    qs = qs.annotate(effective_price=Coalesce("sale_price", "price", output_field=DecimalField()))
+    if sort == "price_asc":
+        qs = qs.order_by("effective_price", "-created_at")
+    elif sort == "price_desc":
+        qs = qs.order_by(F("effective_price").desc(), "-created_at")
+    elif sort == "featured":
+        qs = qs.filter(is_featured=True).order_by("-created_at")
+    else:
+        qs = qs.order_by("-created_at")
+
+    paginator = Paginator(qs, 6)
     page_obj = paginator.get_page(page)
 
     items = []
@@ -264,7 +335,7 @@ def create_product(request):
         if _is_ajax(request):
             html = render_to_string("shop/_product_form.html", {"form": form}, request=request)
             return JsonResponse({"html": html})
-        # fallback full page (not used by modal, but nice to have)
+        #fallback full page 
         return render(request, "shop/create.html", {"form": form})
 
     # POST
@@ -274,7 +345,7 @@ def create_product(request):
         product.created_by = request.user
         product.status = "active"
         product.save()
-        # build minimal payload used by JS to prepend a new card
+      
         payload = {
             "id": str(product.id),
             "name": product.name,
@@ -293,3 +364,14 @@ def create_product(request):
     html = render_to_string("shop/_product_form.html", {"form": form}, request=request)
     return JsonResponse({"ok": False, "html": html}, status=400)
 
+
+@login_required
+@require_POST
+def product_delete(request, pk):
+   
+    product = get_object_or_404(Product, pk=pk)
+    if not (request.user.is_staff or product.created_by_id == request.user.id):
+        return JsonResponse({"ok": False, "error": "Forbidden"}, status=403)
+
+    product.delete()
+    return JsonResponse({"ok": True}, status=200)

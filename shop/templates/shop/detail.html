@@ -85,6 +85,8 @@
 
 {% if user.is_authenticated %}
 <script>
+  window.showToast = window.showToast || function (msg) { console.log('toast:', msg); };
+
   // CSRF dari cookie
   function getCookie(name){
     const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
@@ -136,6 +138,31 @@
 
     form.reset();
     showToast("Review submitted ✅", 'success');
+
+    
+  const CSRF = (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop() || '');
+  async function addToCart(productId, qty=1){
+    const res = await fetch("{% url 'fitur_belanja:add_to_cart' %}", {
+      method:"POST",
+      headers:{"X-Requested-With":"XMLHttpRequest","X-CSRFToken": CSRF,"Content-Type":"application/json"},
+      body: JSON.stringify({product_id: productId, qty})
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || "Failed");
+    const b = document.getElementById('cartBadge');
+    if (b){ b.textContent = data.cart_count; b.classList.remove('hidden'); }
+    if (window.showToast) showToast("Added to cart ✅", "success");
+  }
+
+  
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.add-to-cart');
+    if (!btn) return;
+    const card = btn.closest('[data-product-id]');
+    if (!card) return;
+    try { await addToCart(card.dataset.productId, 1); }
+    catch { if (window.showToast) showToast("Failed to add to cart", "error"); }
+  });
   });
 </script>
 {% endif %}
