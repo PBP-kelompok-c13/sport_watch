@@ -145,10 +145,16 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+STATIC_URL = '/static/'
 
-STATIC_URL = 'static/'
+# ✅ Always define STATIC_ROOT for collectstatic
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# ✅ Only use STATICFILES_DIRS in DEBUG mode
+if DEBUG:
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static',  # Your development static directory
+    ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
