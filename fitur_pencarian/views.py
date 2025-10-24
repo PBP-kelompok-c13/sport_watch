@@ -319,7 +319,6 @@ def ajax_preference_submit(request, id=None):
                 "card": html,
             }
         )
-
     html = render_to_string(
         "fitur_pencarian/_preference_form.html",
         {"form": form, "preference": instance},
