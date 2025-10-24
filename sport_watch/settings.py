@@ -145,16 +145,14 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Static files
 STATIC_URL = '/static/'
-
-# ✅ Always define STATIC_ROOT for collectstatic
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# ✅ Only use STATICFILES_DIRS in DEBUG mode
 if DEBUG:
-    STATICFILES_DIRS = [
-        BASE_DIR / 'static',  # Your development static directory
-    ]
+    dev_static = BASE_DIR / 'static'
+    if dev_static.exists():
+        STATICFILES_DIRS = [dev_static]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
