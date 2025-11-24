@@ -224,12 +224,22 @@ def delete_news(request, id):
     return HttpResponseRedirect(reverse('portal_berita:list_news'))
 
 
-@csrf_exempt
-@require_POST
-def berita_json_view(request):
-    all_berita = Berita.objects.all()
-    data = serializers.serialize('json', all_berita)
-    return JsonResponse(data, safe=False)
+def berita_json_view(request, id):
+    berita = get_object_or_404(Berita, id=id)
+    data = {
+        "id": berita.id,
+        "judul": berita.judul,
+        "konten": berita.konten,
+        "kategori": berita.kategori.nama if berita.kategori else None,
+        "thumbnail": berita.thumbnail,
+        "views": berita.views,
+        "penulis": berita.penulis.username if berita.penulis else None,
+        "sumber": berita.sumber,
+        "is_published": berita.is_published,
+        "tanggal_dibuat": berita.tanggal_dibuat,
+        "tanggal_diperbarui": berita.tanggal_diperbarui,
+    }
+    return JsonResponse(data)
 
 @user_passes_test(is_admin)
 @login_required

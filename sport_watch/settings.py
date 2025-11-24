@@ -33,7 +33,7 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 DEBUG = not PRODUCTION
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "faiz-yusuf-sportwatch.pbp.cs.ui.ac.id",]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "faiz-yusuf-sportwatch.pbp.cs.ui.ac.id", "10.0.2.2"]
 
 
 # Application definition
@@ -48,9 +48,10 @@ INSTALLED_APPS = [
     'portal_berita',
     'scoreboard',
     'fitur_belanja',
-    #'shop', ini gak jadi yaa shop nya direpclace dengna di bawah
     'shop.apps.ShopConfig',
     'fitur_pencarian',
+    'authentication',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'sport_watch.urls'
@@ -162,6 +164,15 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 CSRF_TRUSTED_ORIGINS = [
     'https://faiz-yusuf-sportwatch.pbp.cs.ui.ac.id',
 ]
+
+# Cors Configuration
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
