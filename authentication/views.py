@@ -6,15 +6,40 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.html import strip_tags
-import json
 import requests
+
+
+def _extract_request_data(request):
+    """
+    Support both JSON payloads (Flutter register) and form-encoded payloads
+    (pbp_django_auth login). Falls back to {} when no payload is provided.
+    """
+    content_type = (request.headers.get('Content-Type') or '').lower()
+    body = request.body or b''
+
+    if 'application/json' in content_type:
+        try:
+            return json.loads(body.decode('utf-8') or '{}')
+        except json.JSONDecodeError:
+            return {}
+
+    if request.POST:
+        return request.POST.dict()
+
+    if not body:
+        return {}
+
+    try:
+        return json.loads(body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return {}
 
 
 @csrf_exempt
 @require_POST
 def login_user(request):
     try:
-        data = json.loads(request.body)
+        data = _extract_request_data(request)
         username = data.get('username')
         password = data.get('password')
 
@@ -52,12 +77,12 @@ def login_user(request):
 
 @csrf_exempt
 @require_POST
-def register(request):
+def register_user(request):
     try:
-        data = json.loads(request.body)
+        data = _extract_request_data(request)
         username = data.get('username')
         password = data.get('password')
-        password_confirm = data.get('password_confirm') # Standardized naming
+        password_confirm = data.get('password_confirm')  # Standardized naming
 
         if not username or not password or not password_confirm:
             return JsonResponse({
@@ -86,15 +111,13 @@ def register(request):
             "username": user.username
         }, status=201)
 
-    except json.JSONDecodeError:
-        return JsonResponse({"status": False, "message": "Invalid JSON format."}, status=400)
     except Exception as e:
         return JsonResponse({"status": False, "message": str(e)}, status=500)
     
 @csrf_exempt
 @require_POST
-def logout(request):
-    username = request.user.username
+def logout_user(request):
+    username = getattr(request.user, "username", None)
     try:
         auth_logout(request)
         return JsonResponse({
@@ -102,7 +125,7 @@ def logout(request):
             "status": True,
             "message": "Logged out successfully!"
         }, status=200)
-    except:
+    except Exception:
         return JsonResponse({
             "status": False,
             "message": "Logout failed."
