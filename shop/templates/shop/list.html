@@ -204,7 +204,6 @@ function getCsrf(){
   return m ? m.pop() : '';
 }
 
-// kirim ke server (form-encoded)
 async function addToCart(productId, qty=1){
   const form = new URLSearchParams();
   form.set('product_id', productId);
@@ -215,7 +214,6 @@ async function addToCart(productId, qty=1){
     headers: { "X-CSRFToken": getCsrf() },
     body: form
   });
-
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.ok) throw new Error(data.error || "Failed");
 
@@ -223,6 +221,7 @@ async function addToCart(productId, qty=1){
   if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
   showToast('Added to cart ✅', 'success');
 }
+
 
 // satu-satunya listener tombol Add to Cart
 document.addEventListener('click', async (e) => {

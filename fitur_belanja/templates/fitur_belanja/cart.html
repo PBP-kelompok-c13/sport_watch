@@ -48,7 +48,10 @@
     <div class="flex justify-between font-semibold">
       <span>Total</span><span>Rp {{ total }}</span>
     </div>
-    <button class="w-full mt-4 bg-blue-600 text-white rounded py-2">Proceed to Checkout</button>
+    <a href="{% url 'fitur_belanja:checkout' %}"
+       class="w-full mt-4 bg-blue-600 text-white rounded py-2 text-center inline-block">
+      Proceed to Checkout
+    </a>
     <a href="{% url 'shop:list' %}" class="w-full mt-2 border rounded py-2 inline-block text-center">Continue Shopping</a>
   </aside>
 </div>
