@@ -548,7 +548,6 @@ def review_delete(request, pk):
     get_object_or_404(Review, pk=pk).delete()
     messages.success(request, "Review deleted.")
     return redirect("shop:manage_shop")
-<<<<<<< HEAD
 
 # at top
 from django.views.decorators.csrf import csrf_exempt
@@ -831,5 +830,3 @@ def edit_product_flutter(request, pk):
         {"status": "success", "id": str(product.id)},
         status=200,
     )
-=======
->>>>>>> 52a144141fe741259c807a7dfa6e69638aeac202
