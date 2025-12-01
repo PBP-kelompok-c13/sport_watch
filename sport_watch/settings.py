@@ -31,9 +31,9 @@ SECRET_KEY = 'django-insecure-62m-8_o)rt)x05conpnf$#j7zo!rdt5mho$4@j6y)w=iq9_f79
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 
-DEBUG = True
+DEBUG = not PRODUCTION
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "faiz-yusuf-sportwatch.pbp.cs.ui.ac.id",]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "faiz-yusuf-sportwatch.pbp.cs.ui.ac.id", "10.0.2.2"]
 
 
 # Application definition
@@ -48,19 +48,22 @@ INSTALLED_APPS = [
     'portal_berita',
     'scoreboard',
     'fitur_belanja',
-    #'shop', ini gak jadi yaa shop nya direpclace dengna di bawah
     'shop.apps.ShopConfig',
     'fitur_pencarian',
+    'authentication',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'sport_watch.urls'
@@ -147,12 +150,37 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = '/static/'
+
+# Always collect to 'staticfiles' in every environment
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 if DEBUG:
-    dev_static = BASE_DIR / 'static'
-    if dev_static.exists():
-        STATICFILES_DIRS = [dev_static]
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static',
+    ]
+
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://faiz-yusuf-sportwatch.pbp.cs.ui.ac.id',
+]
+
+# Cors Configuration
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+if PRODUCTION:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SAMESITE = 'None'
+else:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

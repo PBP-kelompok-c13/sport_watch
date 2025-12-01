@@ -13,7 +13,7 @@ User = get_user_model()
 
 
 def dtfmt(dt):
-    # Form expects '%Y-%m-%dT%H:%M'
+    
     return dt.strftime('%Y-%m-%dT%H:%M')
 
 
@@ -30,11 +30,10 @@ class ScoreboardModelTests(TestCase):
 class ScoreboardFormTests(TestCase):
     def test_form_fields_and_widgets(self):
         form = ScoreBoardForm()
-        # field exists
+        
         for f in ['tim1', 'tim2', 'skor_tim1', 'skor_tim2', 'sport', 'status', 'tanggal', 'logo_tim1', 'logo_tim2']:
             self.assertIn(f, form.fields)
 
-        # input format for datetime-local
         self.assertIn('%Y-%m-%dT%H:%M', form.fields['tanggal'].input_formats)
 
     def test_form_valid_data(self):
@@ -60,7 +59,7 @@ class ScoreboardFormTests(TestCase):
             'tim2': 'Bar',
             'skor_tim1': 0,
             'skor_tim2': 0,
-            'sport': 'UFC',  # not in choices
+            'sport': 'UFC',
             'status': 'live',
             'tanggal': dtfmt(now),
         }
@@ -77,8 +76,6 @@ class ScoreboardURLTests(TestCase):
         self.assertEqual(reverse('scoreboard:edit_score', args=[1]), '/scoreboard/admin/edit/1/')
         self.assertEqual(reverse('scoreboard:delete_score', args=[1]), '/scoreboard/admin/delete/1/')
         self.assertEqual(reverse('scoreboard:filter_scores'), '/scoreboard/filter/')
-
-        # resolve points to correct view functions
         self.assertIs(resolve('/scoreboard/').func, views.index)
         self.assertIs(resolve('/scoreboard/filter/').func, views.filter_scores)
 
@@ -115,7 +112,7 @@ class BaseViewTestCase(TestCase):
 
 class IndexViewTests(BaseViewTestCase):
     def test_index_groups_by_status_and_orders_desc(self):
-        # create with distinct dates so order_by('-tanggal') is testable
+
         t1 = timezone.now()
         t2 = t1 + timezone.timedelta(hours=1)
         t3 = t1 + timezone.timedelta(hours=2)
@@ -133,50 +130,45 @@ class IndexViewTests(BaseViewTestCase):
         finished = list(resp.context['finished'])
         upcoming = list(resp.context['upcoming'])
 
-        # correct buckets
         self.assertEqual({obj.status for obj in live}, {'live'})
         self.assertEqual({obj.status for obj in finished}, {'recent'})
         self.assertEqual({obj.status for obj in upcoming}, {'upcoming'})
 
-        # order desc by tanggal
         self.assertEqual(live[0].id, s_live_new.id)
         self.assertEqual(live[1].id, s_live_old.id)
 
-        # lengths
         self.assertEqual(len(finished), 1)
         self.assertEqual(len(upcoming), 1)
 
 
 class AdminGuardTests(BaseViewTestCase):
     def test_management_requires_admin(self):
-        # not logged in -> redirect to login
+        
         resp = self.client.get(reverse('scoreboard:scoreboard_management'))
         self.assertEqual(resp.status_code, 302)
         login_url = resolve_url(settings.LOGIN_URL)
         self.assertIn(login_url, resp['Location'])
 
-        # logged in non-admin -> still redirect to login
+    
         self.login_user()
         resp = self.client.get(reverse('scoreboard:scoreboard_management'))
         self.assertEqual(resp.status_code, 302)
         self.assertIn(login_url, resp['Location'])
 
-        # admin -> ok
         self.login_admin()
         resp = self.client.get(reverse('scoreboard:scoreboard_management'))
         self.assertEqual(resp.status_code, 200)
 
     def test_create_edit_delete_flow(self):
         self.login_admin()
-
-        # CREATE
+        
         now = timezone.now()
         payload = {
             'tim1': 'Madrid',
             'tim2': 'Barca',
             'skor_tim1': 3,
             'skor_tim2': 1,
-            'sport': 'NBA',            # using existing choices
+            'sport': 'NBA',           
             'status': 'live',
             'tanggal': dtfmt(now),
             'logo_tim1': '',
@@ -188,7 +180,7 @@ class AdminGuardTests(BaseViewTestCase):
         obj = Scoreboard.objects.first()
         self.assertEqual(obj.tim1, 'Madrid')
 
-        # EDIT
+     
         payload_edit = payload.copy()
         payload_edit['skor_tim1'] = 5
         resp = self.client.post(reverse('scoreboard:edit_score', args=[obj.pk]), data=payload_edit)
@@ -196,9 +188,9 @@ class AdminGuardTests(BaseViewTestCase):
         obj.refresh_from_db()
         self.assertEqual(obj.skor_tim1, 5)
 
-        # DELETE requires POST
+     
         resp = self.client.get(reverse('scoreboard:delete_score', args=[obj.pk]))
-        self.assertEqual(resp.status_code, 200)  # confirm page
+        self.assertEqual(resp.status_code, 200)  
 
         resp = self.client.post(reverse('scoreboard:delete_score', args=[obj.pk]))
         self.assertEqual(resp.status_code, 302)
@@ -209,7 +201,7 @@ class FilterScoresAPITests(BaseViewTestCase):
     def setUp(self):
         super().setUp()
         base_time = timezone.now()
-        # recent/finished alias check
+      
         self.s_recent = self.make_score(status='recent', sport='NBA', tim1='REC', tanggal=base_time)
         self.s_live = self.make_score(status='live', sport='EPL', tim1='LIV', tanggal=base_time)
         self.s_upcoming = self.make_score(status='upcoming', sport='NFL', tim1='UPC', tanggal=base_time)
@@ -225,7 +217,7 @@ class FilterScoresAPITests(BaseViewTestCase):
         resp = self.get_json()
         self.assertEqual(resp.status_code, 200)
         data = resp.json()['scores']
-        # should include all 3
+      
         self.assertEqual(len(data), 3)
 
     def test_filter_by_status_live(self):
@@ -236,7 +228,7 @@ class FilterScoresAPITests(BaseViewTestCase):
         self.assertEqual(data[0]['tim1'], 'LIV')
 
     def test_filter_by_status_finished_maps_to_recent(self):
-        # client sends 'finished' -> server maps to 'recent'
+      
         resp = self.get_json(status='finished')
         data = resp.json()['scores']
         self.assertEqual(len(data), 1)
@@ -251,7 +243,7 @@ class FilterScoresAPITests(BaseViewTestCase):
         self.assertEqual(data[0]['tim1'], 'UPC')
 
     def test_filter_by_sport_case_insensitive(self):
-        # sport__iexact in view allows lowercase
+     
         resp = self.get_json(sport='epl')
         data = resp.json()['scores']
         self.assertEqual(len(data), 1)
