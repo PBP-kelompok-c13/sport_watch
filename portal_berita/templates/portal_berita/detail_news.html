@@ -1,4 +1,9 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'portal_berita/css/reactions.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
@@ -26,6 +31,17 @@
             </div>
             {% endif %}
         </div>
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">React to this news</h3>
+            <div class="news-reactions" data-news-id="{{ news.id }}" data-react-url="{% url 'portal_berita:react_to_news' news.id %}">
+                {% for reaction in reaction_summary %}
+                <button type="button" class="reaction-button" data-reaction="{{ reaction.key }}" aria-pressed="false">
+                    <span class="reaction-emoji">{{ reaction.emoji }}</span>
+                    <span class="reaction-count">{{ reaction.count }}</span>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 
@@ -48,7 +64,7 @@
     <div class="mt-8">
         {% for comment in comments %}
         <div class="comment bg-white rounded-lg shadow-md p-6 mb-6">
-            <p class="text-sm text-gray-500">{{ comment.user.username }} - {{ comment.created_at|timesince }} ago</p>
+            <p class="text-sm text-gray-500">{{ comment.user.username }} - {{ comment.created_at|timesince }}</p>
             <p class="text-gray-700">{{ comment.content }}</p>
             <a href="#" class="reply-btn text-sm text-blue-500">Reply</a>
             <div class="reply-form hidden mt-4">
@@ -69,19 +85,33 @@
     </div>
 </div>
 
+<script src="{% static 'portal_berita/js/news_reactions.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('delete-btn').addEventListener('click', function() {
-        if (confirm('Are you sure you want to delete this news?')) {
-            document.getElementById('delete-form').submit();
-        }
-    });
+    const initialReactions = {{ user_reactions_json|default:"{}"|safe }};
+    if (window.SportWatchReactions) {
+        window.SportWatchReactions.init({
+            userReactions: initialReactions,
+            loginUrl: "{{ reaction_login_url|escapejs }}",
+        });
+    }
+
+    const deleteBtn = document.getElementById('delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this news?')) {
+                document.getElementById('delete-form').submit();
+            }
+        });
+    }
 
     document.querySelectorAll('.reply-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            let replyForm = this.nextElementSibling;
-            replyForm.classList.toggle('hidden');
+            const replyForm = this.nextElementSibling;
+            if (replyForm) {
+                replyForm.classList.toggle('hidden');
+            }
         });
     });
 });

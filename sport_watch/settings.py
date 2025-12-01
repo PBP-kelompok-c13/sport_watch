@@ -52,7 +52,16 @@ INSTALLED_APPS = [
     'fitur_pencarian',
     'authentication',
     'corsheaders',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'api',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -148,6 +157,7 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Static files
 STATIC_URL = '/static/'
 
 # Always collect to 'staticfiles' in every environment

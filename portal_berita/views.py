@@ -13,7 +13,7 @@ from datetime import datetime
 from django.utils.timesince import timesince
 
 from portal_berita.forms import BeritaForm, KategoriBeritaForm, CommentForm, CustomAuthenticationForm, CustomUserCreationForm
-from portal_berita.models import Berita, KategoriBerita, Comment
+from portal_berita.models import Berita, KategoriBerita, Comment, NewsReaction, REACTION_CHOICES
 from scoreboard.models import Scoreboard
 from shop.models import Product
 
@@ -28,6 +28,9 @@ def main_view(request):
     }
     return render(request, "portal_berita/main.html", context)
 
+from django.views.decorators.cache import never_cache
+
+@never_cache
 def detail_news(request, id):
     news = get_object_or_404(Berita, id=id)
     news.increment_views()
@@ -53,10 +56,16 @@ def detail_news(request, id):
     else:
         comment_form = CommentForm()
 
+    user_reaction = news.get_user_reaction(request.user)
+
     context = {
         'news': news,
         'comments': comments,
         'comment_form': comment_form,
+        'reaction_summary': news.reaction_summary,
+        'user_reaction': user_reaction,
+        'user_reactions_json': json.dumps({str(news.id): user_reaction} if user_reaction else {}),
+        'reaction_login_url': reverse('portal_berita:login'),
     }
     return render(request, 'portal_berita/detail_news.html', context)
 
@@ -101,13 +110,15 @@ def logout_view(request):
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def list_news(request):
-    all_news = Berita.objects.filter(is_published=True).order_by('-tanggal_dibuat')
-    featured_news = None
-    other_news_list = []
-
-    if all_news.exists():
-        featured_news = all_news.first()
-        other_news_list = all_news[1:]
+    news_queryset = (
+        Berita.objects.filter(is_published=True)
+        .select_related('kategori', 'penulis')
+        .prefetch_related('reactions')
+        .order_by('-tanggal_dibuat')
+    )
+    all_news = list(news_queryset)
+    featured_news = all_news[0] if all_news else None
+    other_news_list = all_news[1:] if len(all_news) > 1 else []
 
     # Paginate other_news_list
     paginator = Paginator(other_news_list, 6)  # Show 6 news items per page
@@ -122,6 +133,16 @@ def list_news(request):
     most_popular_news = Berita.objects.filter(is_published=True).order_by('-views')[:5]
     live_scores = Scoreboard.objects.filter(status__in=['live', 'recent']).order_by('-tanggal')[:3]
     featured_products = Product.objects.filter(is_featured=True, status='active')[:3]
+    news_ids = [news.id for news in all_news]
+    user_reactions = {}
+    if request.user.is_authenticated and news_ids:
+        user_reactions = {
+            str(reaction.berita_id): reaction.reaction_type
+            for reaction in NewsReaction.objects.filter(
+                user=request.user,
+                berita_id__in=news_ids,
+            )
+        }
 
     context = {
         'featured_news': featured_news,
@@ -131,6 +152,8 @@ def list_news(request):
         'featured_products': featured_products,
         'has_next_page': other_news.has_next(),
         'next_page_number': other_news.next_page_number() if other_news.has_next() else None,
+        'user_reactions_json': json.dumps(user_reactions),
+        'reaction_login_url': reverse('portal_berita:login'),
     }
     return render(request, 'portal_berita/list_news.html', context)
 
@@ -138,13 +161,28 @@ def load_more_news(request):
     offset = int(request.GET.get('offset', 0))
     limit = 6  # Number of news items to load per request
 
-    all_news = Berita.objects.filter(is_published=True).order_by('-tanggal_dibuat')
+    all_news = (
+        Berita.objects.filter(is_published=True)
+        .prefetch_related('reactions')
+        .order_by('-tanggal_dibuat')
+    )
     # Exclude the featured news if it exists
     if all_news.exists():
         all_news = all_news[1:] # Skip the first one (featured)
 
-    news_to_load = all_news[offset:offset + limit]
-    
+    news_to_load = list(all_news[offset:offset + limit])
+
+    user_reaction_map = {}
+    if request.user.is_authenticated and news_to_load:
+        ids = [news.id for news in news_to_load]
+        user_reaction_map = {
+            str(reaction.berita_id): reaction.reaction_type
+            for reaction in NewsReaction.objects.filter(
+                user=request.user,
+                berita_id__in=ids,
+            )
+        }
+
     data = []
     for news_item in news_to_load:
         data.append({
@@ -157,11 +195,56 @@ def load_more_news(request):
             'tanggal_dibuat_timesince': timesince(news_item.tanggal_dibuat),
             'comment_count': news_item.comment_count,
             'detail_url': reverse('portal_berita:detail_news', args=[news_item.id]),
+            'reactions': news_item.reaction_summary,
+            'user_reaction': user_reaction_map.get(str(news_item.id)),
+            'reaction_post_url': reverse('portal_berita:react_to_news', args=[news_item.id]),
         })
     
     has_more = (offset + limit) < len(all_news)
 
     return JsonResponse({'news': data, 'has_more': has_more})
+
+
+@require_POST
+def react_to_news(request, id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required.'}, status=401)
+
+    valid_reactions = {key for key, _ in REACTION_CHOICES}
+    reaction_type = request.POST.get('reaction')
+
+    if reaction_type not in valid_reactions:
+        return JsonResponse({'error': 'Invalid reaction choice.'}, status=400)
+
+    berita = get_object_or_404(Berita, id=id)
+
+    reaction, created = NewsReaction.objects.get_or_create(
+        berita=berita,
+        user=request.user,
+        defaults={'reaction_type': reaction_type},
+    )
+
+    if not created:
+        if reaction.reaction_type == reaction_type:
+            reaction.delete()
+            user_reaction = None
+            state = 'removed'
+        else:
+            reaction.reaction_type = reaction_type
+            reaction.save(update_fields=['reaction_type'])
+            user_reaction = reaction_type
+            state = 'updated'
+    else:
+        user_reaction = reaction_type
+        state = 'created'
+
+    return JsonResponse({
+        'status': 'ok',
+        'state': state,
+        'news_id': str(berita.id),
+        'user_reaction': user_reaction,
+        'reactions': berita.reaction_summary,
+    })
 
 @require_GET
 def news_list_json(request):
@@ -195,6 +278,9 @@ def news_list_json(request):
         'has_next': page_obj.has_next(),
         'next_page': page_obj.next_page_number() if page_obj.has_next() else None,
         'total_pages': paginator.num_pages,
+        'total_count': paginator.count,
+        'page': page_obj.number,
+        'per_page': per_page,
     })
 
 @csrf_exempt

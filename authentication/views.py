@@ -1,10 +1,11 @@
 import json
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.utils.html import strip_tags
 import requests
 
@@ -154,3 +155,18 @@ def proxy_image(request):
         )
     except requests.RequestException as e:
         return HttpResponse(f'Error fetching image: {str(e)}', status=500)
+
+
+@login_required
+@require_GET
+def profile(request):
+    user = request.user
+    return JsonResponse(
+        {
+            "username": user.username,
+            "email": user.email or "",
+            "is_staff": user.is_staff,
+            "is_superuser": user.is_superuser,
+        },
+        status=200,
+    )

@@ -289,6 +289,8 @@ def products_json(request):
     q    = request.GET.get("q")
     sort = request.GET.get("sort")
     page = int(request.GET.get("page", 1))
+    per_page = int(request.GET.get("per_page", 6))
+    per_page = max(1, min(per_page, 50))
 
     if cat: qs = qs.filter(category__slug=cat)
     if q:   qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
@@ -303,7 +305,7 @@ def products_json(request):
     else:
         qs = qs.order_by("-created_at")
 
-    paginator = Paginator(qs, 6)
+    paginator = Paginator(qs, per_page)
     page_obj = paginator.get_page(page)
 
     items = []
@@ -324,7 +326,13 @@ def products_json(request):
             "owner": (p.created_by.username if p.created_by_id else None),
             "is_owner": (uid is not None and p.created_by_id == uid),
         })
-    return JsonResponse({"results": items, "has_next": page_obj.has_next()}, status=200)
+    return JsonResponse({
+        "results": items,
+        "has_next": page_obj.has_next(),
+        "page": page_obj.number,
+        "per_page": per_page,
+        "total_count": paginator.count,
+    }, status=200)
 
 
 def _is_ajax(request):
@@ -540,6 +548,7 @@ def review_delete(request, pk):
     get_object_or_404(Review, pk=pk).delete()
     messages.success(request, "Review deleted.")
     return redirect("shop:manage_shop")
+<<<<<<< HEAD
 
 # at top
 from django.views.decorators.csrf import csrf_exempt
@@ -822,3 +831,5 @@ def edit_product_flutter(request, pk):
         {"status": "success", "id": str(product.id)},
         status=200,
     )
+=======
+>>>>>>> 52a144141fe741259c807a7dfa6e69638aeac202
