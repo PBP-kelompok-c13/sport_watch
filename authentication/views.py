@@ -57,7 +57,8 @@ def login_user(request):
                 return JsonResponse({
                     "username": user.username,
                     "status": True,
-                    "message": "Login successful!"
+                    "message": "Login successful!",
+                    "id": user.id,  # TAMBAHAN BARU KALAU ADA ERROR COBA LIHAT INI TAPI GAK MUNGKIN SI
                 }, status=200)
             else:
                 return JsonResponse({
@@ -131,20 +132,25 @@ def logout_user(request):
             "message": "Logout failed."
         }, status=401)
 
+
+from urllib.parse import urlparse
+
 def proxy_image(request):
     image_url = request.GET.get('url')
     if not image_url:
         return HttpResponse('No URL provided', status=400)
-    
+
+    # Kalau yang datang cuma "/media/..." → jadikan absolute URL
+    parsed = urlparse(image_url)
+    if not parsed.scheme:  # tidak ada http/https
+        image_url = request.build_absolute_uri(image_url)
+
     try:
-        # Fetch image from external source
         response = requests.get(image_url, timeout=10)
         response.raise_for_status()
-        
-        # Return the image with proper content type
         return HttpResponse(
             response.content,
-            content_type=response.headers.get('Content-Type', 'image/jpeg')
+            content_type=response.headers.get('Content-Type', 'image/jpeg'),
         )
     except requests.RequestException as e:
         return HttpResponse(f'Error fetching image: {str(e)}', status=500)
