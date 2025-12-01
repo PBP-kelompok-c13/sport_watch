@@ -48,7 +48,7 @@
     <div class="mt-8">
         {% for comment in comments %}
         <div class="comment bg-white rounded-lg shadow-md p-6 mb-6">
-            <p class="text-sm text-gray-500">{{ comment.user.username }} - {{ comment.created_at|timesince }} ago</p>
+            <p class="text-sm text-gray-500">{{ comment.user.username }} - {{ comment.created_at|timesince }}</p>
             <p class="text-gray-700">{{ comment.content }}</p>
             <a href="#" class="reply-btn text-sm text-blue-500">Reply</a>
             <div class="reply-form hidden mt-4">

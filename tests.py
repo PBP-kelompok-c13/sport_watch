@@ -422,10 +422,10 @@ class SportWatchTestCase(TestCase):
         load_more = self.client.get(reverse("portal_berita:load_more_news"), {"offset": 0})
         self.assertEqual(load_more.status_code, 200)
 
-        json_resp = self.client.post(reverse("portal_berita:berita_json_view"))
+        json_resp = self.client.post(reverse("portal_berita:berita_json_view", args=[self.news.id]))
         self.assertEqual(json_resp.status_code, 200)
         data = json.loads(json_resp.content)
-        self.assertTrue(json.loads(data))
+        self.assertTrue(data)
 
     # ------------------------------------------------------------------
     # Scoreboard helpers

@@ -28,6 +28,9 @@ def main_view(request):
     }
     return render(request, "portal_berita/main.html", context)
 
+from django.views.decorators.cache import never_cache
+
+@never_cache
 def detail_news(request, id):
     news = get_object_or_404(Berita, id=id)
     news.increment_views()
@@ -195,6 +198,9 @@ def news_list_json(request):
         'has_next': page_obj.has_next(),
         'next_page': page_obj.next_page_number() if page_obj.has_next() else None,
         'total_pages': paginator.num_pages,
+        'total_count': paginator.count,
+        'page': page_obj.number,
+        'per_page': per_page,
     })
 
 @csrf_exempt
