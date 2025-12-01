@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -42,7 +43,7 @@ class Berita(models.Model):
     )
     sumber = models.CharField(max_length=255, blank=True)
     is_published = models.BooleanField(default=False)
-    tanggal_dibuat = models.DateTimeField(auto_now_add=True)
+    tanggal_dibuat = models.DateTimeField(default=timezone.now)
     tanggal_diperbarui = models.DateTimeField(auto_now=True)
 
     class Meta:

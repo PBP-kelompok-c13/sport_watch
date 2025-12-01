@@ -1,4 +1,9 @@
 from django.urls import path
+
+from authentication.views import proxy_image
+
+
+
 from . import views
 app_name = "shop"
 urlpatterns = [
@@ -9,6 +14,18 @@ urlpatterns = [
     path("api/reviews/<uuid:product_id>/", views.reviews_json, name="reviews_json"),
     path("api/reviews/<uuid:product_id>/create/", views.create_review, name="create_review"),
     path("api/products/<uuid:pk>/mini/", views.product_mini_json, name="product_mini_json"),
+    path(
+        "api/reviews/<uuid:product_id>/create-flutter/",
+        views.create_review_flutter,
+        name="create_review_flutter",
+    ),
+
+    path("api/products/<uuid:pk>/delete-flutter/", views.product_delete_flutter, name="product_delete_flutter"),
+     path(
+        "api/products/<uuid:pk>/edit-flutter/",
+        views.edit_product_flutter,          # ← PAKAI YANG INI
+        name="edit_product_flutter",
+    ),
 
     #AJAX
     path("create/", views.product_create, name="create"),
@@ -37,4 +54,13 @@ urlpatterns = [
 
     # Kelola Rev
     path("manage/reviews/<uuid:pk>/delete/", views.review_delete, name="review_delete"),
+
+    #json 
+    path('json/', views.show_json, name='show_json'),
+    path("api/create-flutter/", views.create_product_flutter, name="create_product_flutter"),
+    path("proxy-image/", proxy_image, name="proxy_image"),
+
+    path("api/categories/", views.categories_json, name="categories_json"),
+    path("api/brands/", views.brands_json, name="brands_json"),
+
 ]

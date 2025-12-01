@@ -20,6 +20,9 @@ from django.db.models.functions import Coalesce
 from django.db.models import DecimalField, F
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
+from django.http import HttpResponse
+from django.core import serializers
+import requests
 
 def product_list(request):
     qs = Product.objects.filter(status="active").select_related("category","brand")
@@ -492,9 +495,330 @@ def category_delete(request, pk):
     messages.success(request, "Category deleted. Semua produk dipindahkan ke 'Uncategorized'.")
     return redirect("shop:manage_shop")
 
+def show_json(request):
+    qs = (
+        Product.objects
+        .filter(status="active")
+        .select_related("category", "brand", "created_by")
+    )
+
+    data = []
+    for p in qs:
+        data.append({
+            "model": "shop.product",
+            "pk": str(p.id),
+            "fields": {
+                "created_at": p.created_at.isoformat(),
+                "updated_at": p.updated_at.isoformat(),
+                "created_by": p.created_by_id,
+                "owner_username": (
+                    p.created_by.username if p.created_by_id else None
+                ),
+                "category": p.category.name if p.category else "",
+                "brand": p.brand.name if p.brand else None,
+                "name": p.name,
+                "slug": p.slug,
+                "description": p.description,
+                "price": str(p.price),
+                "sale_price": str(p.sale_price) if p.sale_price is not None else None,
+                "currency": p.currency,          # mis. "IDR"
+                "stock": p.stock,
+                "total_sold": p.total_sold,
+                "thumbnail": p.thumbnail or "",
+                "is_featured": p.is_featured,
+                "status": p.status,              # "active"
+                "rating_avg": float(p.rating_avg),
+                "rating_count": p.rating_count,
+            },
+        })
+
+    return JsonResponse(data, safe=False)
+
 # Reviews
 @staff_member_required
 def review_delete(request, pk):
     get_object_or_404(Review, pk=pk).delete()
     messages.success(request, "Review deleted.")
     return redirect("shop:manage_shop")
+
+# at top
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.html import strip_tags
+import json
+
+@csrf_exempt
+@login_required
+def create_product_flutter(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"status": "error", "error": "Invalid JSON"}, status=400)
+
+    name = strip_tags(data.get("name", ""))
+    description = strip_tags(data.get("description", ""))
+    category_slug = data.get("category_slug")
+    brand_slug = data.get("brand_slug")
+    price = data.get("price")
+    sale_price = data.get("sale_price")
+    currency = data.get("currency", "IDR")
+    stock = data.get("stock", 0)
+    thumbnail = data.get("thumbnail", "")
+    is_featured = bool(data.get("is_featured", False))
+
+    if not name or not category_slug or price is None:
+        return JsonResponse(
+            {"status": "error", "error": "Missing required fields"},
+            status=400,
+        )
+
+    try:
+        category = Category.objects.get(slug=category_slug)
+    except Category.DoesNotExist:
+        return JsonResponse(
+            {"status": "error", "error": "Unknown category"},
+            status=400,
+        )
+
+    brand = None
+    if brand_slug:
+        brand = Brand.objects.filter(slug=brand_slug).first()
+
+    product = Product.objects.create(
+        name=name,
+        description=description,
+        category=category,
+        brand=brand,
+        price=price,
+        sale_price=sale_price,
+        currency=currency,
+        stock=stock,
+        thumbnail=thumbnail,
+        is_featured=is_featured,
+        created_by=request.user,
+        status="active",
+    )
+
+    return JsonResponse(
+        {"status": "success", "id": str(product.id)},
+        status=201,
+    )
+
+
+
+@require_GET
+def categories_json(request):
+    """
+    Return list of top-level categories for Flutter:
+    [
+      {"slug": "accessories", "name": "Accessories"},
+      ...
+    ]
+    """
+    qs = Category.objects.filter(parent__isnull=True).order_by("name")
+    data = [
+        {
+            "slug": c.slug,
+            "name": c.name,
+        }
+        for c in qs
+    ]
+    return JsonResponse(data, safe=False, status=200)
+
+
+@require_GET
+def brands_json(request):
+    """
+    Return list of brands for Flutter:
+    [
+      {"slug": "nike", "name": "Nike"},
+      ...
+    ]
+    """
+    qs = Brand.objects.all().order_by("name")
+    data = [
+        {
+            "slug": b.slug,
+            "name": b.name,
+        }
+        for b in qs
+    ]
+    return JsonResponse(data, safe=False, status=200)
+
+
+
+@csrf_exempt
+@login_required
+@require_POST
+def create_review_flutter(request, product_id):
+    product = get_object_or_404(Product, pk=product_id, status="active")
+
+    # 🔹 Coba baca JSON, kalau gagal jatuh ke request.POST
+    try:
+        if request.body:
+            data = json.loads(request.body.decode("utf-8"))
+        else:
+            data = request.POST
+    except json.JSONDecodeError:
+        data = request.POST
+
+    rating_raw = data.get("rating", 0)
+    title = strip_tags(data.get("title", "") or "")
+    content = strip_tags(data.get("content", "") or "")
+
+    try:
+        rating = int(rating_raw)
+    except (TypeError, ValueError):
+        rating = 0
+
+    if rating < 1 or rating > 5:
+        return JsonResponse(
+            {"ok": False, "error": "Rating must be 1–5"},
+            status=400,
+        )
+
+    # 🔹 Cek user sudah pernah review produk ini belum
+    if Review.objects.filter(product=product, user=request.user).exists():
+        return JsonResponse(
+            {"ok": False, "error": "You already reviewed this product."},
+            status=400,
+        )
+
+    review = Review.objects.create(
+        product=product,
+        user=request.user,
+        rating=rating,
+        title=title,
+        content=content,
+    )
+
+    agg = product.reviews.aggregate(avg=Avg("rating"), cnt=Count("id"))
+    product.rating_avg = agg["avg"] or 0
+    product.rating_count = agg["cnt"] or 0
+    product.save(update_fields=["rating_avg", "rating_count"])
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "review": {
+                "user": request.user.username,
+                "rating": review.rating,
+                "title": review.title,
+                "content": review.content,
+            },
+            "rating_avg": product.rating_avg,
+            "rating_count": product.rating_count,
+        },
+        status=201,
+    )
+
+
+
+@csrf_exempt
+@login_required
+@require_POST
+def product_delete_flutter(request, pk):
+    """
+    Hapus produk via Flutter.
+    Hanya boleh oleh owner atau staff.
+    """
+    product = get_object_or_404(Product, pk=pk)
+
+    if not (request.user.is_staff or product.created_by_id == request.user.id):
+        return JsonResponse(
+            {"status": "error", "error": "Forbidden"},
+            status=403,
+        )
+
+    product.delete()
+    return JsonResponse({"status": "success"}, status=200)
+
+
+
+@csrf_exempt
+@login_required
+def edit_product_flutter(request, pk):
+    """
+    Endpoint UPDATE produk khusus Flutter.
+    - Menerima JSON (POST).
+    - Hanya owner atau staff yang boleh edit.
+    """
+    if request.method != "POST":
+        return JsonResponse(
+            {"status": "error", "error": "POST required"},
+            status=405,
+        )
+
+    # --- parse JSON body ---
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"status": "error", "error": "Invalid JSON"},
+            status=400,
+        )
+
+    # --- ambil product ---
+    product = get_object_or_404(Product, pk=pk)
+
+    # hanya owner atau staff
+    if not (request.user.is_staff or product.created_by_id == request.user.id):
+        return JsonResponse(
+            {"status": "error", "error": "Forbidden"},
+            status=403,
+        )
+
+    # --- ambil field, kalau tidak dikirim pakai nilai lama ---
+    name = strip_tags(data.get("name", product.name))
+    description = strip_tags(data.get("description", product.description))
+    category_slug = data.get("category_slug", None)
+    brand_slug = data.get("brand_slug", None)
+    price = data.get("price", float(product.price))
+    sale_price = data.get("sale_price", product.sale_price)
+    currency = data.get("currency", product.currency or "IDR")
+    stock = data.get("stock", product.stock)
+    thumbnail = data.get("thumbnail", product.thumbnail)
+    is_featured = bool(data.get("is_featured", product.is_featured))
+
+    # validasi minimal
+    if not name or price is None:
+        return JsonResponse(
+            {"status": "error", "error": "Missing required fields"},
+            status=400,
+        )
+
+    # --- update kategori bila slug dikirim ---
+    if category_slug:
+        try:
+            product.category = Category.objects.get(slug=category_slug)
+        except Category.DoesNotExist:
+            return JsonResponse(
+                {"status": "error", "error": "Unknown category"},
+                status=400,
+            )
+
+    # --- update brand bila slug dikirim (boleh None) ---
+    if brand_slug is not None:
+        if brand_slug == "":
+            product.brand = None
+        else:
+            product.brand = Brand.objects.filter(slug=brand_slug).first()
+
+    # --- assign field lain ---
+    product.name = name
+    product.description = description
+    product.price = price
+    product.sale_price = sale_price
+    product.currency = currency
+    product.stock = stock
+    product.thumbnail = thumbnail
+    product.is_featured = is_featured
+
+    product.save()
+
+    return JsonResponse(
+        {"status": "success", "id": str(product.id)},
+        status=200,
+    )

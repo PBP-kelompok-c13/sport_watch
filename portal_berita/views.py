@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponseForbidden
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
@@ -163,6 +163,40 @@ def load_more_news(request):
 
     return JsonResponse({'news': data, 'has_more': has_more})
 
+@require_GET
+def news_list_json(request):
+    per_page = max(1, min(int(request.GET.get('per_page', 6)), 30))
+    page_number = request.GET.get('page', 1)
+    news_queryset = Berita.objects.filter(is_published=True).order_by('-tanggal_dibuat')
+    paginator = Paginator(news_queryset, per_page)
+    page_obj = paginator.get_page(page_number)
+
+    items = []
+    for news_item in page_obj.object_list:
+        items.append({
+            'id': str(news_item.id),
+            'judul': news_item.judul,
+            'konten': news_item.konten,
+            'kategori': news_item.kategori.nama if news_item.kategori else 'General',
+            'thumbnail': news_item.thumbnail or '',
+            'views': news_item.views,
+            'penulis': news_item.penulis.username if news_item.penulis else None,
+            'sumber': news_item.sumber,
+            'is_published': news_item.is_published,
+            'tanggal_dibuat': news_item.tanggal_dibuat.isoformat(),
+            'tanggal_diperbarui': news_item.tanggal_diperbarui.isoformat(),
+            'detail_url': request.build_absolute_uri(
+                reverse('portal_berita:detail_news', args=[news_item.id])
+            ),
+        })
+
+    return JsonResponse({
+        'results': items,
+        'has_next': page_obj.has_next(),
+        'next_page': page_obj.next_page_number() if page_obj.has_next() else None,
+        'total_pages': paginator.num_pages,
+    })
+
 @csrf_exempt
 @user_passes_test(is_admin)
 @login_required
@@ -224,12 +258,22 @@ def delete_news(request, id):
     return HttpResponseRedirect(reverse('portal_berita:list_news'))
 
 
-@csrf_exempt
-@require_POST
-def berita_json_view(request):
-    all_berita = Berita.objects.all()
-    data = serializers.serialize('json', all_berita)
-    return JsonResponse(data, safe=False)
+def berita_json_view(request, id):
+    berita = get_object_or_404(Berita, id=id)
+    data = {
+        "id": berita.id,
+        "judul": berita.judul,
+        "konten": berita.konten,
+        "kategori": berita.kategori.nama if berita.kategori else None,
+        "thumbnail": berita.thumbnail,
+        "views": berita.views,
+        "penulis": berita.penulis.username if berita.penulis else None,
+        "sumber": berita.sumber,
+        "is_published": berita.is_published,
+        "tanggal_dibuat": berita.tanggal_dibuat,
+        "tanggal_diperbarui": berita.tanggal_diperbarui,
+    }
+    return JsonResponse(data)
 
 @user_passes_test(is_admin)
 @login_required
