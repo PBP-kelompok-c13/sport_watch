@@ -1,10 +1,27 @@
 import uuid
 from django.db import models
+from django.db.models import Count
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from django.utils import timezone
 
 User = get_user_model()
+
+REACTION_CHOICES = [
+    ("like", "Like"),
+    ("love", "Love"),
+    ("fire", "Fire"),
+    ("wow", "Wow"),
+    ("sad", "Sad"),
+]
+
+REACTION_EMOJI_MAP = {
+    "like": "\U0001F44D",  # 👍
+    "love": "\U00002764\U0000FE0F",  # ❤️
+    "fire": "\U0001F525",  # 🔥
+    "wow": "\U0001F62E",  # 😮
+    "sad": "\U0001F622",  # 😢
+}
 
 class KategoriBerita(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -65,6 +82,45 @@ class Berita(models.Model):
     def comment_count(self):
         return self.comments.count()
 
+    @property
+    def reaction_counts(self):
+        counts = {key: 0 for key, _ in REACTION_CHOICES}
+        if (
+            hasattr(self, "_prefetched_objects_cache")
+            and "reactions" in self._prefetched_objects_cache
+        ):
+            for reaction in self.reactions.all():
+                counts[reaction.reaction_type] += 1
+        else:
+            aggregated = (
+                self.reactions.values("reaction_type")
+                .annotate(total=Count("reaction_type"))
+            )
+            for item in aggregated:
+                counts[item["reaction_type"]] = item["total"]
+        return counts
+
+    @property
+    def reaction_summary(self):
+        counts = self.reaction_counts
+        return [
+            {
+                "key": key,
+                "label": label,
+                "emoji": REACTION_EMOJI_MAP.get(key, ""),
+                "count": counts.get(key, 0),
+            }
+            for key, label in REACTION_CHOICES
+        ]
+
+    def get_user_reaction(self, user):
+        if not user.is_authenticated:
+            return None
+        reaction = self.reactions.filter(user=user).first()
+        if reaction:
+            return reaction.reaction_type
+        return None
+
 
 class Comment(models.Model):
     berita = models.ForeignKey(Berita, on_delete=models.CASCADE, related_name='comments')
@@ -78,3 +134,23 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.user.username} on {self.berita}'
+
+
+class NewsReaction(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    berita = models.ForeignKey(Berita, on_delete=models.CASCADE, related_name='reactions')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='news_reactions')
+    reaction_type = models.CharField(max_length=20, choices=REACTION_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['berita', 'user'],
+                name='unique_user_news_reaction',
+            )
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user} reacted {self.reaction_type} to {self.berita}'
