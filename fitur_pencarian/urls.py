@@ -13,4 +13,5 @@ urlpatterns = [
     path("api/preferences/<uuid:id>/submit/", views.ajax_preference_submit, name="ajax_preference_submit_id"),
     path("api/recent/", views.ajax_recent_searches, name="ajax_recent_searches"),
     path("api/analytics/", views.ajax_search_analytics, name="ajax_search_analytics"),
+    path("api/filter-options/", views.ajax_filter_options, name="ajax_filter_options"),
 ]
