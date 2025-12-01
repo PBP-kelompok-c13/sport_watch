@@ -1,0 +1,33 @@
+.news-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.reaction-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: #f3f4f6;
+    color: #374151;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.reaction-button:hover {
+    background-color: #e5e7eb;
+}
+
+.reaction-button.active {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+.reaction-button .reaction-emoji {
+    font-size: 1rem;
+    line-height: 1;
+}

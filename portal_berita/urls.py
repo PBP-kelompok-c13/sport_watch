@@ -15,6 +15,7 @@ urlpatterns = [
     path('news/<uuid:id>/', views.detail_news, name='detail_news'),
     path('news/<uuid:id>/edit/', views.edit_news, name='edit_news'),
     path('news/<uuid:id>/delete/', views.delete_news, name='delete_news'),
+    path('news/<uuid:id>/react/', views.react_to_news, name='react_to_news'),
     path('news/json/<uuid:id>/', views.berita_json_view, name='berita_json_view'),
     path('news/load_more/', views.load_more_news, name='load_more_news'),
     path('api/news/', views.news_list_json, name='news_list_json'),

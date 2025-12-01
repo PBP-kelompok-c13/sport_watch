@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'portal_berita/css/reactions.css' %}">
+{% endblock %}
+
 {% block content %}
 <style>
     .gradient-overlay {
@@ -48,6 +52,16 @@
                         {% endif %}
                         <span><a href="{% url 'portal_berita:detail_news' featured_news.id %}#comments" class="hover:text-red-400">{{ featured_news.comment_count }} Comments</a></span>
                     </div>
+                    <div class="mt-4">
+                        <div class="news-reactions" data-news-id="{{ featured_news.id }}" data-react-url="{% url 'portal_berita:react_to_news' featured_news.id %}">
+                            {% for reaction in featured_news.reaction_summary %}
+                            <button type="button" class="reaction-button" data-reaction="{{ reaction.key }}" aria-pressed="false">
+                                <span class="reaction-emoji">{{ reaction.emoji }}</span>
+                                <span class="reaction-count">{{ reaction.count }}</span>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </article>
         </section>
@@ -76,6 +90,16 @@
                             {% endif %}
                             <span><a href="{% url 'portal_berita:detail_news' news_item.id %}#comments" class="hover:text-blue-500">{{ news_item.comment_count }} Comments</a></span>
                         </div>
+                        <div class="mt-3 border-t border-gray-100 pt-3">
+                            <div class="news-reactions" data-news-id="{{ news_item.id }}" data-react-url="{% url 'portal_berita:react_to_news' news_item.id %}">
+                                {% for reaction in news_item.reaction_summary %}
+                                <button type="button" class="reaction-button" data-reaction="{{ reaction.key }}" aria-pressed="false">
+                                    <span class="reaction-emoji">{{ reaction.emoji }}</span>
+                                    <span class="reaction-count">{{ reaction.count }}</span>
+                                </button>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
                 </article>
                 {% empty %}
@@ -94,45 +118,90 @@
             </div>
             {% endif %}
         </section>
+<script src="{% static 'portal_berita/js/news_reactions.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        let offset = {{ other_news.end_index|default:0 }}; // Initial offset based on already displayed news
+        const initialReactions = {{ user_reactions_json|default:"{}"|safe }};
+        if (window.SportWatchReactions) {
+            window.SportWatchReactions.init({
+                userReactions: initialReactions,
+                loginUrl: "{{ reaction_login_url|escapejs }}",
+            });
+        }
+
+        let offset = {{ other_news.end_index|default:0 }};
         const loadMoreBtn = document.getElementById('load-more-btn');
         const newsContainer = document.getElementById('news-container');
+        const loadMoreUrl = "{% url 'portal_berita:load_more_news' %}";
+
+        function buildReactionGroup(newsItem) {
+            if (!newsItem.reactions) {
+                return '';
+            }
+            const buttons = newsItem.reactions.map((reaction) => `
+                <button type="button" class="reaction-button" data-reaction="${reaction.key}" aria-pressed="false">
+                    <span class="reaction-emoji">${reaction.emoji}</span>
+                    <span class="reaction-count">${reaction.count}</span>
+                </button>
+            `).join('');
+            return `
+                <div class="mt-3 border-t border-gray-100 pt-3">
+                    <div class="news-reactions" data-news-id="${newsItem.id}" data-react-url="${newsItem.reaction_post_url}">
+                        ${buttons}
+                    </div>
+                </div>
+            `;
+        }
+
+        function appendNewsCard(newsItem) {
+            const categoryLabel = (newsItem.kategori_nama || 'Default').toUpperCase();
+            const article = `
+                <article class="bg-white rounded-xl shadow-md overflow-hidden transform transition duration-300 hover:scale-[1.02] hover:shadow-lg">
+                    <img src="${newsItem.thumbnail}" alt="${newsItem.judul}" class="w-full h-48 object-cover object-center">
+                    <div class="p-5">
+                        <span class="inline-block text-white text-xs font-bold px-3 py-1 rounded-full mb-2 category-${newsItem.kategori_class}">
+                            ${categoryLabel}
+                        </span>
+                        <h3 class="text-lg font-bold leading-snug mb-2 hover:text-blue-800 transition duration-300"><a href="${newsItem.detail_url}">${newsItem.judul}</a></h3>
+                        <p class="text-gray-600 text-sm mb-3">${newsItem.konten_truncated}</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span>${newsItem.tanggal_dibuat_timesince} ago</span>
+                            <span class="mx-2">&bull;</span>
+                            <span><a href="${newsItem.detail_url}#comments" class="hover:text-blue-500">${newsItem.comment_count} Comments</a></span>
+                        </div>
+                        ${buildReactionGroup(newsItem)}
+                    </div>
+                </article>
+            `;
+            const template = document.createElement('template');
+            template.innerHTML = article.trim();
+            const element = template.content.firstElementChild;
+            newsContainer.appendChild(element);
+
+            if (window.SportWatchReactions) {
+                const reactionEntry = {};
+                reactionEntry[newsItem.id] = newsItem.user_reaction || null;
+                window.SportWatchReactions.mergeUserReactions(reactionEntry);
+                window.SportWatchReactions.bind(element);
+            }
+        }
 
         if (loadMoreBtn) {
             loadMoreBtn.addEventListener('click', function() {
-                fetch(`{% url 'portal_berita:load_more_news' %}?offset=${offset}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        data.news.forEach(news_item => {
-                            const article = `
-                                <article class="bg-white rounded-xl shadow-md overflow-hidden transform transition duration-300 hover:scale-[1.02] hover:shadow-lg">
-                                    <img src="${news_item.thumbnail}" alt="${news_item.judul}" class="w-full h-48 object-cover object-center">
-                                    <div class="p-5">
-                                        <span class="inline-block text-white text-xs font-bold px-3 py-1 rounded-full mb-2 category-${news_item.kategori_class}">
-                                            ${news_item.kategori_nama.toUpperCase()}
-                                        </span>
-                                        <h3 class="text-lg font-bold leading-snug mb-2 hover:text-blue-800 transition duration-300"><a href="${news_item.detail_url}">${news_item.judul}</a></h3>
-                                        <p class="text-gray-600 text-sm mb-3">${news_item.konten_truncated}</p>
-                                        <div class="flex items-center text-xs text-gray-500">
-                                            <span>${news_item.tanggal_dibuat_timesince} ago</span>
-                                            <span class="mx-2">&bull;</span>
-                                            <span><a href="${news_item.detail_url}#comments" class="hover:text-blue-500">${news_item.comment_count} Comments</a></span>
-                                        </div>
-                                    </div>
-                                </article>
-                            `;
-                            newsContainer.insertAdjacentHTML('beforeend', article);
+                fetch(`${loadMoreUrl}?offset=${offset}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        data.news.forEach((newsItem) => {
+                            appendNewsCard(newsItem);
                         });
 
                         offset += data.news.length;
 
-                        if (!data.has_more) {
+                        if (!data.has_more && loadMoreBtn) {
                             loadMoreBtn.style.display = 'none';
                         }
                     })
-                    .catch(error => console.error('Error loading more news:', error));
+                    .catch((error) => console.error('Error loading more news:', error));
             });
         }
     });
