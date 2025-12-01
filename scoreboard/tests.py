@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.test import TestCase, Client
-from django.urls import reverse, resolve
+from django.urls import resolve, reverse
+from django.shortcuts import resolve_url
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -144,13 +146,14 @@ class AdminGuardTests(BaseViewTestCase):
         
         resp = self.client.get(reverse('scoreboard:scoreboard_management'))
         self.assertEqual(resp.status_code, 302)
-        self.assertIn('/accounts/login', resp['Location'])
+        login_url = resolve_url(settings.LOGIN_URL)
+        self.assertIn(login_url, resp['Location'])
 
     
         self.login_user()
         resp = self.client.get(reverse('scoreboard:scoreboard_management'))
         self.assertEqual(resp.status_code, 302)
-        self.assertIn('/accounts/login', resp['Location'])
+        self.assertIn(login_url, resp['Location'])
 
         self.login_admin()
         resp = self.client.get(reverse('scoreboard:scoreboard_management'))

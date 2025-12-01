@@ -157,6 +157,7 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Static files
 STATIC_URL = '/static/'
 
 # Always collect to 'staticfiles' in every environment

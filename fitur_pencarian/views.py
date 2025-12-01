@@ -10,8 +10,8 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 from django.urls import reverse
 
-from portal_berita.models import Berita
-from shop.models import Product
+from portal_berita.models import Berita, KategoriBerita
+from shop.models import Product, Category, Brand
 
 from .forms import SearchForm, SearchPreferenceForm
 from .models import SearchPreference, SearchLog
@@ -71,8 +71,11 @@ def _apply_preference_to_data(cleaned_data, preference):
     if not preference:
         return cleaned_data
 
-    if cleaned_data.get("search_in") in (None, ""):
-        cleaned_data["search_in"] = preference.default_scope
+    cleaned_data["search_in"] = (
+        preference.default_scope
+        or cleaned_data.get("search_in")
+        or SearchPreference.SearchScope.ALL
+    )
     if not cleaned_data.get("news_category") and preference.default_news_category:
         cleaned_data["news_category"] = preference.default_news_category
     if not cleaned_data.get("product_category") and preference.default_product_category:
@@ -83,6 +86,8 @@ def _apply_preference_to_data(cleaned_data, preference):
         cleaned_data["min_price"] = preference.min_price
     if not cleaned_data.get("max_price") and preference.max_price is not None:
         cleaned_data["max_price"] = preference.max_price
+    if preference.only_discount:
+        cleaned_data["only_discount"] = True
     return cleaned_data
 
 
@@ -97,6 +102,7 @@ def _serialize_news_item(news, is_staff=False):
         "category": news.kategori.nama if news.kategori else "Umum",
         "thumbnail": news.thumbnail,
         "url": url,
+        "content": news.konten,
         "views": news.views if is_staff else None,
         "published_at": timezone.localtime(news.tanggal_dibuat).strftime("%d %b %Y"),
     }
@@ -367,5 +373,28 @@ def ajax_search_analytics(request):
         {
             "top_queries": top_queries,
             "scope_breakdown": scope_breakdown,
+        }
+    )
+
+
+@require_GET
+def ajax_filter_options(request):
+    news_categories = [
+        {"id": str(category.id), "name": category.nama}
+        for category in KategoriBerita.objects.order_by("nama")
+    ]
+    categories = [
+        {"id": str(category.id), "name": category.full_path}
+        for category in Category.objects.order_by("name")
+    ]
+    brands = [
+        {"id": str(brand.id), "name": brand.name}
+        for brand in Brand.objects.order_by("name")
+    ]
+    return JsonResponse(
+        {
+            "news_categories": news_categories,
+            "product_categories": categories,
+            "brands": brands,
         }
     )
