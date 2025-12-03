@@ -10,7 +10,7 @@
     </div>
   </div>
   <div>
-    <!-- kategori dan ow owner -->
+    <!-- kategori dan owner -->
     <div class="text-sm text-gray-500">
       {{ product.category.name }}
       {% if product.created_by_id %} • by <span class="font-medium">{{ product.created_by.username }}</span>{% endif %}
@@ -33,7 +33,9 @@
     {% endif %}
 
     <button
-      class="mt-6 px-6 py-3 bg-blue-600 text-white rounded
+      id="addToCartBtn"
+      data-product-id="{{ product.id }}"
+      class="mt-6 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition
              {% if not product.in_stock %}opacity-50 cursor-not-allowed
              {% elif user.is_authenticated and product.created_by_id == user.id %}opacity-50 cursor-not-allowed
              {% endif %}"
@@ -52,7 +54,7 @@
   </div>
 </div>
 
-<!-- Reviews using ajaz-->
+<!-- Reviews using ajax -->
 <div class="mt-10">
   <h2 class="text-xl font-semibold mb-3">
     Reviews ({{ product.rating_count }}) — {% star_rating product.rating_avg 5 %}
@@ -83,7 +85,6 @@
   </div>
 </div>
 
-{% if user.is_authenticated %}
 <script>
   window.showToast = window.showToast || function (msg) { console.log('toast:', msg); };
 
@@ -99,6 +100,59 @@
     return '★'.repeat(f) + (h ? '☆' : '') + '☆'.repeat(e);
   }
 
+  // ============ ADD TO CART FUNCTION ============
+  async function addToCart(productId, qty=1){
+    try {
+      const res = await fetch("{% url 'fitur_belanja:add_to_cart' %}", {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({product_id: productId, qty: qty})
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Failed to add to cart");
+      }
+
+      // Update cart badge if exists
+      const badge = document.getElementById('cartBadge');
+      if (badge) {
+        badge.textContent = data.cart_count;
+        badge.classList.remove('hidden');
+      }
+
+      showToast("Added to cart ✅", "success");
+      return true;
+    } catch (error) {
+      showToast(error.message || "Failed to add to cart", "error");
+      return false;
+    }
+  }
+
+  // ============ ADD TO CART BUTTON HANDLER ============
+  const addToCartBtn = document.getElementById('addToCartBtn');
+  if (addToCartBtn && !addToCartBtn.disabled) {
+    addToCartBtn.addEventListener('click', async () => {
+      const productId = addToCartBtn.dataset.productId;
+      if (productId) {
+        addToCartBtn.disabled = true;
+        addToCartBtn.textContent = 'Adding...';
+        
+        const success = await addToCart(productId, 1);
+        
+        addToCartBtn.disabled = false;
+        addToCartBtn.textContent = 'Add to Cart';
+      }
+    });
+  }
+
+  // ============ REVIEW FORM HANDLER ============
+  {% if user.is_authenticated %}
   const form = document.getElementById('reviewForm');
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -138,34 +192,9 @@
 
     form.reset();
     showToast("Review submitted ✅", 'success');
-
-    
-  const CSRF = (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop() || '');
-  async function addToCart(productId, qty=1){
-    const res = await fetch("{% url 'fitur_belanja:add_to_cart' %}", {
-      method:"POST",
-      headers:{"X-Requested-With":"XMLHttpRequest","X-CSRFToken": CSRF,"Content-Type":"application/json"},
-      body: JSON.stringify({product_id: productId, qty})
-    });
-    const data = await res.json();
-    if (!res.ok || !data.ok) throw new Error(data.error || "Failed");
-    const b = document.getElementById('cartBadge');
-    if (b){ b.textContent = data.cart_count; b.classList.remove('hidden'); }
-    if (window.showToast) showToast("Added to cart ✅", "success");
-  }
-
-  
-  document.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.add-to-cart');
-    if (!btn) return;
-    const card = btn.closest('[data-product-id]');
-    if (!card) return;
-    try { await addToCart(card.dataset.productId, 1); }
-    catch { if (window.showToast) showToast("Failed to add to cart", "error"); }
   });
-  });
+  {% endif %}
 </script>
-{% endif %}
 
 {% include 'toast.html' %}
 {% endblock %}
