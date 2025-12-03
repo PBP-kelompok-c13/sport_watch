@@ -69,7 +69,7 @@
     {% if live %}
       <div id="live-wrap" class="grid">
         {% for score in live %}
-          <article class="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition p-4">
+          <article class="rounded-2xl border border-rose-200 bg-white shadow-sm hover:shadow-md transition p-4">
             <div class="flex items-start justify-between">
               <span class="text-[10px] font-semibold px-2 py-0.5 rounded
                 {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700
@@ -151,7 +151,7 @@
     {% if finished %}
       <div id="finished-wrap" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {% for score in finished %}
-          <article class="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition p-4">
+            <article class="rounded-2xl border border-gray-300 bg-white shadow-sm hover:shadow-md transition p-4">
             <div class="flex items-start justify-between">
               <span class="text-[10px] font-semibold px-2 py-0.5 rounded
                 {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700
@@ -341,9 +341,19 @@ document.addEventListener("DOMContentLoaded", function () {
     return `<div class="h-9 w-9 rounded-full bg-gray-50"></div>`;
   }
 
-  function cardHTML(s, status) {
+    function cardHTML(s, status) {
+    let borderClass = 'border-gray-200';
+
+    if (status === 'live') {
+      borderClass = 'border-rose-200';       // sama kayak Flutter live
+    } else if (status === 'finished') {
+      borderClass = 'border-gray-300';       // sama kayak Flutter finished
+    } else if (status === 'upcoming') {
+      borderClass = 'border-amber-200';      // kuning, udah cocok
+    }
+
     return `
-      <article class="rounded-2xl border ${status==='upcoming' ? 'border-amber-200' : 'border-gray-200'} bg-white shadow-sm hover:shadow-md transition p-4">
+      <article class="rounded-2xl border ${borderClass} bg-white shadow-sm hover:shadow-md transition p-4">
         <div class="flex items-start justify-between">
           <span class="text-[10px] font-semibold px-2 py-0.5 rounded ${leagueBadgeClasses(s.sport)}">
             ${s.sport_display || s.sport || "League"}
@@ -369,6 +379,7 @@ document.addEventListener("DOMContentLoaded", function () {
       </article>
     `;
   }
+
 
   function renderTo(targetWrap, data, status) {
     targetWrap.innerHTML = "";

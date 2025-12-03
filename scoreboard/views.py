@@ -53,33 +53,38 @@ def delete_score(request, pk):
     return render(request, 'scoreboard/confirm_delete.html', {'score': item})
 
 def filter_scores(request):
-    status = request.GET.get('status')
+    status = request.GET.get('status')  
     sport = request.GET.get('sport')
     
     if status == 'finished':
-        status = 'recent'
+        status_filter = 'recent'
+    else:
+        status_filter = status
 
-    data = Scoreboard.objects.all()
+    data = Scoreboard.objects.all().order_by('-tanggal')
 
-    if status in {'live', 'recent', 'upcoming'}:
-        data = data.filter(status=status)
+    if status_filter in {'live', 'recent', 'upcoming'}:
+        data = data.filter(status=status_filter)
 
     if sport:
         data = data.filter(sport__iexact=sport)
 
-    results = [
-        {
+    results = []
+    for s in data:
+        status_for_frontend = 'finished' if s.status == 'recent' else s.status
+
+        results.append({
+            'id': s.id,
             'tim1': s.tim1,
             'tim2': s.tim2,
             'skor_tim1': s.skor_tim1,
             'skor_tim2': s.skor_tim2,
-            'tanggal': s.tanggal.strftime('%Y-%m-%d %H:%M') if hasattr(s.tanggal, 'strftime') else str(s.tanggal),
-            'sport': s.sport,
-            'status': s.status,
-            'sport_display': s.get_sport_display(), 
-            'logo_tim1': getattr(s, 'logo_tim1', None),
-            'logo_tim2': getattr(s, 'logo_tim2', None),
-        }
-        for s in data
-    ]
+            'tanggal': s.tanggal.isoformat(),
+            'sport': s.sport,                
+            'sport_display': s.get_sport_display(),
+            'status': status_for_frontend,   
+            'logo_tim1': s.logo_tim1,
+            'logo_tim2': s.logo_tim2,
+        })
+
     return JsonResponse({'scores': results})
