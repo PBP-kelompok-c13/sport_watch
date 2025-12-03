@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block content %}
 <a href="{% url 'shop:list' %}" class="text-sm text-gray-600">&larr; Continue Shopping</a>
 
@@ -39,14 +40,20 @@
   <aside class="bg-white rounded-xl p-4 h-fit">
     <h3 class="font-semibold mb-3">Order Summary</h3>
     <div class="flex justify-between py-1">
-      <span>Subtotal</span><span>Rp {{ subtotal }}</span>
+      <span>Subtotal</span>
+      <span>Rp {{ subtotal|floatformat:2|intcomma }}</span>
     </div>
+
     <div class="flex justify-between py-1">
-      <span>Shipping</span><span>Rp {{ shipping }}</span>
+      <span>Shipping</span>
+      <span>Rp {{ shipping|floatformat:2|intcomma }}</span>
     </div>
+
     <hr class="my-3">
+
     <div class="flex justify-between font-semibold">
-      <span>Total</span><span>Rp {{ total }}</span>
+      <span>Total</span>
+      <span>Rp {{ total|floatformat:2|intcomma }}</span>
     </div>
     <a href="{% url 'fitur_belanja:checkout' %}"
        class="w-full mt-4 bg-blue-600 text-white rounded py-2 text-center inline-block">
@@ -62,34 +69,44 @@
     return m ? m.pop() : '';
   }
 
-  // qty +/-
   document.addEventListener('click', async (e) => {
     const wrap = e.target.closest('[data-item-id]');
     if (!wrap) return;
 
     const id = wrap.dataset.itemId;
     const input = wrap.querySelector('.qty-input');
+
+    // qty minus
     if (e.target.closest('.qty-minus')) {
       input.value = Math.max(1, (parseInt(input.value || '1') - 1));
     }
+
+    // qty plus
     if (e.target.closest('.qty-plus')) {
       input.value = (parseInt(input.value || '1') + 1);
     }
+
+    // update qty
     if (e.target.closest('.qty-minus') || e.target.closest('.qty-plus')) {
       await fetch("{% url 'fitur_belanja:update_qty' %}", {
         method: "POST",
         headers: {"X-CSRFToken": getCsrf()},
         body: new URLSearchParams({ item_id: id, qty: input.value })
       });
+      location.reload();     // <- refresh seluruh halaman
     }
+
+    // remove item
     if (e.target.closest('.remove-item')) {
       const res = await fetch("{% url 'fitur_belanja:remove_item' %}", {
         method: "POST",
         headers: {"X-CSRFToken": getCsrf()},
         body: new URLSearchParams({ item_id: id })
       });
-      if (res.ok) wrap.remove();
+
+      if (res.ok) location.reload();  // <- refresh setelah delete
     }
   });
 </script>
+
 {% endblock %}

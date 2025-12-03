@@ -1,13 +1,11 @@
 # fitur_belanja/views.py
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from shop.models import Product
 from .models import CartItem
 from django.contrib import messages
-from django.shortcuts import redirect, render
-from django.db import transaction
 from .utils import cart_from_request
 import json
 import uuid
@@ -34,19 +32,19 @@ def shopping(request):
 
 @require_POST
 def add_to_cart(request):
-    # Baca input: dukung form-encoded & JSON
-    if request.headers.get("Content-Type", "").startswith("application/json"):
-        try:
+    try:
+        # Support form-encoded and JSON payloads
+        if request.headers.get("Content-Type", "").startswith("application/json"):
             payload = json.loads(request.body.decode() or "{}")
-        except json.JSONDecodeError:
-            payload = {}
-        raw_pid = payload.get("product_id")
-        qty = int(payload.get("qty", 1) or 1)
-    else:
-        raw_pid = request.POST.get("product_id")
-        qty = int(request.POST.get("qty", "1") or 1)
+            raw_pid = payload.get("product_id")
+            qty = int(payload.get("qty", 1) or 1)
+        else:
+            raw_pid = request.POST.get("product_id")
+            qty = int(request.POST.get("qty", "1") or 1)
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return JsonResponse({"ok": False, "error": "Invalid data"}, status=400)
 
-    # Validasi UUID
+    # Validate UUID
     try:
         pid = uuid.UUID(str(raw_pid))
     except (TypeError, ValueError):
@@ -54,14 +52,19 @@ def add_to_cart(request):
 
     product = get_object_or_404(Product, id=pid)
 
-    
-    if (request.user.is_authenticated and product.created_by_id == request.user.id) or not product.in_stock:
-        return JsonResponse({"ok": False, "error": "Not allowed"}, status=400)
+    # Owner cannot buy their own product and product must be in stock
+    if request.user.is_authenticated and product.created_by_id == request.user.id:
+        return JsonResponse({"ok": False, "error": "Cannot buy your own product"}, status=400)
+    if not product.in_stock:
+        return JsonResponse({"ok": False, "error": "Product out of stock"}, status=400)
 
     cart = cart_from_request(request)
+
+    # simpan item
     with transaction.atomic():
         item, created = CartItem.objects.select_for_update().get_or_create(
-            cart=cart, product=product,
+            cart=cart,
+            product=product,
             defaults={"qty": qty, "unit_price": product.final_price},
         )
         if not created:
@@ -69,7 +72,11 @@ def add_to_cart(request):
             item.unit_price = product.final_price
             item.save(update_fields=["qty", "unit_price"])
 
-    return JsonResponse({"ok": True, "cart_count": cart.item_count})
+    return JsonResponse({
+        "ok": True,
+        "cart_count": cart.item_count,
+        "message": "Success add to cart"
+    })
 
 @require_POST
 def update_qty(request):
@@ -83,11 +90,17 @@ def update_qty(request):
 
 @require_POST
 def remove_item(request):
-    item_id = int(request.POST.get("item_id", "0"))
+    item_id = request.POST.get("item_id")
+
     cart = cart_from_request(request)
-    item = get_object_or_404(CartItem, id=item_id, cart=cart)
-    item.delete()
-    return JsonResponse({"ok": True, "cart_count": cart.item_count})
+    item = CartItem.objects.filter(id=item_id, cart=cart).first()
+
+    if item:
+        item.delete()
+
+    # setelah delete, total dihitung ulang otomatis dari property
+    return JsonResponse({"success": True})
+
 
 @require_POST
 def clear_cart(request):
