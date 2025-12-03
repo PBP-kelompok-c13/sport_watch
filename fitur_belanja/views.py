@@ -6,6 +6,7 @@ from django.db import transaction
 from shop.models import Product
 from .models import CartItem
 from .utils import cart_from_request
+import json
 
 def shopping(request):
     cart = cart_from_request(request)
@@ -28,26 +29,53 @@ def shopping(request):
 
 @require_POST
 def add_to_cart(request):
-    pid = int(request.POST.get("product_id", "0") or 0)
-    qty = int(request.POST.get("qty", "1") or 1)
+    try:
+        if request.content_type.startswith('application/json'):
+            data = json.loads(request.body)
+            pid = data.get("product_id")
+            qty = data.get("qty", 1)
+        else:
+            pid = request.POST.get("product_id")
+            qty = request.POST.get("qty", 1)
+
+        qty = int(qty)
+
+    except (ValueError, json.JSONDecodeError):
+        return JsonResponse({"ok": False, "error": "Invalid data"}, status=400)
+
+    if not pid:
+        return JsonResponse({"ok": False, "error": "Missing product_id"}, status=400)
+
+    # Product.id adalah UUID → langsung pakai tanpa cast
     product = get_object_or_404(Product, id=pid)
 
-    # tidak boleh beli produk sendiri dan tidak boleh bila out of stock
-    if (request.user.is_authenticated and product.created_by_id == request.user.id) or not product.in_stock:
-        return JsonResponse({"ok": False, "error": "Not allowed"}, status=400)
+
+    # owner tidak boleh beli produknya sendiri
+    if request.user.is_authenticated and product.created_by_id == request.user.id:
+        return JsonResponse({"ok": False, "error": "Cannot buy your own product"}, status=400)
+
+    # stock check
+    if not product.in_stock:
+        return JsonResponse({"ok": False, "error": "Product out of stock"}, status=400)
 
     cart = cart_from_request(request)
+
+    # simpan item
     with transaction.atomic():
         item, created = CartItem.objects.select_for_update().get_or_create(
-            cart=cart, product=product,
+            cart=cart,
+            product=product,
             defaults={"qty": 0, "unit_price": product.final_price}
         )
         item.qty += qty
-        # cache harga terbaru saat add
         item.unit_price = product.final_price
         item.save()
 
-    return JsonResponse({"ok": True, "cart_count": cart.item_count})
+    return JsonResponse({
+        "ok": True,
+        "cart_count": cart.item_count,
+        "message": "Success add to cart"
+    })
 
 @require_POST
 def update_qty(request):
@@ -61,11 +89,17 @@ def update_qty(request):
 
 @require_POST
 def remove_item(request):
-    item_id = int(request.POST.get("item_id", "0"))
+    item_id = request.POST.get("item_id")
+
     cart = cart_from_request(request)
-    item = get_object_or_404(CartItem, id=item_id, cart=cart)
-    item.delete()
-    return JsonResponse({"ok": True, "cart_count": cart.item_count})
+    item = CartItem.objects.filter(id=item_id, cart=cart).first()
+
+    if item:
+        item.delete()
+
+    # setelah delete, total dihitung ulang otomatis dari property
+    return JsonResponse({"success": True})
+
 
 @require_POST
 def clear_cart(request):
