@@ -382,3 +382,82 @@ def news_management(request):
     news_list = Berita.objects.all()
     context = {'news_list': news_list}
     return render(request, 'portal_berita/news_management.html', context)
+
+@csrf_exempt
+@login_required
+@require_POST
+def create_news_flutter(request):
+    if not request.user.is_staff:
+         return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+
+    judul = strip_tags(data.get('judul', ''))
+    konten = strip_tags(data.get('konten', ''))
+    thumbnail = data.get('thumbnail', '')
+    sumber = strip_tags(data.get('sumber', ''))
+    is_published = data.get('is_published', False)
+    kategori_name = data.get('kategori', None)
+
+    if not judul or not konten:
+        return JsonResponse({'status': 'error', 'message': 'Title and Content are required'}, status=400)
+
+    kategori = None
+    if kategori_name:
+        kategori, _ = KategoriBerita.objects.get_or_create(nama=kategori_name)
+
+    berita = Berita.objects.create(
+        judul=judul,
+        konten=konten,
+        thumbnail=thumbnail,
+        sumber=sumber,
+        is_published=is_published,
+        kategori=kategori,
+        penulis=request.user
+    )
+
+    return JsonResponse({'status': 'success', 'id': str(berita.id)}, status=201)
+
+@csrf_exempt
+@login_required
+@require_POST
+def edit_news_flutter(request, id):
+    if not request.user.is_staff:
+         return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
+
+    berita = get_object_or_404(Berita, id=id)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+
+    berita.judul = strip_tags(data.get('judul', berita.judul))
+    berita.konten = strip_tags(data.get('konten', berita.konten))
+    berita.thumbnail = data.get('thumbnail', berita.thumbnail)
+    berita.sumber = strip_tags(data.get('sumber', berita.sumber))
+    berita.is_published = data.get('is_published', berita.is_published)
+    
+    kategori_name = data.get('kategori', None)
+    if kategori_name:
+        kategori, _ = KategoriBerita.objects.get_or_create(nama=kategori_name)
+        berita.kategori = kategori
+    
+    berita.save()
+
+    return JsonResponse({'status': 'success', 'id': str(berita.id)})
+
+@csrf_exempt
+@login_required
+@require_POST
+def delete_news_flutter(request, id):
+    if not request.user.is_staff:
+         return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
+
+    berita = get_object_or_404(Berita, id=id)
+    berita.delete()
+
+    return JsonResponse({'status': 'success', 'id': str(id)})

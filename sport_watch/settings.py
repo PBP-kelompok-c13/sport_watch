@@ -33,7 +33,13 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 DEBUG = not PRODUCTION
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "faiz-yusuf-sportwatch.pbp.cs.ui.ac.id", "10.0.2.2"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "faiz-yusuf-sportwatch.pbp.cs.ui.ac.id",
+    "10.0.2.2",
+    "testserver",  # Django test client
+]
 
 
 # Application definition
@@ -174,6 +180,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 CSRF_TRUSTED_ORIGINS = [
     'https://faiz-yusuf-sportwatch.pbp.cs.ui.ac.id',
+    'http://127.0.0.1:8000',
+    'http://10.0.2.2:8000',
 ]
 
 # Cors Configuration

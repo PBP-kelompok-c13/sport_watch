@@ -59,7 +59,10 @@ def login_user(request):
                     "username": user.username,
                     "status": True,
                     "message": "Login successful!",
-                    "id": user.id,  # TAMBAHAN BARU KALAU ADA ERROR COBA LIHAT INI TAPI GAK MUNGKIN SI
+                    "id": user.id,
+                    "email": user.email or "",
+                    "is_staff": user.is_staff,
+                    "is_superuser": user.is_superuser,
                 }, status=200)
             else:
                 return JsonResponse({
@@ -157,10 +160,25 @@ def proxy_image(request):
         return HttpResponse(f'Error fetching image: {str(e)}', status=500)
 
 
-@login_required
 @require_GET
 def profile(request):
+    """
+    Return JSON profile info for the current session.
+    If unauthenticated, return a JSON payload with status False instead of redirecting.
+    This keeps Flutter clients from being given an HTML login form.
+    """
     user = request.user
+    if not user.is_authenticated:
+        return JsonResponse(
+            {
+                "status": False,
+                "message": "Authentication required.",
+                "is_staff": False,
+                "is_superuser": False,
+            },
+            status=200,
+        )
+
     return JsonResponse(
         {
             "username": user.username,
