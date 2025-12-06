@@ -115,3 +115,15 @@ GitHub.sublime-settings
 .history
 #drawio
 *.drawio
+
+# Flutter/Android (generated artifacts)
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+android/local.properties
+ios/Flutter/Generated.xcconfig
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Keep pubspec.lock tracked for apps (ignore only if this is a published package)
