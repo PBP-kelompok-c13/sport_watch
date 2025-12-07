@@ -24,4 +24,6 @@ urlpatterns = [
     path('api/create-flutter/', views.create_news_flutter, name='create_news_flutter'),
     path('api/edit-flutter/<uuid:id>/', views.edit_news_flutter, name='edit_news_flutter'),
     path('api/delete-flutter/<uuid:id>/', views.delete_news_flutter, name='delete_news_flutter'),
+    path('api/news/<uuid:id>/comments/', views.news_comments_json, name='news_comments_json'),
+    path('api/news/<uuid:id>/comment/create/', views.create_comment_flutter, name='create_comment_flutter'),
 ]
