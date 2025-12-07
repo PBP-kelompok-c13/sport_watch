@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.html import strip_tags
 import json
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 def is_admin(user):
     return user.is_authenticated and (user.is_staff or user.is_superuser)
@@ -93,17 +95,13 @@ def filter_scores(request):
 
     return JsonResponse({'scores': results})
 
-@csrf_exempt
-@login_required
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_score_flutter(request):
     if not request.user.is_staff:
-        return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
+         return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
 
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    data = request.data
 
     tim1 = strip_tags(data.get('tim1', ''))
     tim2 = strip_tags(data.get('tim2', ''))
@@ -131,19 +129,15 @@ def create_score_flutter(request):
 
     return JsonResponse({'status': 'success', 'id': score.id}, status=201)
 
-@csrf_exempt
-@login_required
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def edit_score_flutter(request, pk):
     if not request.user.is_staff:
         return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
         
     score = get_object_or_404(Scoreboard, pk=pk)
     
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    data = request.data
 
     score.tim1 = strip_tags(data.get('tim1', score.tim1))
     score.tim2 = strip_tags(data.get('tim2', score.tim2))
@@ -158,9 +152,8 @@ def edit_score_flutter(request, pk):
     
     return JsonResponse({'status': 'success', 'id': score.id})
 
-@csrf_exempt
-@login_required
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def delete_score_flutter(request, pk):
     if not request.user.is_staff:
         return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
@@ -169,4 +162,3 @@ def delete_score_flutter(request, pk):
     score.delete()
     
     return JsonResponse({'status': 'success', 'id': pk})
-

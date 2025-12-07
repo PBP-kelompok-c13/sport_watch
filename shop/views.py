@@ -23,6 +23,8 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.core import serializers
 import requests
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 def product_list(request):
     qs = Product.objects.filter(status="active").select_related("category","brand")
@@ -554,16 +556,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.html import strip_tags
 import json
 
-@csrf_exempt
-@login_required
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_product_flutter(request):
-    if request.method != "POST":
-        return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
-
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"status": "error", "error": "Invalid JSON"}, status=400)
+    data = request.data
 
     name = strip_tags(data.get("name", ""))
     description = strip_tags(data.get("description", ""))
@@ -615,7 +611,6 @@ def create_product_flutter(request):
     )
 
 
-
 @require_GET
 def categories_json(request):
     """
@@ -656,21 +651,12 @@ def brands_json(request):
     return JsonResponse(data, safe=False, status=200)
 
 
-
-@csrf_exempt
-@login_required
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_review_flutter(request, product_id):
     product = get_object_or_404(Product, pk=product_id, status="active")
 
-    # 🔹 Coba baca JSON, kalau gagal jatuh ke request.POST
-    try:
-        if request.body:
-            data = json.loads(request.body.decode("utf-8"))
-        else:
-            data = request.POST
-    except json.JSONDecodeError:
-        data = request.POST
+    data = request.data
 
     rating_raw = data.get("rating", 0)
     title = strip_tags(data.get("title", "") or "")
@@ -723,10 +709,8 @@ def create_review_flutter(request, product_id):
     )
 
 
-
-@csrf_exempt
-@login_required
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def product_delete_flutter(request, pk):
     """
     Hapus produk via Flutter.
@@ -744,29 +728,15 @@ def product_delete_flutter(request, pk):
     return JsonResponse({"status": "success"}, status=200)
 
 
-
-@csrf_exempt
-@login_required
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def edit_product_flutter(request, pk):
     """
     Endpoint UPDATE produk khusus Flutter.
     - Menerima JSON (POST).
     - Hanya owner atau staff yang boleh edit.
     """
-    if request.method != "POST":
-        return JsonResponse(
-            {"status": "error", "error": "POST required"},
-            status=405,
-        )
-
-    # --- parse JSON body ---
-    try:
-        data = json.loads(request.body.decode("utf-8"))
-    except json.JSONDecodeError:
-        return JsonResponse(
-            {"status": "error", "error": "Invalid JSON"},
-            status=400,
-        )
+    data = request.data
 
     # --- ambil product ---
     product = get_object_or_404(Product, pk=pk)
