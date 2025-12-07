@@ -131,8 +131,16 @@ def list_news(request):
         other_news = paginator.page(paginator.num_pages)
 
     most_popular_news = Berita.objects.filter(is_published=True).order_by('-views')[:5]
-    live_scores = Scoreboard.objects.filter(status__in=['live', 'recent']).order_by('-tanggal')[:3]
-    featured_products = Product.objects.filter(is_featured=True, status='active')[:3]
+    try:
+        live_scores = Scoreboard.objects.filter(status__in=['live', 'recent']).order_by('-tanggal')[:3]
+    except Exception:
+        live_scores = []
+
+    try:
+        featured_products = Product.objects.filter(is_featured=True, status='active')[:3]
+    except Exception:
+        featured_products = []
+
     news_ids = [news.id for news in all_news]
     user_reactions = {}
     if request.user.is_authenticated and news_ids:
