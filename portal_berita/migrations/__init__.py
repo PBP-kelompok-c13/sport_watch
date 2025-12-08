@@ -82,6 +82,7 @@ def _ensure_cleanup_marked() -> None:
     except (OperationalError, ProgrammingError):
         return
 
+    # 1) If comment is applied but the clean-up is missing, backfill the cleanup.
     if comment_key in applied and cleanup_key not in applied:
         try:
             _perform_legacy_cleanup()
@@ -93,6 +94,14 @@ def _ensure_cleanup_marked() -> None:
             )
         with suppress(IntegrityError):
             recorder.migration_qs.create(app=cleanup_key[0], name=cleanup_key[1])
+
+    # 2) If the alter migration is recorded but its dependency (comment) is missing,
+    # mark the dependency as applied to restore a consistent history. This situation
+    # can happen on old deployments where the migration row was dropped but the
+    # later migration remained.
+    if cleanup_key in applied and comment_key not in applied:
+        with suppress(IntegrityError):
+            recorder.migration_qs.create(app=comment_key[0], name=comment_key[1])
 
 
 _ensure_cleanup_marked()

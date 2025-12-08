@@ -179,9 +179,9 @@ STATIC_URL = "/static/"
 # Always collect to 'staticfiles' in every environment
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+_STATIC_DIR = BASE_DIR / "static"
+# Only include the extra static directory when it exists to avoid runtime warnings.
+STATICFILES_DIRS = [_STATIC_DIR] if _STATIC_DIR.exists() else []
 
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
