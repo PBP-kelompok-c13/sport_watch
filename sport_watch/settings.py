@@ -188,6 +188,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 CSRF_TRUSTED_ORIGINS = [
     "https://faiz-yusuf-sportwatch.pbp.cs.ui.ac.id",
+    "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://10.0.2.2:8000",
 ]
