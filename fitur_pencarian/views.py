@@ -357,8 +357,6 @@ def ajax_recent_searches(request):
     return JsonResponse({"recent": request.session.get("recent_searches", [])})
 
 
-@login_required
-@user_passes_test(lambda user: user.is_staff)
 @require_GET
 def ajax_search_analytics(request):
     top_queries = list(
