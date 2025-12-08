@@ -64,6 +64,7 @@ def _ensure_cleanup_marked() -> None:
         "0002_remove_produk_kategori_remove_berita_ringkasan_and_more",
     )
     comment_key = ("portal_berita", "0002_comment")
+    alter_key = ("portal_berita", "0002_alter_berita_tanggal_dibuat_comment")
 
     try:
         connection.ensure_connection()
@@ -95,13 +96,16 @@ def _ensure_cleanup_marked() -> None:
         with suppress(IntegrityError):
             recorder.migration_qs.create(app=cleanup_key[0], name=cleanup_key[1])
 
-    # 2) If the alter migration is recorded but its dependency (comment) is missing,
-    # mark the dependency as applied to restore a consistent history. This situation
-    # can happen on old deployments where the migration row was dropped but the
-    # later migration remained.
-    if cleanup_key in applied and comment_key not in applied:
+    # 2) If the alter migration is recorded but its dependency (comment) is
+    # missing, mark the dependency (and its own dependency, the clean-up)
+    # as applied to restore a consistent history. This situation can happen
+    # on old deployments where some migration rows were dropped manually.
+    if alter_key in applied and comment_key not in applied:
         with suppress(IntegrityError):
             recorder.migration_qs.create(app=comment_key[0], name=comment_key[1])
+        if cleanup_key not in applied:
+            with suppress(IntegrityError):
+                recorder.migration_qs.create(app=cleanup_key[0], name=cleanup_key[1])
 
 
 _ensure_cleanup_marked()
