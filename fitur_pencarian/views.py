@@ -357,10 +357,24 @@ def ajax_recent_searches(request):
     return JsonResponse({"recent": request.session.get("recent_searches", [])})
 
 
-@login_required
-@user_passes_test(lambda user: user.is_staff)
 @require_GET
 def ajax_search_analytics(request):
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {
+                "error": "Authentication required.",
+                "code": "auth_required",
+            },
+            status=401,
+        )
+    if not request.user.is_staff:
+        return JsonResponse(
+            {
+                "error": "Staff only endpoint.",
+                "code": "forbidden",
+            },
+            status=403,
+        )
     top_queries = list(
         SearchLog.objects.values("keyword")
         .annotate(total=Count("id"))
