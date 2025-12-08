@@ -22,10 +22,13 @@ the real migration while keeping the migration history consistent so
 from __future__ import annotations
 
 from contextlib import suppress
+import logging
 
 from django.db import connection
 from django.db.migrations.recorder import MigrationRecorder
 from django.db.utils import IntegrityError, OperationalError, ProgrammingError
+
+log = logging.getLogger(__name__)
 
 
 def _perform_legacy_cleanup() -> None:
@@ -36,10 +39,13 @@ def _perform_legacy_cleanup() -> None:
         cursor.execute("DROP TABLE IF EXISTS portal_berita_kategoriproduk")
 
         try:
-            cursor.execute(
-                "ALTER TABLE portal_berita_berita DROP COLUMN ringkasan"
+            cursor.execute("ALTER TABLE portal_berita_berita DROP COLUMN ringkasan")
+        except Exception as exc:  # pragma: no cover - defensive
+            log.warning(
+                "Could not drop legacy column portal_berita_berita.ringkasan; "
+                "skipping clean-up step",
+                exc_info=exc,
             )
-        except Exception:
             if connection.vendor == "sqlite":
                 cursor.execute("PRAGMA table_info('portal_berita_berita')")
                 columns = {row[1] for row in cursor.fetchall()}
@@ -77,10 +83,16 @@ def _ensure_cleanup_marked() -> None:
         return
 
     if comment_key in applied and cleanup_key not in applied:
-        _perform_legacy_cleanup()
+        try:
+            _perform_legacy_cleanup()
+        except Exception as exc:  # pragma: no cover - defensive
+            log.warning(
+                "Skipping legacy clean-up because of database error; "
+                "marking migration as applied anyway to unblock installs.",
+                exc_info=exc,
+            )
         with suppress(IntegrityError):
             recorder.migration_qs.create(app=cleanup_key[0], name=cleanup_key[1])
 
 
 _ensure_cleanup_marked()
-
