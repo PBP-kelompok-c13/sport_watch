@@ -86,12 +86,13 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # CORS must run early so it can add headers before CSRF checks.
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "sport_watch.urls"
@@ -188,6 +189,9 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 CSRF_TRUSTED_ORIGINS = [
     "https://faiz-yusuf-sportwatch.pbp.cs.ui.ac.id",
+    "http://localhost",
+    "http://127.0.0.1",
+    "http://10.0.2.2",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://10.0.2.2:8000",
@@ -195,13 +199,18 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Cors Configuration
 
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    CORS_ALLOW_ALL_ORIGINS = False
-    CORS_ALLOWED_ORIGINS = os.getenv(
-        "CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
-    ).split(",")
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://10.0.2.2:8000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:49393",
+    "http://127.0.0.1:49393",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -213,6 +222,8 @@ if PRODUCTION:
 else:
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
+    # Same-site requests across localhost origins use the same site definition;
+    # Lax keeps cookies working over HTTP without requiring Secure.
     CSRF_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SAMESITE = "Lax"
 
