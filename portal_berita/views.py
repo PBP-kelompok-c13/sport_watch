@@ -256,13 +256,23 @@ def load_more_news(request):
     return JsonResponse({"news": data, "has_more": has_more})
 
 
+@csrf_exempt
 @require_POST
 def react_to_news(request, id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required."}, status=401)
 
     valid_reactions = {key for key, _ in REACTION_CHOICES}
-    reaction_type = request.POST.get("reaction")
+    reaction_type = None
+    if request.body:
+        try:
+            payload = json.loads(request.body)
+            if isinstance(payload, dict):
+                reaction_type = payload.get("reaction")
+        except json.JSONDecodeError:
+            reaction_type = None
+    if not reaction_type:
+        reaction_type = request.POST.get("reaction")
 
     if reaction_type not in valid_reactions:
         return JsonResponse({"error": "Invalid reaction choice."}, status=400)
