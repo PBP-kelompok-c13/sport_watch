@@ -67,7 +67,7 @@ class TestPublicViews(TestCase):
         self.assertNotContains(r, self.p_draft.name)
 
     def test_product_detail_json(self):
-        r = self.client.get(reverse("shop:product_detail_json", args=[self.p1.slug]))
+        r = self.client.get(reverse("api_shop:product_detail", args=[self.p1.slug]))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()["slug"], self.p1.slug)
 
@@ -79,7 +79,7 @@ class TestReviews(TestCase):
 
     def test_create_review_updates_aggregate(self):
         self.client.login(username="alice", password="x")
-        url = reverse("shop:create_review", args=[self.p.id])
+        url = reverse("api_shop:review_create", args=[self.p.id])
         r = self.client.post(url, {"rating": 5, "title": "ok", "content": "nice"})
         self.assertEqual(r.status_code, 201)
         self.p.refresh_from_db()

@@ -169,10 +169,10 @@ class SportWatchTestCase(TestCase):
     # ------------------------------------------------------------------
     def test_cart_views_flow(self):
         # Guest adds an item to the cart
-        add_url = reverse("fitur_belanja:add_to_cart")
+        add_url = reverse("api_cart:add_to_cart")
         response = self.client.post(
             add_url,
-            {"product_id": str(int(self.secondary_product.id)), "qty": 2},
+            {"product_id": str(self.secondary_product.id), "qty": 2},
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -183,7 +183,7 @@ class SportWatchTestCase(TestCase):
         self.client.force_login(self.staff)
         response = self.client.post(
             add_url,
-            {"product_id": str(int(self.product.id)), "qty": 1},
+            {"product_id": str(self.product.id), "qty": 1},
         )
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json()["ok"])
@@ -196,13 +196,13 @@ class SportWatchTestCase(TestCase):
             unit_price=self.secondary_product.final_price,
         )
 
-        update_url = reverse("fitur_belanja:update_qty")
+        update_url = reverse("api_cart:update_qty")
         response = self.client.post(update_url, {"item_id": item.id, "qty": 5})
         self.assertEqual(response.status_code, 200)
         item.refresh_from_db()
         self.assertEqual(item.qty, 5)
 
-        remove_url = reverse("fitur_belanja:remove_item")
+        remove_url = reverse("api_cart:remove_item")
         response = self.client.post(remove_url, {"item_id": item.id})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(cart.items.count(), 0)
@@ -214,7 +214,7 @@ class SportWatchTestCase(TestCase):
             qty=3,
             unit_price=self.secondary_product.final_price,
         )
-        clear_url = reverse("fitur_belanja:clear_cart")
+        clear_url = reverse("api_cart:clear_cart")
         response = self.client.post(clear_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(cart.items.count(), 0)
@@ -246,19 +246,19 @@ class SportWatchTestCase(TestCase):
             product.restock(0)
 
         list_response = self.client.get(
-            reverse("shop:products_json"),
+            reverse("api_shop:products"),
             {"sort": "price_desc", "q": "Fleet", "category": self.category.slug},
         )
         self.assertEqual(list_response.status_code, 200)
         payload = list_response.json()
         self.assertTrue(payload["results"])
 
-        detail_response = self.client.get(reverse("shop:product_detail_json", args=[product.slug]))
+        detail_response = self.client.get(reverse("api_shop:product_detail", args=[product.slug]))
         self.assertEqual(detail_response.status_code, 200)
         detail_payload = detail_response.json()
         self.assertEqual(detail_payload["final_price"], float(product.final_price))
 
-        mini_response = self.client.get(reverse("shop:product_mini_json", args=[product.id]))
+        mini_response = self.client.get(reverse("api_shop:product_mini", args=[product.id]))
         self.assertEqual(mini_response.status_code, 200)
 
         # Product list HTML view works with filters and pagination
@@ -316,7 +316,7 @@ class SportWatchTestCase(TestCase):
         created_product.refresh_from_db()
         self.assertEqual(created_product.description, "Updated")
 
-        review_url = reverse("shop:create_review", args=[created_product.id])
+        review_url = reverse("api_shop:review_create", args=[created_product.id])
         response = self.client.post(
             review_url,
             {"rating": 5, "title": "Great", "content": "Loved it"},
@@ -325,7 +325,7 @@ class SportWatchTestCase(TestCase):
         review_payload = response.json()
         self.assertTrue(review_payload["ok"])
 
-        reviews_json = self.client.get(reverse("shop:reviews_json", args=[created_product.id]))
+        reviews_json = self.client.get(reverse("api_shop:reviews", args=[created_product.id]))
         self.assertEqual(reviews_json.status_code, 200)
         self.assertTrue(reviews_json.json()["results"])
 
@@ -435,7 +435,7 @@ class SportWatchTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.scoreboard_live, response.context["live"])
 
-        response = self.client.get(reverse("scoreboard:filter_scores"), {"status": "finished"})
+        response = self.client.get(reverse("api_scoreboard:scores"), {"status": "finished"})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertTrue(payload["scores"])

@@ -7,6 +7,7 @@ app_name = "shop_api"
 
 urlpatterns = [
     path("products/", views.products_json, name="products"),
+    path("json/", views.show_json, name="shop_json"),
     path("products/create/", views.create_product_flutter, name="product_create"),
     path("products/<slug:slug>/", views.product_detail_json, name="product_detail"),
     path("products/<uuid:pk>/mini/", views.product_mini_json, name="product_mini"),

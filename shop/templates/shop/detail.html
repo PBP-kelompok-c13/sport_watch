@@ -104,7 +104,7 @@
     e.preventDefault();
     const fd = new FormData(form);
 
-    const res = await fetch("{% url 'shop:create_review' product.id %}", {
+    const res = await fetch("{% url 'api_shop:review_create' product.id %}", {
       method: "POST",
       headers: { "X-Requested-With":"XMLHttpRequest", "X-CSRFToken": csrfToken },
       body: fd
@@ -142,7 +142,7 @@
     
   const CSRF = (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop() || '');
   async function addToCart(productId, qty=1){
-    const res = await fetch("{% url 'fitur_belanja:add_to_cart' %}", {
+    const res = await fetch("{% url 'api_cart:add_to_cart' %}", {
       method:"POST",
       headers:{"X-Requested-With":"XMLHttpRequest","X-CSRFToken": CSRF,"Content-Type":"application/json"},
       body: JSON.stringify({product_id: productId, qty})

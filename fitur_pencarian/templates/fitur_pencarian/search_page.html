@@ -11,7 +11,7 @@
 
     <div class="grid lg:grid-cols-3 gap-6">
         <section class="lg:col-span-2 bg-white rounded-lg shadow p-6 space-y-6">
-            <form id="search-form" class="space-y-4" data-results-url="{% url 'fitur_pencarian:ajax_search_results' %}">
+            <form id="search-form" class="space-y-4" data-results-url="{% url 'api_search:search_results' %}">
                 <div class="grid md:grid-cols-3 gap-4">
                     <div class="md:col-span-2">
                         <label for="id_query" class="block text-sm font-medium text-gray-700">{{ search_form.query.label }}</label>
@@ -64,7 +64,7 @@
                         </select>
                     </div>
                     <div class="flex items-end justify-end gap-3">
-                        <button type="button" id="open-preference-modal" data-form-url="{% url 'fitur_pencarian:ajax_preference_form' %}" class="inline-flex items-center px-4 py-2 rounded-md border border-blue-500 text-blue-600 hover:bg-blue-50 transition">
+                        <button type="button" id="open-preference-modal" data-form-url="{% url 'api_search:preference_form' %}" class="inline-flex items-center px-4 py-2 rounded-md border border-blue-500 text-blue-600 hover:bg-blue-50 transition">
                             Buat Preset
                         </button>
                         <button type="submit" class="inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition">
@@ -113,7 +113,7 @@
                         <span class="text-xs text-red-500">Login untuk menyimpan preset</span>
                     {% endif %}
                 </div>
-                <div id="preference-list" class="space-y-3" data-submit-url="{% url 'fitur_pencarian:ajax_preference_submit' %}">
+                <div id="preference-list" class="space-y-3" data-submit-url="{% url 'api_search:preference_submit' %}">
                     {% for preference in preferences %}
                         {% include "fitur_pencarian/_preference_card.html" %}
                     {% empty %}
@@ -238,12 +238,12 @@
 <script>
     window.SportWatchSearch = {
         endpoints: {
-            results: "{% url 'fitur_pencarian:ajax_search_results' %}",
-            preferenceForm: "{% url 'fitur_pencarian:ajax_preference_form' %}",
-            preferenceSubmit: "{% url 'fitur_pencarian:ajax_preference_submit' %}",
-            preferenceDelete: "{% url 'fitur_pencarian:ajax_preference_delete' %}",
-            recent: "{% url 'fitur_pencarian:ajax_recent_searches' %}",
-            analytics: "{% url 'fitur_pencarian:ajax_search_analytics' %}"
+            results: "{% url 'api_search:search_results' %}",
+            preferenceForm: "{% url 'api_search:preference_form' %}",
+            preferenceSubmit: "{% url 'api_search:preference_submit' %}",
+            preferenceDelete: "{% url 'api_search:preference_delete' %}",
+            recent: "{% url 'api_search:recent_searches' %}",
+            analytics: "{% url 'api_search:analytics' %}"
         },
         isAuthenticated: "{{ request.user.is_authenticated|yesno:'true,false' }}" === 'true',
         isStaff: "{{ request.user.is_staff|yesno:'true,false' }}" === 'true'

@@ -393,7 +393,7 @@
             const container = document.getElementById('preference-form-container');
             if (!container) return;
 
-            // gunakan /api/preferences/<id>/form/ saat edit
+            // gunakan /api/search/preferences/<id>/form/ saat edit
             const url = id
                 ? config.endpoints.preferenceForm.replace(/form\/?$/, `${encodeURIComponent(id)}/form/`)
                 : config.endpoints.preferenceForm;

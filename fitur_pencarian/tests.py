@@ -21,7 +21,7 @@ class SearchPreferenceAjaxTests(TestCase):
         )
 
         response = self.client.post(
-            reverse("fitur_pencarian:ajax_preference_submit"),
+            reverse("api_search:preference_submit"),
             {
                 "id": str(preference.id),
                 "label": "Diskon Sepak Bola",

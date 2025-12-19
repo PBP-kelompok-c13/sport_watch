@@ -145,11 +145,12 @@
     return m ? m.pop() : '';
   }
   const csrfToken = getCookie('csrftoken');
+  const productsApiUrl = "{% url 'api_shop:products' %}";
 
   // ============ ADD TO CART FUNCTION (SINGLE VERSION) ============
   async function addToCart(productId, qty=1){
     try {
-      const res = await fetch("{% url 'fitur_belanja:add_to_cart' %}", {
+      const res = await fetch("{% url 'api_cart:add_to_cart' %}", {
         method: "POST",
         headers: {
           "X-Requested-With": "XMLHttpRequest",
@@ -209,7 +210,7 @@
     loadBtn.addEventListener('click', async () => {
       const params = new URLSearchParams(window.location.search);
       params.set('page', loadBtn.dataset.next);
-      const res = await fetch(`/shop/api/products/?${params.toString()}`);
+      const res = await fetch(`${productsApiUrl}?${params.toString()}`);
       const data = await res.json();
       const grid = document.getElementById('grid');
 

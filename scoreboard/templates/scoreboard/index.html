@@ -292,6 +292,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const wrapLive = document.getElementById("live-wrap");
   const wrapFinished = document.getElementById("finished-wrap");
   const wrapUpcoming = document.getElementById("upcoming-wrap");
+  const scoresApiUrl = "{% url 'api_scoreboard:scores' %}";
 
   let currentStatus = "";
   let currentLeague = "";
@@ -402,7 +403,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (currentLeague) query.append("sport", currentLeague);
 
     try {
-      const response = await fetch(`/scoreboard/filter/?${query.toString()}`, {
+      const response = await fetch(`${scoresApiUrl}?${query.toString()}`, {
         headers: { "X-Requested-With": "XMLHttpRequest" }
       });
 
@@ -425,7 +426,7 @@ document.addEventListener("DOMContentLoaded", function () {
         [secLive, secFinished, secUpcoming].forEach(s => s.classList.remove("hidden"));
         showToast("Showing all matches ✅");
     
-        await fetch(`/scoreboard/filter/`, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+        await fetch(scoresApiUrl, { headers: { "X-Requested-With": "XMLHttpRequest" } });
       }
 
     } catch (error) {

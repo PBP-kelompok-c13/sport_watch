@@ -88,7 +88,7 @@
 
     // update qty
     if (e.target.closest('.qty-minus') || e.target.closest('.qty-plus')) {
-      await fetch("{% url 'fitur_belanja:update_qty' %}", {
+      await fetch("{% url 'api_cart:update_qty' %}", {
         method: "POST",
         headers: {"X-CSRFToken": getCsrf()},
         body: new URLSearchParams({ item_id: id, qty: input.value })
@@ -98,7 +98,7 @@
 
     // remove item
     if (e.target.closest('.remove-item')) {
-      const res = await fetch("{% url 'fitur_belanja:remove_item' %}", {
+      const res = await fetch("{% url 'api_cart:remove_item' %}", {
         method: "POST",
         headers: {"X-CSRFToken": getCsrf()},
         body: new URLSearchParams({ item_id: id })

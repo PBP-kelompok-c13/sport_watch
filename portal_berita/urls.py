@@ -18,12 +18,4 @@ urlpatterns = [
     path('news/<uuid:id>/react/', views.react_to_news, name='react_to_news'),
     path('news/json/<uuid:id>/', views.berita_json_view, name='berita_json_view'),
     path('news/load_more/', views.load_more_news, name='load_more_news'),
-    path('api/news/', views.news_list_json, name='news_list_json'),
-    
-    # flutter
-    path('api/create-flutter/', views.create_news_flutter, name='create_news_flutter'),
-    path('api/edit-flutter/<uuid:id>/', views.edit_news_flutter, name='edit_news_flutter'),
-    path('api/delete-flutter/<uuid:id>/', views.delete_news_flutter, name='delete_news_flutter'),
-    path('api/news/<uuid:id>/comments/', views.news_comments_json, name='news_comments_json'),
-    path('api/news/<uuid:id>/comment/create/', views.create_comment_flutter, name='create_comment_flutter'),
 ]

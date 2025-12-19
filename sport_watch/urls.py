@@ -3,15 +3,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/", include("sport_watch.api_router")),
     path("", include("portal_berita.urls")),
-    path(
-        "authentication/",
-        include(("authentication.urls", "authentication"), namespace="authentication"),
-    ),
-    path(
-        "auth/",
-        include(("authentication.urls", "authentication"), namespace="auth_alias"),
-    ),
     path("scoreboard/", include("scoreboard.urls")),
     path("shop/", include("shop.urls")),
     path(
