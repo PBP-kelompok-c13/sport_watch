@@ -6,11 +6,11 @@
 {% block content %}
 <div class="flex justify-center">
     <div class="w-full max-w-xs">
-        <form method="post" action="{% url 'portal_berita:register' %}" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <form method="post" action="{% url 'portal_berita:register' %}" class="bg-white dark:bg-slate-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 transition-colors duration-300">
             {% csrf_token %}
             {% for field in form %}
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id_for_label }}">
+                    <label class="block text-gray-700 dark:text-slate-300 text-sm font-bold mb-2 transition-colors duration-300" for="{{ field.id_for_label }}">
                         {{ field.label }}
                     </label>
                     {{ field }}
@@ -21,7 +21,7 @@
                 </div>
             {% endfor %}
             <div class="flex items-center justify-between">
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors duration-300" type="submit">
                     Register
                 </button>
             </div>

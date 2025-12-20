@@ -2,10 +2,10 @@
 {% block title %}Checkout - Sport Watch{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-6 py-8">
+<div class="container mx-auto px-6 py-8 transition-colors duration-300">
 
   <!-- 🔹 Panah kembali ke halaman Shopping -->
-  <a href="{% url 'fitur_belanja:shopping' %}" class="flex items-center text-blue-600 hover:text-blue-800 font-medium mb-4">
+  <a href="{% url 'fitur_belanja:shopping' %}" class="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium mb-4 transition-colors duration-200">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
       <path fill-rule="evenodd" d="M17 10a1 1 0 01-1 1H6.414l4.293 4.293a1 1 0 11-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 111.414 1.414L6.414 9H16a1 1 0 011 1z" clip-rule="evenodd" />
     </svg>
@@ -13,13 +13,13 @@
   </a>
 
   <!-- 🔹 Judul Halaman -->
-  <h1 class="text-3xl font-bold mb-6 text-center">Checkout</h1>
-  <p class="text-center mb-4">Total Pembayaran: <strong>Rp {{ total|floatformat:0 }}</strong></p>
+  <h1 class="text-3xl font-bold mb-6 text-center dark:text-white transition-colors duration-200">Checkout</h1>
+  <p class="text-center mb-4 dark:text-slate-300 transition-colors duration-200">Total Pembayaran: <strong class="text-blue-600 dark:text-blue-400">Rp {{ total|floatformat:0 }}</strong></p>
 
   <!-- 🔹 Tombol Bayar -->
   <form method="POST" class="text-center">
     {% csrf_token %}
-    <button type="submit" class="bg-blue-600 text-white py-3 px-6 rounded hover:bg-blue-700">
+    <button type="submit" class="bg-blue-600 dark:bg-blue-500 text-white py-3 px-8 rounded-lg font-bold shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transform hover:-translate-y-0.5 transition-all duration-200">
       Bayar Sekarang
     </button>
   </form>

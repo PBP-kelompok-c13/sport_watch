@@ -1,41 +1,66 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Products</h1>
+<div class="mb-8 flex items-center justify-between">
+    <h1 class="text-3xl font-bold dark:text-white transition-colors duration-300">Products Management</h1>
+    <a href="{% url 'shop:admin_product_create' %}" class="px-5 py-2.5 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition-all duration-200 shadow-lg flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        New Product
+    </a>
+</div>
 
-<a href="{% url 'shop:admin_product_create' %}" class="px-3 py-2 bg-blue-600 text-white rounded mb-4 inline-block">+ New Product</a>
-
-<div class="bg-white rounded-xl overflow-hidden">
-  <table class="min-w-full text-sm">
-    <thead class="bg-gray-100">
-      <tr>
-        <th class="p-2 text-left">Name</th>
-        <th class="p-2 text-left">Category</th>
-        <th class="p-2 text-left">Brand</th>
-        <th class="p-2 text-right">Price</th>
-        <th class="p-2 text-center">Stock</th>
-        <th class="p-2">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for p in products %}
-      <tr class="border-t">
-        <td class="p-2">{{ p.name }}</td>
-        <td class="p-2">{{ p.category }}</td>
-        <td class="p-2">{{ p.brand }}</td>
-        <td class="p-2 text-right">{{ p.final_price|floatformat:2 }}</td>
-        <td class="p-2 text-center">{{ p.stock }}</td>
-        <td class="p-2 space-x-2">
-          <a class="text-blue-600" href="{% url 'shop:admin_product_edit' p.pk %}">Edit</a>
-          <form method="post" action="{% url 'shop:admin_product_delete' p.pk %}" class="inline">
-            {% csrf_token %}
-            <button class="text-red-600">Delete</button>
-          </form>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td class="p-4" colspan="6">No products.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-gray-100 dark:border-slate-700 transition-colors duration-300">
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 dark:bg-slate-700 transition-colors duration-300">
+        <tr>
+          <th class="px-6 py-4 text-left font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Name</th>
+          <th class="px-6 py-4 text-left font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Category</th>
+          <th class="px-6 py-4 text-left font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Brand</th>
+          <th class="px-6 py-4 text-right font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Price</th>
+          <th class="px-6 py-4 text-center font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Stock</th>
+          <th class="px-6 py-4 text-center font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 dark:divide-slate-700 transition-colors duration-300">
+        {% for p in products %}
+        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
+          <td class="px-6 py-4 font-medium dark:text-white">{{ p.name }}</td>
+          <td class="px-6 py-4 text-slate-600 dark:text-slate-400">
+            <span class="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold">
+                {{ p.category }}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-slate-600 dark:text-slate-400">{{ p.brand }}</td>
+          <td class="px-6 py-4 text-right font-bold dark:text-white">Rp {{ p.final_price|floatformat:2 }}</td>
+          <td class="px-6 py-4 text-center">
+              {% if p.stock > 10 %}
+                <span class="text-green-600 dark:text-green-400 font-semibold">{{ p.stock }}</span>
+              {% elif p.stock > 0 %}
+                <span class="text-amber-600 dark:text-amber-400 font-semibold">{{ p.stock }}</span>
+              {% else %}
+                <span class="text-red-600 dark:text-red-400 font-semibold">Out</span>
+              {% endif %}
+          </td>
+          <td class="px-6 py-4 text-center space-x-3">
+            <a class="text-blue-600 dark:text-blue-400 font-bold hover:underline" href="{% url 'shop:admin_product_edit' p.pk %}">Edit</a>
+            <form method="post" action="{% url 'shop:admin_product_delete' p.pk %}" class="inline">
+              {% csrf_token %}
+              <button class="text-red-600 dark:text-red-400 font-bold hover:underline">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td class="px-6 py-10 text-center text-gray-500 dark:text-slate-400" colspan="6">
+                <div class="flex flex-col items-center gap-2">
+                    <svg class="w-12 h-12 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                    <span>No products found in the catalog.</span>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

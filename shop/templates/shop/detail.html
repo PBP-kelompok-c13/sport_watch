@@ -1,39 +1,39 @@
 {% extends "base.html" %}
 {% load shop_tags %}
 {% block content %}
-<a href="{% url 'shop:list' %}" class="text-blue-600">&larr; Back to Shop</a>
+<a href="{% url 'shop:list' %}" class="text-blue-600 dark:text-blue-400 transition-colors duration-300">&larr; Back to Shop</a>
 
 <div class="grid lg:grid-cols-2 gap-8 mt-4">
   <div>
-    <div class="bg-white rounded-2xl overflow-hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden transition-colors duration-300">
       {% if product.thumbnail %}<img src="{{product.thumbnail}}" class="w-full">{% endif %}
     </div>
   </div>
   <div>
     <!-- kategori dan ow owner -->
-    <div class="text-sm text-gray-500">
+    <div class="text-sm text-gray-500 dark:text-slate-400 transition-colors duration-300">
       {{ product.category.name }}
       {% if product.created_by_id %} • by <span class="font-medium">{{ product.created_by.username }}</span>{% endif %}
     </div>
-    <h1 class="text-3xl font-bold mt-1">{{ product.name }}</h1>
+    <h1 class="text-3xl font-bold mt-1 dark:text-white transition-colors duration-300">{{ product.name }}</h1>
 
     <div class="flex items-end gap-2 mt-3">
-      <div class="text-3xl font-bold">{{ product.final_price|price_idr }}</div>
+      <div class="text-3xl font-bold dark:text-white transition-colors duration-300">{{ product.final_price|price_idr }}</div>
       {% if product.sale_price %}
-        <div class="text-gray-400 line-through">{{ product.price|price_idr }}</div>
+        <div class="text-gray-400 dark:text-slate-500 line-through transition-colors duration-300">{{ product.price|price_idr }}</div>
       {% endif %}
       {% if product.sale_price %}<span class="px-2 py-1 bg-red-500 text-white text-xs rounded">Sale - {{ product.discount_percent }}%</span>{% endif %}
       {% if not product.in_stock %}<span class="px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>{% endif %}
     </div>
 
-    <p class="mt-4 text-gray-700">{{ product.description }}</p>
+    <p class="mt-4 text-gray-700 dark:text-slate-300 transition-colors duration-300">{{ product.description }}</p>
 
     {% if show_member_price %}
-      <div class="mt-2 text-green-700 text-sm">Member benefit: akses harga promo & review.</div>
+      <div class="mt-2 text-green-700 dark:text-green-400 text-sm transition-colors duration-300">Member benefit: akses harga promo & review.</div>
     {% endif %}
 
     <button
-      class="mt-6 px-6 py-3 bg-blue-600 text-white rounded
+      class="mt-6 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors duration-300
              {% if not product.in_stock %}opacity-50 cursor-not-allowed
              {% elif user.is_authenticated and product.created_by_id == user.id %}opacity-50 cursor-not-allowed
              {% endif %}"
@@ -54,31 +54,31 @@
 
 <!-- Reviews using ajaz-->
 <div class="mt-10">
-  <h2 class="text-xl font-semibold mb-3">
+  <h2 class="text-xl font-semibold mb-3 dark:text-white transition-colors duration-300">
     Reviews ({{ product.rating_count }}) — {% star_rating product.rating_avg 5 %}
   </h2>
 
   {% if user.is_authenticated %}
-  <form id="reviewForm" class="bg-white p-4 rounded-lg shadow mb-6">
+  <form id="reviewForm" class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow mb-6 transition-colors duration-300">
     {% csrf_token %}
     {{ form.as_p }}
-    <button class="px-4 py-2 bg-gray-900 text-white rounded">Submit Review</button>
+    <button class="px-4 py-2 bg-gray-900 text-white rounded dark:bg-slate-200 dark:text-slate-900 transition-colors duration-300">Submit Review</button>
   </form>
   {% else %}
-  <div class="bg-yellow-50 border border-yellow-200 text-sm p-3 rounded mb-6">
+  <div class="bg-yellow-50 border border-yellow-200 text-sm p-3 rounded mb-6 dark:bg-yellow-900/30 dark:border-yellow-700 dark:text-yellow-200 transition-colors duration-300">
     Login untuk menulis review.
   </div>
   {% endif %}
 
   <div id="reviewList" class="space-y-4">
     {% for r in reviews %}
-      <div class="bg-white p-4 rounded shadow">
-        <div class="text-sm text-gray-500">{{ r.user.username }} • {{ r.rating }}★</div>
-        {% if r.title %}<div class="font-semibold">{{ r.title }}</div>{% endif %}
-        <div class="text-gray-700">{{ r.content }}</div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded shadow transition-colors duration-300">
+        <div class="text-sm text-gray-500 dark:text-slate-400 transition-colors duration-300">{{ r.user.username }} • {{ r.rating }}★</div>
+        {% if r.title %}<div class="font-semibold dark:text-white transition-colors duration-300">{{ r.title }}</div>{% endif %}
+        <div class="text-gray-700 dark:text-slate-300 transition-colors duration-300">{{ r.content }}</div>
       </div>
     {% empty %}
-      <p class="text-gray-500">Belum ada review.</p>
+      <p class="text-gray-500 dark:text-slate-400 transition-colors duration-300">Belum ada review.</p>
     {% endfor %}
   </div>
 </div>
@@ -124,11 +124,11 @@
 
     // prepend review baru
     const box = document.createElement('div');
-    box.className = "bg-white p-4 rounded shadow";
+    box.className = "bg-white dark:bg-slate-800 p-4 rounded shadow transition-colors duration-300";
     box.innerHTML = `
-      <div class="text-sm text-gray-500">{{ request.user.username }} • ${data.review.rating}★</div>
-      ${data.review.title ? `<div class="font-semibold">${data.review.title}</div>` : ''}
-      <div class="text-gray-700">${data.review.content}</div>
+      <div class="text-sm text-gray-500 dark:text-slate-400 transition-colors duration-300">{{ request.user.username }} • ${data.review.rating}★</div>
+      ${data.review.title ? `<div class="font-semibold dark:text-white transition-colors duration-300">${data.review.title}</div>` : ''}
+      <div class="text-gray-700 dark:text-slate-300 transition-colors duration-300">${data.review.content}</div>
     `;
     document.getElementById('reviewList').prepend(box);
 
@@ -139,7 +139,7 @@
     form.reset();
     showToast("Review submitted ✅", 'success');
 
-    
+
   const CSRF = (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop() || '');
   async function addToCart(productId, qty=1){
     const res = await fetch("{% url 'api_cart:add_to_cart' %}", {
@@ -154,7 +154,7 @@
     if (window.showToast) showToast("Added to cart ✅", "success");
   }
 
-  
+
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.add-to-cart');
     if (!btn) return;

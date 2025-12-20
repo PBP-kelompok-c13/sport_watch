@@ -1,25 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Your cart</h1>
+<div class="mb-8">
+  <h1 class="text-3xl font-bold mb-2 dark:text-white transition-colors duration-200">Your Shopping Cart</h1>
+  <p class="text-gray-600 dark:text-slate-400 transition-colors duration-200">Review your selected items before proceeding to checkout.</p>
+</div>
 
 {% if items %}
-  <div class="space-y-3">
+  <div class="grid gap-4">
     {% for it in items %}
-      <div class="bg-white p-4 rounded shadow flex justify-between">
-        <div>
-          <div class="font-medium">{{ it.product.name }}</div>
-          <div class="text-sm text-gray-500">Qty: {{ it.qty }}</div>
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex justify-between items-center transition-all duration-300 hover:shadow-md">
+        <div class="space-y-1">
+          <div class="font-bold text-lg dark:text-white transition-colors duration-200">{{ it.product.name }}</div>
+          <div class="text-sm font-medium text-gray-500 dark:text-slate-400 flex items-center gap-2 transition-colors duration-200">
+              <span class="px-2 py-0.5 bg-gray-100 dark:bg-slate-700 rounded-md">Qty: {{ it.qty }}</span>
+          </div>
         </div>
-        <div class="font-semibold">
-          Rp {{ it.subtotal|floatformat:0 }}
+        <div class="text-right">
+          <div class="text-xl font-extrabold text-blue-600 dark:text-blue-400 transition-colors duration-200">
+            Rp {{ it.subtotal|floatformat:0 }}
+          </div>
         </div>
       </div>
     {% endfor %}
   </div>
-  <div class="mt-4 text-right text-xl">
-    Total: <span class="font-bold">Rp {{ cart.total|floatformat:0 }}</span>
+  
+  <div class="mt-8 flex flex-col items-end gap-4 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 transition-colors duration-300">
+    <div class="text-2xl dark:text-slate-300 flex items-center gap-4 transition-colors duration-200">
+      Total: <span class="font-black text-slate-900 dark:text-white">Rp {{ cart.total|floatformat:0 }}</span>
+    </div>
+    <div class="flex gap-4">
+        <a href="{% url 'shop:list' %}" class="px-6 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700 transition-colors duration-200">
+            Keep Shopping
+        </a>
+        <a href="{% url 'fitur_belanja:checkout' %}" class="px-8 py-2 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 shadow-lg transition-all duration-200">
+            Checkout
+        </a>
+    </div>
   </div>
 {% else %}
-  <p class="text-gray-600">Your cart is empty.</p>
+  <div class="bg-white dark:bg-slate-800 rounded-3xl p-16 text-center border border-dashed border-gray-200 dark:border-slate-700 transition-colors duration-300">
+    <div class="mb-4 inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full text-gray-400 dark:text-slate-500 transition-colors duration-300">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 10-8 0v4M5 9h14l-1 10a2 2 0 01-2 2H8a2 2 0 01-2-2L5 9z"></path></svg>
+    </div>
+    <p class="text-gray-500 dark:text-slate-400 text-lg font-medium transition-colors duration-200">Your cart is feeling a bit light.</p>
+    <a href="{% url 'shop:list' %}" class="mt-6 inline-block text-blue-600 dark:text-blue-400 font-bold hover:underline transition-colors duration-200">Go explore the shop &rarr;</a>
+  </div>
 {% endif %}
 {% endblock %}

@@ -2,15 +2,15 @@
 {% block content %}
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Scoreboard Management</h1>
-    <a href="{% url 'scoreboard:create_score' %}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-md">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-white transition-colors duration-300">Scoreboard Management</h1>
+    <a href="{% url 'scoreboard:create_score' %}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-md transition-colors duration-300">
       + Add Score
     </a>
   </div>
 
-  <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-    <table class="min-w-full text-sm text-gray-700">
-      <thead class="bg-gray-50">
+  <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden transition-colors duration-300">
+    <table class="min-w-full text-sm text-gray-700 dark:text-slate-200 transition-colors duration-300">
+      <thead class="bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
         <tr>
           <th class="px-6 py-3 text-left font-semibold">Team 1</th>
           <th class="px-6 py-3 text-left font-semibold">Score</th>
@@ -19,23 +19,23 @@
           <th class="px-6 py-3 text-right font-semibold">Actions</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-200">
+      <tbody class="divide-y divide-gray-200 dark:divide-slate-700 transition-colors duration-300">
         {% for s in scores %}
         <tr>
-          <td class="px-6 py-3 font-medium text-gray-900">{{ s.tim1 }}</td>
+          <td class="px-6 py-3 font-medium text-gray-900 dark:text-slate-100 transition-colors duration-300">{{ s.tim1 }}</td>
           <td class="px-6 py-3">{{ s.skor_tim1 }} - {{ s.skor_tim2 }}</td>
-          <td class="px-6 py-3 font-medium text-gray-900">{{ s.tim2 }}</td>
+          <td class="px-6 py-3 font-medium text-gray-900 dark:text-slate-100 transition-colors duration-300">{{ s.tim2 }}</td>
           <td class="px-6 py-3">{{ s.tanggal }}</td>
           <td class="px-6 py-3 text-right space-x-3">
-            <a href="{% url 'scoreboard:edit_score' s.id %}" class="text-indigo-600 hover:text-indigo-800">Edit</a>
+            <a href="{% url 'scoreboard:edit_score' s.id %}" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors duration-300">Edit</a>
             <form action="{% url 'scoreboard:delete_score' s.id %}" method="post" class="inline">
               {% csrf_token %}
-              <button type="submit" class="text-red-600 hover:text-red-800" onclick="return confirm('Yakin hapus skor ini?')">Delete</button>
+              <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-300" onclick="return confirm('Yakin hapus skor ini?')">Delete</button>
             </form>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">Belum ada data skor</td></tr>
+        <tr><td colspan="5" class="px-6 py-8 text-center text-gray-400 dark:text-slate-500 transition-colors duration-300">Belum ada data skor</td></tr>
         {% endfor %}
       </tbody>
     </table>

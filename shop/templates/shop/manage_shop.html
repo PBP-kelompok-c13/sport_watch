@@ -1,72 +1,106 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Manage Shop</h1>
+<h1 class="text-3xl font-bold mb-8 dark:text-white transition-colors duration-300">Manage Shop</h1>
 
 <div class="grid md:grid-cols-2 gap-8">
   <!-- Brands -->
-  <section>
-    <h2 class="font-semibold text-lg mb-3">Brands</h2>
-    <form method="post" class="mb-3">
+  <section class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl transition-colors duration-300">
+    <h2 class="font-bold text-xl mb-4 dark:text-white flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+        Brands
+    </h2>
+    <form method="post" class="mb-6 space-y-4">
       {% csrf_token %}
       <input type="hidden" name="create_brand" value="1">
-      {{ brand_form.as_p }}
-      <button class="px-3 py-1 bg-blue-600 text-white rounded">Add Brand</button>
+      <div class="dark:text-slate-200">
+          {{ brand_form.as_p }}
+      </div>
+      <button class="w-full px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors duration-200 shadow-md">Add Brand</button>
     </form>
-    <ul class="divide-y bg-white rounded-xl">
+    <ul class="divide-y dark:divide-slate-700 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 transition-colors duration-300">
       {% for b in brands %}
-        <li class="p-3 flex justify-between">
-          <span>{{ b.name }}</span>
-          <span class="space-x-2">
-            <a class="text-blue-600" href="{% url 'shop:brand_edit' b.pk %}">Edit</a>
-            <a class="text-red-600" href="{% url 'shop:brand_delete' b.pk %}">Delete</a>
+        <li class="p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
+          <span class="font-medium dark:text-slate-200">{{ b.name }}</span>
+          <span class="flex gap-4">
+            <a class="text-blue-600 dark:text-blue-400 font-medium hover:underline" href="{% url 'shop:brand_edit' b.pk %}">Edit</a>
+            <a class="text-red-600 dark:text-red-400 font-medium hover:underline" href="{% url 'shop:brand_delete' b.pk %}">Delete</a>
           </span>
         </li>
-      {% empty %}<li class="p-3">No brands.</li>{% endfor %}
+      {% empty %}
+        <li class="p-6 text-center text-gray-500 dark:text-slate-400">No brands.</li>
+      {% endfor %}
     </ul>
   </section>
 
   <!-- Categories -->
-  <section>
-    <h2 class="font-semibold text-lg mb-3">Categories</h2>
-    <form method="post" class="mb-3">
+  <section class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl transition-colors duration-300">
+    <h2 class="font-bold text-xl mb-4 dark:text-white flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-emerald-600 rounded-full"></span>
+        Categories
+    </h2>
+    <form method="post" class="mb-6 space-y-4">
       {% csrf_token %}
       <input type="hidden" name="create_category" value="1">
-      {{ category_form.as_p }}
-      <button class="px-3 py-1 bg-blue-600 text-white rounded">Add Category</button>
+      <div class="dark:text-slate-200">
+          {{ category_form.as_p }}
+      </div>
+      <button class="w-full px-4 py-2 bg-emerald-600 dark:bg-emerald-500 text-white font-semibold rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-400 transition-colors duration-200 shadow-md">Add Category</button>
     </form>
-    <ul class="divide-y bg-white rounded-xl">
+    <ul class="divide-y dark:divide-slate-700 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 transition-colors duration-300">
       {% for c in categories %}
-        <li class="p-3 flex justify-between">
-          <span>{{ c.name }}{% if c.parent %} <span class="text-gray-500">→ {{ c.parent.name }}</span>{% endif %}</span>
-          <span class="space-x-2">
-            <a class="text-blue-600" href="{% url 'shop:category_edit' c.pk %}">Edit</a>
-            <a class="text-red-600" href="{% url 'shop:category_delete' c.pk %}">Delete</a>
+        <li class="p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
+          <span class="font-medium dark:text-slate-200">
+            {{ c.name }}
+            {% if c.parent %}
+              <span class="text-gray-400 dark:text-slate-500 text-sm ml-1 font-normal">in {{ c.parent.name }}</span>
+            {% endif %}
+          </span>
+          <span class="flex gap-4">
+            <a class="text-blue-600 dark:text-blue-400 font-medium hover:underline" href="{% url 'shop:category_edit' c.pk %}">Edit</a>
+            <a class="text-red-600 dark:text-red-400 font-medium hover:underline" href="{% url 'shop:category_delete' c.pk %}">Delete</a>
           </span>
         </li>
-      {% empty %}<li class="p-3">No categories.</li>{% endfor %}
+      {% empty %}
+        <li class="p-6 text-center text-gray-500 dark:text-slate-400">No categories.</li>
+      {% endfor %}
     </ul>
   </section>
 </div>
 
 <!-- Quick link to product management table -->
-<div class="mt-8">
-  <a href="{% url 'shop:manage_products' %}" class="px-4 py-2 bg-gray-900 text-white rounded">Manage Products</a>
+<div class="mt-10 flex justify-center">
+  <a href="{% url 'shop:manage_products' %}" class="inline-flex items-center gap-2 px-8 py-3 bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-full hover:bg-blue-600 dark:hover:bg-white transition-all duration-300 shadow-lg">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+    Manage All Products
+  </a>
 </div>
 
 <!-- Latest reviews -->
-<div class="mt-10">
-  <h2 class="font-semibold text-lg mb-3">Recent Reviews</h2>
-  <div class="space-y-2">
+<div class="mt-16">
+  <h2 class="font-bold text-2xl mb-6 dark:text-white flex items-center gap-2">
+      <span class="w-1.5 h-6 bg-amber-500 rounded-full"></span>
+      Recent Reviews
+  </h2>
+  <div class="grid gap-4">
     {% for r in reviews %}
-      <div class="bg-white p-3 rounded flex justify-between">
-        <div>
-          <div class="text-sm text-gray-500">{{ r.user.username }} on <b>{{ r.product.name }}</b> — {{ r.rating }}★</div>
-          {% if r.title %}<div class="font-semibold">{{ r.title }}</div>{% endif %}
-          <div>{{ r.content }}</div>
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 transition-colors duration-300 flex justify-between items-start">
+        <div class="space-y-2">
+          <div class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500 flex items-center gap-2">
+              <span class="text-blue-600 dark:text-blue-400">{{ r.user.username }}</span> 
+              <span>on</span> 
+              <span class="text-slate-700 dark:text-slate-300">{{ r.product.name }}</span>
+              <span class="text-amber-500 ml-2">{{ r.rating }}★</span>
+          </div>
+          {% if r.title %}<div class="font-bold text-slate-800 dark:text-white">{{ r.title }}</div>{% endif %}
+          <div class="text-gray-600 dark:text-slate-400">{{ r.content }}</div>
         </div>
-        <a class="text-red-600" href="{% url 'shop:review_delete' r.pk %}">Delete</a>
+        <a class="text-red-600 dark:text-red-400 font-medium hover:underline text-sm ml-4" href="{% url 'shop:review_delete' r.pk %}">Delete</a>
       </div>
-    {% empty %}<div class="text-gray-500">No reviews.</div>{% endfor %}
+    {% empty %}
+      <div class="bg-slate-50 dark:bg-slate-800/50 p-10 rounded-xl text-center text-gray-500 dark:text-slate-400 border border-dashed border-gray-200 dark:border-slate-700">
+        No reviews yet.
+      </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

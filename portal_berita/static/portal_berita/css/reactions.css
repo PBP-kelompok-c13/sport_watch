@@ -27,6 +27,20 @@
     color: #ffffff;
 }
 
+.dark .reaction-button {
+    background-color: #1f2937;
+    color: #e2e8f0;
+}
+
+.dark .reaction-button:hover {
+    background-color: #334155;
+}
+
+.dark .reaction-button.active {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
 .reaction-button .reaction-emoji {
     font-size: 1rem;
     line-height: 1;

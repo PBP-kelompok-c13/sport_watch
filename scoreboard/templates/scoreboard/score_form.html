@@ -1,81 +1,81 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <h1 class="text-xl font-bold mb-6">{{ title|default:"Add New Score" }}</h1>
+  <h1 class="text-xl font-bold mb-6 dark:text-white transition-colors duration-300">{{ title|default:"Add New Score" }}</h1>
 
-  <form method="post" class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
+  <form method="post" class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-6 space-y-4 transition-colors duration-300">
     {% csrf_token %}
 
     <!-- Tim 1 -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Tim1:</label>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors duration-300">Tim1:</label>
       <input type="text" name="tim1" value="{{ form.tim1.value|default:'' }}"
-             class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-3 py-2 text-sm text-gray-700">
+             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring focus:ring-blue-200 dark:focus:ring-blue-500/30 focus:ring-opacity-50 px-3 py-2 text-sm text-gray-700 transition-colors duration-300">
       {% if form.tim1.errors %}<p class="text-red-600 text-xs mt-1">{{ form.tim1.errors.0 }}</p>{% endif %}
     </div>
 
     <!-- Tim 2 -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Tim2:</label>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors duration-300">Tim2:</label>
       <input type="text" name="tim2" value="{{ form.tim2.value|default:'' }}"
-             class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-3 py-2 text-sm text-gray-700">
+             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring focus:ring-blue-200 dark:focus:ring-blue-500/30 focus:ring-opacity-50 px-3 py-2 text-sm text-gray-700 transition-colors duration-300">
       {% if form.tim2.errors %}<p class="text-red-600 text-xs mt-1">{{ form.tim2.errors.0 }}</p>{% endif %}
     </div>
 
     <!-- Skor -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Skor tim1:</label>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors duration-300">Skor tim1:</label>
       <input type="number" name="skor_tim1" value="{{ form.skor_tim1.value|default:'' }}"
-             class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-3 py-2 text-sm text-gray-700">
+             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring focus:ring-blue-200 dark:focus:ring-blue-500/30 focus:ring-opacity-50 px-3 py-2 text-sm text-gray-700 transition-colors duration-300">
       {% if form.skor_tim1.errors %}<p class="text-red-600 text-xs mt-1">{{ form.skor_tim1.errors.0 }}</p>{% endif %}
     </div>
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Skor tim2:</label>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors duration-300">Skor tim2:</label>
       <input type="number" name="skor_tim2" value="{{ form.skor_tim2.value|default:'' }}"
-             class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-3 py-2 text-sm text-gray-700">
+             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring focus:ring-blue-200 dark:focus:ring-blue-500/30 focus:ring-opacity-50 px-3 py-2 text-sm text-gray-700 transition-colors duration-300">
       {% if form.skor_tim2.errors %}<p class="text-red-600 text-xs mt-1">{{ form.skor_tim2.errors.0 }}</p>{% endif %}
     </div>
 
     <!-- Sport -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Sport:</label>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors duration-300">Sport:</label>
       {{ form.sport }}
       {% if form.sport.errors %}<p class="text-red-600 text-xs mt-1">{{ form.sport.errors.0 }}</p>{% endif %}
     </div>
 
     <!-- Status -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Status:</label>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors duration-300">Status:</label>
       {{ form.status }}
       {% if form.status.errors %}<p class="text-red-600 text-xs mt-1">{{ form.status.errors.0 }}</p>{% endif %}
     </div>
 
     <!-- Tanggal & Jam -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal & Jam:</label>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors duration-300">Tanggal & Jam:</label>
       {{ form.tanggal }}
       {% if form.tanggal.errors %}<p class="text-red-600 text-xs mt-1">{{ form.tanggal.errors.0 }}</p>{% endif %}
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Logo Tim 1 (URL):</label>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors duration-300">Logo Tim 1 (URL):</label>
       {{ form.logo_tim1 }}
       {% if form.logo_tim1.errors %}<p class="text-red-600 text-xs mt-1">{{ form.logo_tim1.errors.0 }}</p>{% endif %}
     </div>
 
      <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Logo Tim 2 (URL):</label>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors duration-300">Logo Tim 2 (URL):</label>
       {{ form.logo_tim2 }}
       {% if form.logo_tim2.errors %}<p class="text-red-600 text-xs mt-1">{{ form.logo_tim2.errors.0 }}</p>{% endif %}
     </div>
 
     <div class="flex items-center gap-3 pt-4">
       <button type="submit"
-              class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-md shadow-sm">
+              class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-md shadow-sm transition-colors duration-300">
         Save
       </button>
       <a href="{% url 'scoreboard:scoreboard_management' %}"
-         class="text-gray-500 text-sm hover:text-gray-700">Cancel</a>
+         class="text-gray-500 dark:text-slate-400 text-sm hover:text-gray-700 dark:hover:text-slate-200 transition-colors duration-300">Cancel</a>
     </div>
   </form>
 </div>

@@ -113,7 +113,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f"Welcome, {username}!")
-                return redirect("portal_berita:main")
+                return redirect("portal_berita:list_news")
             else:
                 messages.error(request, "Invalid username or password.")
         else:

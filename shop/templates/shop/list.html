@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 {% load shop_tags %}
 {% block content %}
-<h1 class="text-3xl font-bold mb-1">Sports Merchandise</h1>
-<p class="text-gray-600 mb-6">Shop official team gear and premium sports equipment</p>
+<h1 class="text-3xl font-bold mb-1 dark:text-white transition-colors duration-300">Sports Merchandise</h1>
+<p class="text-gray-600 dark:text-slate-400 mb-6 transition-colors duration-300">Shop official team gear and premium sports equipment</p>
 
 <!-- Toolbar  Sort -->
 <form method="get" class="flex items-center gap-3 mb-4">
-  <select name="sort" class="border rounded px-3 py-2">
+  <select name="sort" class="border rounded px-3 py-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 transition-colors duration-300">
     <option value="featured"   {% if sort == 'featured' %}selected{% endif %}>Featured</option>
     <option value="price_asc"  {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
     <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
   </select>
-  <button class="px-4 py-2 bg-blue-600 text-white rounded">Apply</button>
+  <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors duration-300">Apply</button>
 </form>
 
 <!-- Add Product DI ATAS GRID using modal -->
 {% if user.is_authenticated %}
   <div class="mb-4 flex justify-end">
     <button id="openCreateModal"
-       class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-black">
+       class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-black dark:bg-slate-200 dark:text-slate-900 dark:hover:bg-white transition-colors duration-300">
       + Add Product
     </button>
   </div>
@@ -27,19 +27,19 @@
 <!-- Category chips -->
 <div class="flex flex-wrap gap-2 mb-6">
   <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}"
-     class="px-3 py-1 rounded-full border {% if not active_cat %}bg-gray-200{% endif %}">All</a>
+     class="px-3 py-1 rounded-full border dark:border-slate-700 dark:text-slate-200 {% if not active_cat %}bg-gray-200 dark:bg-slate-700{% endif %}">All</a>
   {% for c in categories %}
     <a href="?category={{ c.slug }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}"
-       class="px-3 py-1 rounded-full border {% if active_cat == c.slug %}bg-gray-800 text-white{% endif %}">{{ c.name }}</a>
+       class="px-3 py-1 rounded-full border dark:border-slate-700 dark:text-slate-200 {% if active_cat == c.slug %}bg-gray-800 text-white dark:bg-slate-200 dark:text-slate-900{% endif %}">{{ c.name }}</a>
   {% endfor %}
 </div>
 
-<p class="text-sm text-gray-500 mb-3">Showing {{ products|length }} of {{ page_obj.paginator.count }} products</p>
+<p class="text-sm text-gray-500 dark:text-slate-400 mb-3 transition-colors duration-300">Showing {{ products|length }} of {{ page_obj.paginator.count }} products</p>
 
 <!-- State kosong-->
 {% if page_obj.paginator.count == 0 %}
-  <div class="bg-white rounded-xl p-10 text-center">
-    <p class="text-gray-600 mb-4">Belum ada produk untuk kategori/pencarian ini.</p>
+  <div class="bg-white dark:bg-slate-800 rounded-xl p-10 text-center border border-transparent dark:border-slate-700 transition-colors duration-300">
+    <p class="text-gray-600 dark:text-slate-300 mb-4 transition-colors duration-300">Belum ada produk untuk kategori/pencarian ini.</p>
     {% if user.is_authenticated %}
       <button id="openCreateModalEmpty" class="px-4 py-2 bg-gray-900 text-white rounded">
         Add your first product
@@ -51,36 +51,36 @@
 <!-- Grid -->
 <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
   {% for p in products %}
-    <div class="relative bg-white rounded-2xl shadow p-4" data-product-id="{{p.id}}">
+    <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow p-4 border border-transparent dark:border-slate-700 transition-colors duration-300" data-product-id="{{p.id}}">
       {% if p.sale_price %}<span class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">Sale</span>{% endif %}
       {% if not p.in_stock %}<span class="absolute top-2 right-2 px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>{% endif %}
       <a href="{% url 'shop:detail' p.slug %}">
-        <div class="aspect-[16/10] bg-gray-100 rounded mb-4 overflow-hidden">
+        <div class="aspect-[16/10] bg-gray-100 dark:bg-slate-700 rounded mb-4 overflow-hidden transition-colors duration-300">
           {% if p.thumbnail %}<img src="{{p.thumbnail}}" class="w-full h-full object-cover">{% endif %}
         </div>
-        <div class="text-xs text-gray-500 mb-1">{{ p.category.name }}</div>
-        <h3 class="font-semibold mb-1 line-clamp-2">{{ p.name }}</h3>
-        <div class="text-xs text-gray-500">{% star_rating p.rating_avg 5 %} ({{ p.rating_count }})</div>
+        <div class="text-xs text-gray-500 dark:text-slate-400 mb-1 transition-colors duration-300">{{ p.category.name }}</div>
+        <h3 class="font-semibold mb-1 line-clamp-2 dark:text-white transition-colors duration-300">{{ p.name }}</h3>
+        <div class="text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">{% star_rating p.rating_avg 5 %} ({{ p.rating_count }})</div>
       </a>
 
       <!-- owner pemilik card -->
-      <div class="text-xs text-gray-500 mt-1">
+      <div class="text-xs text-gray-500 dark:text-slate-400 mt-1 transition-colors duration-300">
         {% if p.created_by_id %}by <span class="font-medium">{{ p.created_by.username }}</span>{% endif %}
       </div>
 
       <div class="flex items-end gap-2 mt-1">
-        <div class="text-xl font-bold">{{ p.final_price|price_idr }}</div>
-        {% if p.sale_price %}<div class="text-gray-400 line-through">{{ p.price|price_idr }}</div>{% endif %}
+        <div class="text-xl font-bold dark:text-white transition-colors duration-300">{{ p.final_price|price_idr }}</div>
+        {% if p.sale_price %}<div class="text-gray-400 dark:text-slate-500 line-through transition-colors duration-300">{{ p.price|price_idr }}</div>{% endif %}
       </div>
 
       {% if show_member_price %}
-        <div class="text-xs text-green-700 mt-1">Member</div>
+        <div class="text-xs text-green-700 dark:text-green-400 mt-1 transition-colors duration-300">Member</div>
       {% endif %}
 
       <div class="mt-3">
         {# Owner tidak boleh add to cart #}
         <button
-          class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full hover:bg-blue-700 transition
+          class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition
                  {% if not p.in_stock %}
                     opacity-50 cursor-not-allowed
                  {% elif user.is_authenticated and p.created_by_id == user.id %}
@@ -100,8 +100,8 @@
         </button>
         {% if user.is_authenticated and user.is_staff or user.is_authenticated and p.created_by_id == user.id %}
           <div class="mt-2 flex gap-2">
-            <a href="{% url 'shop:edit' p.id %}" class="px-3 py-1 border rounded text-sm">Edit</a>
-            <button class="px-3 py-1 border rounded text-sm text-red-600"
+            <a href="{% url 'shop:edit' p.id %}" class="px-3 py-1 border rounded text-sm dark:border-slate-700 dark:text-slate-200 transition-colors duration-300">Edit</a>
+            <button class="px-3 py-1 border rounded text-sm text-red-600 dark:border-slate-700 dark:text-red-400 transition-colors duration-300"
                     data-action="delete" data-id="{{ p.id }}">Delete</button>
           </div>
         {% endif %}
@@ -113,7 +113,7 @@
 <!-- Load More -->
 {% if page_obj.has_next %}
   <div class="text-center mt-8">
-    <button id="loadMore" data-next="{{ page_obj.next_page_number }}" class="px-5 py-2 border rounded">Load More Products</button>
+    <button id="loadMore" data-next="{{ page_obj.next_page_number }}" class="px-5 py-2 border rounded dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors duration-300">Load More Products</button>
   </div>
 {% endif %}
 
@@ -123,14 +123,14 @@
   <div class="absolute inset-0 bg-black/40"></div>
   <!-- dialog -->
   <div class="absolute inset-0 flex items-start justify-center mt-16 px-4">
-    <div class="w-full max-w-2xl bg-white rounded-2xl shadow p-6">
+    <div class="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow p-6 transition-colors duration-300">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold">Create Product</h3>
-        <button id="closeCreateModalX" class="text-gray-500 hover:text-black">&times;</button>
+        <h3 class="text-lg font-semibold dark:text-white transition-colors duration-300">Create Product</h3>
+        <button id="closeCreateModalX" class="text-gray-500 hover:text-black dark:text-slate-400 dark:hover:text-slate-200 transition-colors duration-300">&times;</button>
       </div>
       <div id="createModalBody">
         <!-- form fragment akan dimuat via AJAX GET /shop/create/ -->
-        <div class="text-sm text-gray-500">Loading form...</div>
+        <div class="text-sm text-gray-500 dark:text-slate-400 transition-colors duration-300">Loading form...</div>
       </div>
     </div>
   </div>
@@ -161,7 +161,7 @@
       });
 
       const data = await res.json();
-      
+
       if (!res.ok || !data.ok) {
         throw new Error(data.error || "Failed to add to cart");
       }
@@ -185,7 +185,7 @@
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.add-to-cart');
     if (!btn || btn.disabled) return;
-    
+
     const card = btn.closest('[data-product-id]');
     if (!card) return;
 
@@ -222,30 +222,30 @@
         const btnText = isOwner ? 'Your product' : 'Add to Cart';
 
         const el = document.createElement('div');
-        el.className = "relative bg-white rounded-2xl shadow p-4";
+        el.className = "relative bg-white dark:bg-slate-800 rounded-2xl shadow p-4 border border-transparent dark:border-slate-700 transition-colors duration-300";
         el.setAttribute('data-product-id', p.id);
 
         el.innerHTML = `
           ${p.sale_price ? '<span class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">Sale</span>' : ''}
           ${!p.in_stock ? '<span class="absolute top-2 right-2 px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>' : ''}
           <a href="/shop/p/${p.slug}/">
-            <div class="aspect-[16/10] bg-gray-100 rounded mb-4 overflow-hidden">
+            <div class="aspect-[16/10] bg-gray-100 dark:bg-slate-700 rounded mb-4 overflow-hidden transition-colors duration-300">
               ${p.thumbnail ? `<img src="${p.thumbnail}" class="w-full h-full object-cover">` : ''}
             </div>
-            <div class="text-xs text-gray-500 mb-1">${p.category ?? ''}</div>
-            <h3 class="font-semibold mb-1 line-clamp-2">${p.name}</h3>
+            <div class="text-xs text-gray-500 dark:text-slate-400 mb-1 transition-colors duration-300">${p.category ?? ''}</div>
+            <h3 class="font-semibold mb-1 line-clamp-2 dark:text-white transition-colors duration-300">${p.name}</h3>
           </a>
-          <div class="text-xs text-gray-500 mt-1">${ownerText}</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400 mt-1 transition-colors duration-300">${ownerText}</div>
           <div class="flex items-end gap-2 mt-1">
             <div class="text-xl font-bold">Rp ${(p.sale_price ?? p.price).toLocaleString('id-ID')}</div>
-            ${p.sale_price ? `<div class="text-gray-400 line-through">Rp ${p.price.toLocaleString('id-ID')}</div>` : ''}
+            ${p.sale_price ? `<div class="text-gray-400 dark:text-slate-500 line-through transition-colors duration-300">Rp ${p.price.toLocaleString('id-ID')}</div>` : ''}
           </div>
           <div class="mt-3">
-            <button class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full hover:bg-blue-700 transition ${btnCls}" ${disable}>${btnText}</button>
+            <button class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition ${btnCls}" ${disable}>${btnText}</button>
             ${isOwner ? `
               <div class="mt-2 flex gap-2">
-                <a href="/shop/${p.id}/edit/" class="px-3 py-1 border rounded text-sm">Edit</a>
-                <button class="px-3 py-1 border rounded text-sm text-red-600" data-action="delete" data-id="${p.id}">Delete</button>
+                <a href="/shop/${p.id}/edit/" class="px-3 py-1 border rounded text-sm dark:border-slate-700 dark:text-slate-200 transition-colors duration-300">Edit</a>
+                <button class="px-3 py-1 border rounded text-sm text-red-600 dark:border-slate-700 dark:text-red-400 transition-colors duration-300" data-action="delete" data-id="${p.id}">Delete</button>
               </div>` : ''}
           </div>`;
         grid.appendChild(el);
@@ -312,30 +312,30 @@
       const ownerText = p.owner ? `by <span class="font-medium">${p.owner}</span>` : 'by <span class="font-medium">you</span>';
       const grid = document.getElementById('grid');
       const el = document.createElement('div');
-      el.className = "relative bg-white rounded-2xl shadow p-4";
+      el.className = "relative bg-white dark:bg-slate-800 rounded-2xl shadow p-4 border border-transparent dark:border-slate-700 transition-colors duration-300";
       el.setAttribute('data-product-id', p.id);
       el.innerHTML = `
         ${p.sale_price ? '<span class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs rounded">Sale</span>' : ''}
         ${!p.in_stock ? '<span class="absolute top-2 right-2 px-2 py-1 bg-orange-500 text-white text-xs rounded">Out of Stock</span>' : ''}
         <a href="/shop/p/${p.slug}/">
-          <div class="aspect-[16/10] bg-gray-100 rounded mb-4 overflow-hidden">
+          <div class="aspect-[16/10] bg-gray-100 dark:bg-slate-700 rounded mb-4 overflow-hidden transition-colors duration-300">
             ${p.thumbnail ? `<img src="${p.thumbnail}" class="w-full h-full object-cover">` : ''}
           </div>
-          <div class="text-xs text-gray-500 mb-1">${p.category ?? ''}</div>
-          <h3 class="font-semibold mb-1 line-clamp-2">${p.name}</h3>
+          <div class="text-xs text-gray-500 dark:text-slate-400 mb-1 transition-colors duration-300">${p.category ?? ''}</div>
+          <h3 class="font-semibold mb-1 line-clamp-2 dark:text-white transition-colors duration-300">${p.name}</h3>
         </a>
-        <div class="text-xs text-gray-500 mt-1">${ownerText}</div>
+        <div class="text-xs text-gray-500 dark:text-slate-400 mt-1 transition-colors duration-300">${ownerText}</div>
         <div class="flex items-end gap-2 mt-1">
           <div class="text-xl font-bold">Rp ${(p.sale_price ?? p.price).toLocaleString('id-ID')}</div>
-          ${p.sale_price ? `<div class="text-gray-400 line-through">Rp ${p.price.toLocaleString('id-ID')}</div>` : ''}
+          ${p.sale_price ? `<div class="text-gray-400 dark:text-slate-500 line-through transition-colors duration-300">Rp ${p.price.toLocaleString('id-ID')}</div>` : ''}
         </div>
         <div class="mt-3">
           <button class="add-to-cart px-4 py-2 bg-blue-600 text-white rounded w-full opacity-50 cursor-not-allowed" disabled>
             Your product
           </button>
           <div class="mt-2 flex gap-2">
-            <a href="/shop/${p.id}/edit/" class="px-3 py-1 border rounded text-sm">Edit</a>
-            <button class="px-3 py-1 border rounded text-sm text-red-600" data-action="delete" data-id="${p.id}">Delete</button>
+            <a href="/shop/${p.id}/edit/" class="px-3 py-1 border rounded text-sm dark:border-slate-700 dark:text-slate-200 transition-colors duration-300">Edit</a>
+            <button class="px-3 py-1 border rounded text-sm text-red-600 dark:border-slate-700 dark:text-red-400 transition-colors duration-300" data-action="delete" data-id="${p.id}">Delete</button>
           </div>
         </div>`;
 

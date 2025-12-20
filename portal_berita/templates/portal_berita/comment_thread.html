@@ -1,18 +1,30 @@
-<div class="comment-thread ml-4 pl-4 border-l-2 border-gray-200">
+<div class="comment-thread mt-4 pl-4 md:pl-8 border-l-2 border-slate-100 dark:border-slate-700 transition-colors duration-300">
     {% for reply in comment.replies.all %}
         <div class="comment mt-4">
-            <p class="text-sm text-gray-500">{{ reply.user.username }} - {{ reply.created_at|timesince }} ago</p>
-            <p class="text-gray-700">{{ reply.content }}</p>
-            <a href="#" class="reply-btn text-sm text-blue-500">Reply</a>
-            <div class="reply-form hidden mt-2">
+            <div class="flex items-center space-x-2 mb-1">
+                <span class="font-bold text-slate-900 dark:text-white transition-colors duration-300 text-sm">{{ reply.user.username }}</span>
+                <span class="text-slate-400 text-xs">&bull;</span>
+                <span class="text-slate-500 dark:text-slate-400 transition-colors duration-300 text-xs">{{ reply.created_at|timesince }} ago</span>
+            </div>
+            <p class="text-slate-700 dark:text-slate-300 transition-colors duration-300 leading-relaxed mb-2">{{ reply.content }}</p>
+            
+            <a href="#" class="reply-btn text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center mb-2 transition-colors duration-200">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                Reply
+            </a>
+
+            <div class="reply-form hidden mt-2 mb-4">
                 <form method="post" action="{% url 'portal_berita:detail_news' news.id %}">
                     {% csrf_token %}
                     <input type="hidden" name="parent_id" value="{{ reply.id }}">
-                    {{ comment_form.content }}
+                    <div class="mb-2">
+                         <!-- Assumes form field renders as textarea or input, styling handled by parent or default -->
+                         {{ comment_form.content }}
+                    </div>
                     {% if comment_form.content.errors %}
                         <p class="text-red-500 text-xs italic">{{ comment_form.content.errors.0 }}</p>
                     {% endif %}
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mt-2">Submit Reply</button>
+                    <button type="submit" class="bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold py-1 px-3 rounded-lg text-xs transition-colors">Submit Reply</button>
                 </form>
             </div>
             {% if reply.replies.all %}

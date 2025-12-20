@@ -6,83 +6,126 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-    <img src="{{ news.thumbnail|default:'/static/images/default_news_thumbnail.jpg' }}" alt="{{ news.judul|default:'News Thumbnail' }}" class="w-full h-96 object-cover">
-    <div class="p-6">
-        <h1 class="text-4xl font-bold text-gray-800 mb-2">{{ news.judul }}</h1>
-        <p class="text-sm text-gray-500 mb-4">By {{ news.penulis.username }} on {{ news.tanggal_dibuat|date:"F d, Y" }}</p>
-        <div class="prose max-w-none text-gray-700">
-            {{ news.konten|safe }}
-        </div>
-        <hr class="my-6">
-        <div class="flex justify-between items-center">
-            <div>
-                <p class="text-gray-600"><strong>Category:</strong> {{ news.kategori.nama }}</p>
-                <p class="text-gray-600"><strong>Source:</strong> {{ news.sumber }}</p>
-                <p class="text-gray-600"><strong>Views:</strong> {{ news.views }}</p>
+<div class="max-w-4xl mx-auto">
+    <article class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden mb-8 transition-colors duration-300">
+        <img src="{{ news.thumbnail|default:'/static/images/default_news_thumbnail.jpg' }}" 
+             alt="{{ news.judul|default:'News Thumbnail' }}" 
+             class="w-full h-96 object-cover object-center">
+        <div class="p-8 md:p-10">
+            {% if news.kategori %}
+            <span class="inline-block text-white text-xs uppercase font-semibold tracking-wider px-3 py-1 bg-blue-600 rounded-full mb-4 shadow-sm">
+                {{ news.kategori.nama }}
+            </span>
+            {% endif %}
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight transition-colors duration-300">{{ news.judul }}</h1>
+            
+            <div class="flex items-center text-sm text-slate-500 dark:text-slate-400 font-medium mb-8 pb-8 border-b border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                <span class="mr-4">By <span class="text-slate-900 dark:text-white font-bold">{{ news.penulis.username }}</span></span>
+                <span>{{ news.tanggal_dibuat|date:"F d, Y" }}</span>
+                <span class="mx-3">&bull;</span>
+                <span>{{ news.views }} Views</span>
+                <span class="mx-3">&bull;</span>
+                <span class="text-slate-400 italic">Source: {{ news.sumber }}</span>
             </div>
-            {% if user.is_staff %}
-            <div class="flex space-x-4">
-                <a href="{% url 'portal_berita:edit_news' news.id %}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Edit</a>
-                <form action="{% url 'portal_berita:delete_news' news.id %}" method="post" id="delete-form">
-                    {% csrf_token %}
-                    <button type="button" id="delete-btn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Delete</button>
-                </form>
+
+            <div class="prose prose-lg prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed transition-colors duration-300">
+                {{ news.konten|safe }}
+            </div>
+            
+            <div class="mt-10 pt-6 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center transition-colors duration-300">
+                <div>
+                     <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">React to this story</h3>
+                     <div class="news-reactions" data-news-id="{{ news.id }}" data-react-url="{% url 'portal_berita:react_to_news' news.id %}">
+                        {% for reaction in reaction_summary %}
+                        <button type="button" class="reaction-button" data-reaction="{{ reaction.key }}" aria-pressed="false">
+                            <span class="reaction-emoji">{{ reaction.emoji }}</span>
+                            <span class="reaction-count">{{ reaction.count }}</span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if user.is_staff %}
+                <div class="flex space-x-3">
+                    <a href="{% url 'portal_berita:edit_news' news.id %}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-5 rounded-lg transition-colors shadow-sm">Edit</a>
+                    <form action="{% url 'portal_berita:delete_news' news.id %}" method="post" id="delete-form">
+                        {% csrf_token %}
+                        <button type="button" id="delete-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-5 rounded-lg transition-colors shadow-sm">Delete</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+
+    <section>
+        <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
+            Comments 
+            <span class="ml-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm py-1 px-3 rounded-full transition-colors duration-300">{{ news.comment_count }}</span>
+        </h2>
+
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 mb-8 transition-colors duration-300">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">Join the Conversation</h3>
+            {% if user.is_authenticated %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-4">
+                    {{ comment_form.content }} <!-- Ensure this renders with tailwind classes or add styling via CSS or widget tweaks -->
+                </div>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Post Comment</button>
+            </form>
+            {% else %}
+            <div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-6 text-center border border-slate-200 dark:border-slate-700 border-dashed transition-colors duration-300">
+                <p class="text-slate-600 dark:text-slate-400 mb-3">You must be logged in to participate.</p>
+                <a href="{% url 'portal_berita:login' %}" class="inline-block text-blue-600 dark:text-blue-400 font-bold hover:underline">Log In Now</a>
             </div>
             {% endif %}
         </div>
-        <div class="mt-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-3">React to this news</h3>
-            <div class="news-reactions" data-news-id="{{ news.id }}" data-react-url="{% url 'portal_berita:react_to_news' news.id %}">
-                {% for reaction in reaction_summary %}
-                <button type="button" class="reaction-button" data-reaction="{{ reaction.key }}" aria-pressed="false">
-                    <span class="reaction-emoji">{{ reaction.emoji }}</span>
-                    <span class="reaction-count">{{ reaction.count }}</span>
-                </button>
-                {% endfor %}
+
+        <div class="space-y-6">
+            {% for comment in comments %}
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-6 border border-slate-50 dark:border-slate-700 transition-colors duration-300">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-slate-500 dark:text-slate-200 font-bold text-xs">
+                            {{ comment.user.username|slice:":2"|upper }}
+                        </div>
+                        <span class="font-bold text-slate-900 dark:text-white">{{ comment.user.username }}</span>
+                        <span class="text-slate-400 text-xs">&bull;</span>
+                        <span class="text-slate-500 dark:text-slate-400 text-xs">{{ comment.created_at|timesince }} ago</span>
+                    </div>
+                </div>
+                <p class="text-slate-700 dark:text-slate-300 leading-relaxed mb-4">{{ comment.content }}</p>
+                
+                <div class="flex items-center">
+                    <a href="#" class="reply-btn text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                        Reply
+                    </a>
+                </div>
+
+                <div class="reply-form hidden mt-4 pl-4 border-l-2 border-slate-100 dark:border-slate-700">
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'portal_berita:detail_news' news.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                        <div class="mb-2">
+                            {{ comment_form.content }}
+                        </div>
+                        <button type="submit" class="bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">Submit Reply</button>
+                    </form>
+                    {% else %}
+                     <p class="text-slate-500 dark:text-slate-400 text-sm">Please <a href="{% url 'portal_berita:login' %}" class="text-blue-600 dark:text-blue-400 hover:underline">log in</a> to reply.</p>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-4 pl-4 md:pl-8 border-l-2 border-slate-50 dark:border-slate-700">
+                    {% include 'portal_berita/comment_thread.html' with comment=comment news=news %}
+                </div>
             </div>
+            {% endfor %}
         </div>
-    </div>
-</div>
-
-<div class="max-w-4xl mx-auto mt-8">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">Comments ({{ news.comment_count }})</h2>
-
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-xl font-bold text-gray-800 mb-4">Leave a Comment</h3>
-        {% if user.is_authenticated %}
-        <form method="post">
-            {% csrf_token %}
-            {{ comment_form.content }}
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">Submit</button>
-        </form>
-        {% else %}
-        <p class="text-gray-600">Please <a href="{% url 'portal_berita:login' %}" class="text-blue-500 hover:underline">log in</a> to leave a comment.</p>
-        {% endif %}
-    </div>
-
-    <div class="mt-8">
-        {% for comment in comments %}
-        <div class="comment bg-white rounded-lg shadow-md p-6 mb-6">
-            <p class="text-sm text-gray-500">{{ comment.user.username }} - {{ comment.created_at|timesince }}</p>
-            <p class="text-gray-700">{{ comment.content }}</p>
-            <a href="#" class="reply-btn text-sm text-blue-500">Reply</a>
-            <div class="reply-form hidden mt-4">
-                {% if user.is_authenticated %}
-                <form method="post" action="{% url 'portal_berita:detail_news' news.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
-                    {{ comment_form.content }}
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mt-2">Submit Reply</button>
-                </form>
-                {% else %}
-                <p class="text-gray-600">Please <a href="{% url 'portal_berita:login' %}" class="text-blue-500 hover:underline">log in</a> to reply.</p>
-                {% endif %}
-            </div>
-            {% include 'portal_berita/comment_thread.html' with comment=comment news=news %}
-        </div>
-        {% endfor %}
-    </div>
+    </section>
 </div>
 
 <script src="{% static 'portal_berita/js/news_reactions.js' %}"></script>

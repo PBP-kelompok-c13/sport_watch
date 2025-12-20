@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-  <p class="text-lg">Yakin mau hapus skor <strong>{{ score.tim1 }} vs {{ score.tim2 }}</strong> ({{ score.tanggal }})?</p>
+  <p class="text-lg dark:text-slate-200 transition-colors duration-300">Yakin mau hapus skor <strong>{{ score.tim1 }} vs {{ score.tim2 }}</strong> ({{ score.tanggal }})?</p>
   <form method="post" class="mt-6 space-x-3">
     {% csrf_token %}
     <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">Hapus</button>
-    <a href="{% url 'scoreboard:scoreboard_management' %}" class="text-gray-600">Batal</a>
+    <a href="{% url 'scoreboard:scoreboard_management' %}" class="text-gray-600 dark:text-slate-400 transition-colors duration-300">Batal</a>
   </form>
 </div>
 {% endblock %}
- 

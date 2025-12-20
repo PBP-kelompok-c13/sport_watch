@@ -6,14 +6,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sport Watch{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <script>
+        // Check for saved user preference, if any, on load of the website
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <style>
+        input:not([type="checkbox"]):not([type="radio"]):not([class]),
+        textarea:not([class]),
+        select:not([class]) {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background-color: #ffffff;
+            color: #111827;
+        }
+
+        input:not([type="checkbox"]):not([type="radio"]):not([class]):focus,
+        textarea:not([class]):focus,
+        select:not([class]):focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .dark input:not([type="checkbox"]):not([type="radio"]):not([class]),
+        .dark textarea:not([class]),
+        .dark select:not([class]) {
+            background-color: #0f172a;
+            border-color: #475569;
+            color: #e2e8f0;
+        }
+
+        .dark input:not([type="checkbox"]):not([type="radio"]):not([class])::placeholder,
+        .dark textarea:not([class])::placeholder {
+            color: #94a3b8;
+        }
+
+        .dark input:not([type="checkbox"]):not([type="radio"]):not([class]):focus,
+        .dark textarea:not([class]):focus,
+        .dark select:not([class]):focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+        }
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300">
     {% include 'navbar.html' %}
 
     <div class="py-10">
         <main>
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {% block content %}
                 {% endblock %}
             </div>

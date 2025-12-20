@@ -233,4 +233,4 @@ else:
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "portal_berita:login"
-LOGIN_REDIRECT_URL = "portal_berita:main"
+LOGIN_REDIRECT_URL = "portal_berita:list_news"

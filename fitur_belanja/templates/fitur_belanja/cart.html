@@ -1,65 +1,65 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% block content %}
-<a href="{% url 'shop:list' %}" class="text-sm text-gray-600">&larr; Continue Shopping</a>
+<a href="{% url 'shop:list' %}" class="text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 transition-colors duration-200">&larr; Continue Shopping</a>
 
-<h1 class="text-3xl font-bold mt-3 mb-1">Shopping Cart</h1>
-<p class="text-gray-500 mb-6">{{ cart.item_count }} item in your cart</p>
+<h1 class="text-3xl font-bold mt-3 mb-1 dark:text-white transition-colors duration-200">Shopping Cart</h1>
+<p class="text-gray-500 dark:text-slate-400 mb-6 transition-colors duration-200">{{ cart.item_count }} item in your cart</p>
 
 <div class="grid lg:grid-cols-3 gap-6">
   <div class="lg:col-span-2 space-y-4">
     {% for it in items %}
-      <div class="bg-white rounded-xl p-4 flex items-center gap-4"
+      <div class="bg-white dark:bg-slate-800 rounded-xl p-4 flex items-center gap-4 shadow-sm border border-transparent dark:border-slate-700 transition-colors duration-300"
            data-item-id="{{ it.id }}">
-        <div class="w-20 h-20 bg-gray-100 rounded overflow-hidden">
+        <div class="w-20 h-20 bg-gray-100 dark:bg-slate-700 rounded overflow-hidden transition-colors duration-300">
           {% if it.product.thumbnail %}
             <img src="{{ it.product.thumbnail }}" class="w-full h-full object-cover">
           {% endif %}
         </div>
         <div class="flex-1">
-          <div class="font-semibold">{{ it.product.name }}</div>
-          <div class="text-sm text-gray-500">{{ it.unit_price }}</div>
-          <div class="mt-2 inline-flex items-center border rounded">
-            <button class="qty-minus px-3 py-1">−</button>
-            <input class="qty-input w-12 text-center border-l border-r py-1" value="{{ it.qty }}">
-            <button class="qty-plus px-3 py-1">+</button>
+          <div class="font-semibold dark:text-white transition-colors duration-200">{{ it.product.name }}</div>
+          <div class="text-sm text-gray-500 dark:text-slate-400 transition-colors duration-200">{{ it.unit_price }}</div>
+          <div class="mt-2 inline-flex items-center border dark:border-slate-600 rounded overflow-hidden transition-colors duration-300">
+            <button class="qty-minus px-3 py-1 bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors duration-200">−</button>
+            <input class="qty-input w-12 text-center border-l border-r dark:border-slate-600 py-1 dark:bg-slate-800 dark:text-white transition-colors duration-300" value="{{ it.qty }}">
+            <button class="qty-plus px-3 py-1 bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors duration-200">+</button>
           </div>
         </div>
         <div class="text-right">
-          <div class="font-semibold">Rp {{ it.subtotal }}</div>
-          <button class="text-red-600 text-sm mt-2 remove-item">Remove</button>
+          <div class="font-semibold dark:text-white transition-colors duration-200">Rp {{ it.subtotal }}</div>
+          <button class="text-red-600 dark:text-red-400 text-sm mt-2 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200 remove-item">Remove</button>
         </div>
       </div>
     {% empty %}
-      <div class="bg-white rounded-xl p-10 text-center text-gray-500">
+      <div class="bg-white dark:bg-slate-800 rounded-xl p-10 text-center text-gray-500 dark:text-slate-400 border border-transparent dark:border-slate-700 transition-colors duration-300 shadow-sm">
         Cart kamu kosong.
       </div>
     {% endfor %}
   </div>
 
-  <aside class="bg-white rounded-xl p-4 h-fit">
-    <h3 class="font-semibold mb-3">Order Summary</h3>
-    <div class="flex justify-between py-1">
+  <aside class="bg-white dark:bg-slate-800 rounded-xl p-4 h-fit shadow-sm border border-transparent dark:border-slate-700 transition-colors duration-300">
+    <h3 class="font-semibold mb-3 dark:text-white transition-colors duration-200">Order Summary</h3>
+    <div class="flex justify-between py-1 text-gray-600 dark:text-slate-300 transition-colors duration-200">
       <span>Subtotal</span>
       <span>Rp {{ subtotal|floatformat:2|intcomma }}</span>
     </div>
 
-    <div class="flex justify-between py-1">
+    <div class="flex justify-between py-1 text-gray-600 dark:text-slate-300 transition-colors duration-200">
       <span>Shipping</span>
       <span>Rp {{ shipping|floatformat:2|intcomma }}</span>
     </div>
 
-    <hr class="my-3">
+    <hr class="my-3 dark:border-slate-700 transition-colors duration-200">
 
-    <div class="flex justify-between font-semibold">
+    <div class="flex justify-between font-semibold dark:text-white transition-colors duration-200">
       <span>Total</span>
       <span>Rp {{ total|floatformat:2|intcomma }}</span>
     </div>
     <a href="{% url 'fitur_belanja:checkout' %}"
-       class="w-full mt-4 bg-blue-600 text-white rounded py-2 text-center inline-block">
+       class="w-full mt-4 bg-blue-600 dark:bg-blue-500 text-white rounded py-2 text-center inline-block hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 shadow-sm">
       Proceed to Checkout
     </a>
-    <a href="{% url 'shop:list' %}" class="w-full mt-2 border rounded py-2 inline-block text-center">Continue Shopping</a>
+    <a href="{% url 'shop:list' %}" class="w-full mt-2 border border-gray-300 dark:border-slate-600 rounded py-2 inline-block text-center text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200">Continue Shopping</a>
   </aside>
 </div>
 

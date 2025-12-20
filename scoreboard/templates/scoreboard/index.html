@@ -11,18 +11,18 @@
 .animate-fade { animation: fadeInOut 2s ease-in-out; }
 </style>
 
-<div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4">
+<div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4 transition-colors duration-300">
 
   <!-- Header -->
   <div class="mb-3 flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight">Live Scores & Results</h1>
-      <p class="text-sm text-gray-500 mt-1">PBP C — Score Tracker by Kelompok 13</p>
+      <h1 class="text-2xl font-bold tracking-tight dark:text-white transition-colors duration-300">Live Scores & Results</h1>
+      <p class="text-sm text-gray-500 dark:text-slate-400 mt-1 transition-colors duration-300">PBP C — Score Tracker by Kelompok 13</p>
     </div>
     {% if request.user.is_authenticated %}
       {% if request.user.is_staff or request.user.is_superuser %}
         <a href="{% url 'scoreboard:scoreboard_management' %}"
-           class="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+           class="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors duration-300">
           Admin Panel
         </a>
       {% endif %}
@@ -31,28 +31,28 @@
 
   <!-- Filters -->
   <div class="mb-5">
-    <div class="w-full rounded-2xl border border-gray-200 bg-white/70 backdrop-blur p-3">
+    <div class="w-full rounded-2xl border border-gray-200 bg-white/70 backdrop-blur p-3 dark:bg-slate-800/70 dark:border-slate-700 transition-colors duration-300">
       <div class="flex flex-wrap items-center gap-2">
         <!-- Status -->
         <div class="flex items-center gap-2">
-          <span class="text-gray-500 text-sm">Status:</span>
-          <button data-status=""           class="filter-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-900 text-white">All</button>
-          <button data-status="live"       class="filter-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">Live</button>
-          <button data-status="finished"   class="filter-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">Finished</button>
-          <button data-status="upcoming"   class="filter-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">Upcoming</button>
+          <span class="text-gray-500 text-sm dark:text-slate-400 transition-colors duration-300">Status:</span>
+          <button data-status=""           class="filter-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-900 text-white dark:bg-slate-600 dark:text-white transition-colors duration-300">All</button>
+          <button data-status="live"       class="filter-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">Live</button>
+          <button data-status="finished"   class="filter-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">Finished</button>
+          <button data-status="upcoming"   class="filter-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">Upcoming</button>
         </div>
 
-        <span class="hidden sm:block h-5 w-px bg-gray-200"></span>
+        <span class="hidden sm:block h-5 w-px bg-gray-200 dark:bg-slate-700 transition-colors duration-300"></span>
 
         <!-- Sports -->
         <div class="flex items-center gap-2">
-          <span class="text-gray-500 text-sm">Sports:</span>
-          <button data-league=""    class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-900 text-white">All</button>
-          <button data-league="nba" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">NBA</button>
-          <button data-league="epl" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">EPL</button>
-          <button data-league="nfl" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">NFL</button>
-          <button data-league="mlb" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">MLB</button>
-          <button data-league="nhl" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200">NHL</button>
+          <span class="text-gray-500 text-sm dark:text-slate-400 transition-colors duration-300">Sports:</span>
+          <button data-league=""    class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-900 text-white dark:bg-slate-600 dark:text-white transition-colors duration-300">All</button>
+          <button data-league="nba" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">NBA</button>
+          <button data-league="epl" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">EPL</button>
+          <button data-league="nfl" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">NFL</button>
+          <button data-league="mlb" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">MLB</button>
+          <button data-league="nhl" class="league-btn px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">NHL</button>
         </div>
       </div>
     </div>
@@ -61,80 +61,80 @@
   <!-- Live Now -->
   <section id="section-live" class="mb-8">
     <div class="flex items-center gap-2 mb-3">
-      <span class="h-2.5 w-2.5 rounded-full bg-rose-500 ring-4 ring-rose-100"></span>
-      <h2 class="text-lg font-semibold">Live Now</h2>
-      {% if live %}<span class="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">{{ live|length }} Live</span>{% endif %}
+      <span class="h-2.5 w-2.5 rounded-full bg-rose-500 ring-4 ring-rose-100 dark:ring-rose-900"></span>
+      <h2 class="text-lg font-semibold dark:text-white transition-colors duration-300">Live Now</h2>
+      {% if live %}<span class="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300">{{ live|length }} Live</span>{% endif %}
     </div>
 
     {% if live %}
       <div id="live-wrap" class="grid">
         {% for score in live %}
-          <article class="rounded-2xl border border-rose-200 bg-white shadow-sm hover:shadow-md transition p-4">
+          <article class="rounded-2xl border border-rose-200 bg-white shadow-sm hover:shadow-md transition p-4 dark:bg-slate-800 dark:border-rose-900/50 transition-colors duration-300">
             <div class="flex items-start justify-between">
               <span class="text-[10px] font-semibold px-2 py-0.5 rounded
-                {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700
-                {% elif score.sport == 'EPL' %} bg-emerald-100 text-emerald-700
-                {% elif score.sport == 'NFL' %} bg-rose-100 text-rose-700
-                {% elif score.sport == 'MLB' %} bg-blue-100 text-blue-700
-                {% elif score.sport == 'NHL' %} bg-slate-100 text-slate-700
-                {% else %} bg-gray-100 text-gray-700 {% endif %}">
+                {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300
+                {% elif score.sport == 'EPL' %} bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300
+                {% elif score.sport == 'NFL' %} bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300
+                {% elif score.sport == 'MLB' %} bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300
+                {% elif score.sport == 'NHL' %} bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300
+                {% else %} bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 {% endif %}">
                 {{ score.get_sport_display }}
               </span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-600 text-white ring-4 ring-rose-100">LIVE</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-600 text-white ring-4 ring-rose-100 dark:ring-rose-900">LIVE</span>
             </div>
 
             <div class="mt-3 flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                 {% if score.logo_tim1 %}
-                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async">
+                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform dark:bg-slate-700" loading="lazy" decoding="async">
                 {% else %}
-                  <div class="h-9 w-9 rounded-full bg-gray-100"></div>
+                  <div class="h-9 w-9 rounded-full bg-gray-100 dark:bg-slate-700"></div>
                 {% endif %}
-                <div class="text-base font-semibold text-gray-900">{{ score.tim1 }}</div>
+                <div class="text-base font-semibold text-gray-900 dark:text-white transition-colors duration-300">{{ score.tim1 }}</div>
               </div>
 
               <div class="flex items-end gap-2">
-                <span class="text-3xl font-extrabold leading-none">{{ score.skor_tim1 }}</span>
-                <span class="text-lg font-bold text-gray-400">-</span>
-                <span class="text-3xl font-extrabold leading-none">{{ score.skor_tim2 }}</span>
+                <span class="text-3xl font-extrabold leading-none dark:text-white transition-colors duration-300">{{ score.skor_tim1 }}</span>
+                <span class="text-lg font-bold text-gray-400 dark:text-slate-600 transition-colors duration-300">-</span>
+                <span class="text-3xl font-extrabold leading-none dark:text-white transition-colors duration-300">{{ score.skor_tim2 }}</span>
               </div>
 
               <div class="flex items-center gap-2.5 justify-end">
-                <div class="text-base font-semibold text-gray-900 text-right">{{ score.tim2 }}</div>
+                <div class="text-base font-semibold text-gray-900 text-right dark:text-white transition-colors duration-300">{{ score.tim2 }}</div>
                 {% if score.logo_tim2 %}
-                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async">
+                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform dark:bg-slate-700" loading="lazy" decoding="async">
                 {% else %}
-                  <div class="h-9 w-9 rounded-full bg-gray-100"></div>
+                  <div class="h-9 w-9 rounded-full bg-gray-100 dark:bg-slate-700"></div>
                 {% endif %}
               </div>
             </div>
 
-            <p class="mt-2 text-xs text-gray-500">{{ score.tanggal }}</p>
+            <p class="mt-2 text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">{{ score.tanggal }}</p>
           </article>
         {% endfor %}
       </div>
     {% else %}
-      <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4">
+      <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 dark:bg-slate-800 dark:border-slate-700 transition-colors duration-300">
         <div class="flex items-start justify-between">
-          <p class="text-xs text-gray-400 uppercase tracking-wide">—</p>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-500">LIVE</span>
+          <p class="text-xs text-gray-400 dark:text-slate-500 uppercase tracking-wide transition-colors duration-300">—</p>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-500 dark:bg-rose-900 dark:text-rose-300">LIVE</span>
         </div>
         <div class="mt-3 flex items-center justify-between max-w-md mx-auto">
           <div class="flex items-center gap-2.5">
-            <div class="h-9 w-9 rounded-full bg-gray-100"></div>
-            <div class="text-base font-semibold text-gray-400">Team A</div>
+            <div class="h-9 w-9 rounded-full bg-gray-100 dark:bg-slate-700"></div>
+            <div class="text-base font-semibold text-gray-400 dark:text-slate-500 transition-colors duration-300">Team A</div>
           </div>
           <div class="flex items-end gap-2">
-            <span class="text-3xl font-extrabold leading-none text-gray-300">0</span>
-            <span class="text-lg font-bold text-gray-300">-</span>
-            <span class="text-3xl font-extrabold leading-none text-gray-300">0</span>
+            <span class="text-3xl font-extrabold leading-none text-gray-300 dark:text-slate-600 transition-colors duration-300">0</span>
+            <span class="text-lg font-bold text-gray-300 dark:text-slate-600 transition-colors duration-300">-</span>
+            <span class="text-3xl font-extrabold leading-none text-gray-300 dark:text-slate-600 transition-colors duration-300">0</span>
           </div>
           <div class="flex items-center gap-2.5 justify-end">
-            <div class="text-base font-semibold text-gray-400 text-right">Team B</div>
-            <div class="h-9 w-9 rounded-full bg-gray-100"></div>
+            <div class="text-base font-semibold text-gray-400 text-right dark:text-slate-500 transition-colors duration-300">Team B</div>
+            <div class="h-9 w-9 rounded-full bg-gray-100 dark:bg-slate-700"></div>
           </div>
         </div>
-        <p class="mt-2 text-center text-xs text-gray-400">Nggak ada match live hari ini</p>
+        <p class="mt-2 text-center text-xs text-gray-400 dark:text-slate-500 transition-colors duration-300">Nggak ada match live hari ini</p>
       </article>
     {% endif %}
   </section>
@@ -142,81 +142,81 @@
   <!-- Recent Results -->
   <section id="section-finished" class="mb-8">
     <div class="flex items-center gap-2 mb-3">
-      <span class="h-4 w-4 inline-flex items-center justify-center rounded-full border border-gray-300">
-        <svg class="h-3 w-3 text-gray-500" viewBox="0 0 24 24" fill="none"><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="h-4 w-4 inline-flex items-center justify-center rounded-full border border-gray-300 dark:border-slate-600">
+        <svg class="h-3 w-3 text-gray-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none"><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </span>
-      <h2 class="text-lg font-semibold">Recent Results</h2>
+      <h2 class="text-lg font-semibold dark:text-white transition-colors duration-300">Recent Results</h2>
     </div>
 
     {% if finished %}
       <div id="finished-wrap" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {% for score in finished %}
-            <article class="rounded-2xl border border-gray-300 bg-white shadow-sm hover:shadow-md transition p-4">
+            <article class="rounded-2xl border border-gray-300 bg-white shadow-sm hover:shadow-md transition p-4 dark:bg-slate-800 dark:border-slate-700 transition-colors duration-300">
             <div class="flex items-start justify-between">
               <span class="text-[10px] font-semibold px-2 py-0.5 rounded
-                {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700
-                {% elif score.sport == 'EPL' %} bg-emerald-100 text-emerald-700
-                {% elif score.sport == 'NFL' %} bg-rose-100 text-rose-700
-                {% elif score.sport == 'MLB' %} bg-blue-100 text-blue-700
-                {% elif score.sport == 'NHL' %} bg-slate-100 text-slate-700
-                {% else %} bg-gray-100 text-gray-700 {% endif %}">
+                {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300
+                {% elif score.sport == 'EPL' %} bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300
+                {% elif score.sport == 'NFL' %} bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300
+                {% elif score.sport == 'MLB' %} bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300
+                {% elif score.sport == 'NHL' %} bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300
+                {% else %} bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 {% endif %}">
                 {{ score.get_sport_display }}
               </span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-900 text-white ring-4 ring-gray-100">FT</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-900 text-white ring-4 ring-gray-100 dark:bg-slate-700 dark:ring-slate-700">FT</span>
             </div>
 
             <div class="mt-2.5 flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                 {% if score.logo_tim1 %}
-                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async"">
+                  <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform dark:bg-slate-700" loading="lazy" decoding="async"">
                 {% else %}
-                  <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+                  <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-slate-700"></div>
                 {% endif %}
-                <div class="text-sm font-semibold text-gray-900">{{ score.tim1 }}</div>
+                <div class="text-sm font-semibold text-gray-900 dark:text-white transition-colors duration-300">{{ score.tim1 }}</div>
               </div>
 
               <div class="flex items-center gap-2">
-                <span class="text-2xl font-extrabold leading-none">{{ score.skor_tim1 }}</span>
-                <span class="text-base font-bold text-gray-400">-</span>
-                <span class="text-2xl font-extrabold leading-none">{{ score.skor_tim2 }}</span>
+                <span class="text-2xl font-extrabold leading-none dark:text-white transition-colors duration-300">{{ score.skor_tim1 }}</span>
+                <span class="text-base font-bold text-gray-400 dark:text-slate-600 transition-colors duration-300">-</span>
+                <span class="text-2xl font-extrabold leading-none dark:text-white transition-colors duration-300">{{ score.skor_tim2 }}</span>
               </div>
 
               <div class="flex items-center gap-2.5 justify-end">
-                <div class="text-sm font-semibold text-gray-900 text-right">{{ score.tim2 }}</div>
+                <div class="text-sm font-semibold text-gray-900 text-right dark:text-white transition-colors duration-300">{{ score.tim2 }}</div>
                 {% if score.logo_tim2 %}
-                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform" loading="lazy" decoding="async">
+                  <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-contain bg-white shadow-sm hover:scale-105 transition-transform dark:bg-slate-700" loading="lazy" decoding="async">
                 {% else %}
-                  <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+                  <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-slate-700"></div>
                 {% endif %}
               </div>
             </div>
 
-            <p class="mt-2 text-xs text-gray-500">{{ score.tanggal }}</p>
+            <p class="mt-2 text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">{{ score.tanggal }}</p>
           </article>
         {% endfor %}
       </div>
     {% else %}
-      <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4">
+      <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 dark:bg-slate-800 dark:border-slate-700 transition-colors duration-300">
         <div class="flex items-start justify-between">
-          <p class="text-xs text-gray-400 uppercase tracking-wide">—</p>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">FT</span>
+          <p class="text-xs text-gray-400 uppercase tracking-wide dark:text-slate-500 transition-colors duration-300">—</p>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-300">FT</span>
         </div>
         <div class="mt-2.5 flex items-center justify-between max-w-md mx-auto">
           <div class="flex items-center gap-2.5">
-            <div class="h-8 w-8 rounded-full bg-gray-100"></div>
-            <div class="text-sm font-semibold text-gray-400">Team A</div>
+            <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-slate-700"></div>
+            <div class="text-sm font-semibold text-gray-400 dark:text-slate-500 transition-colors duration-300">Team A</div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-2xl font-extrabold leading-none text-gray-300">0</span>
-            <span class="text-base font-bold text-gray-300">-</span>
-            <span class="text-2xl font-extrabold leading-none text-gray-300">0</span>
+            <span class="text-2xl font-extrabold leading-none text-gray-300 dark:text-slate-600 transition-colors duration-300">0</span>
+            <span class="text-base font-bold text-gray-300 dark:text-slate-600 transition-colors duration-300">-</span>
+            <span class="text-2xl font-extrabold leading-none text-gray-300 dark:text-slate-600 transition-colors duration-300">0</span>
           </div>
           <div class="flex items-center gap-2.5 justify-end">
-            <div class="text-sm font-semibold text-gray-400 text-right">Team B</div>
-            <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+            <div class="text-sm font-semibold text-gray-400 text-right dark:text-slate-500 transition-colors duration-300">Team B</div>
+            <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-slate-700"></div>
           </div>
         </div>
-        <p class="mt-2 text-center text-xs text-gray-400">Belum ada match yang selesai</p>
+        <p class="mt-2 text-center text-xs text-gray-400 dark:text-slate-500 transition-colors duration-300">Belum ada match yang selesai</p>
       </article>
     {% endif %}
   </section>
@@ -224,57 +224,57 @@
   <!-- Upcoming -->
   <section id="section-upcoming">
     <div class="flex items-center gap-2 mb-3">
-      <span class="h-2.5 w-2.5 rounded-full bg-amber-400 ring-4 ring-amber-100"></span>
-      <h2 class="text-lg font-semibold">Upcoming Match</h2>
+      <span class="h-2.5 w-2.5 rounded-full bg-amber-400 ring-4 ring-amber-100 dark:ring-amber-900"></span>
+      <h2 class="text-lg font-semibold dark:text-white transition-colors duration-300">Upcoming Match</h2>
     </div>
 
     {% if upcoming %}
       <div id="upcoming-wrap" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {% for score in upcoming %}
-          <article class="rounded-2xl border border-amber-200 bg-white shadow-sm hover:shadow-md transition p-4">
+          <article class="rounded-2xl border border-amber-200 bg-white shadow-sm hover:shadow-md transition p-4 dark:bg-slate-800 dark:border-amber-900/50 transition-colors duration-300">
             <div class="flex items-center justify-between">
               <span class="text-[10px] font-semibold px-2 py-0.5 rounded
-                {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700
-                {% elif score.sport == 'EPL' %} bg-emerald-100 text-emerald-700
-                {% elif score.sport == 'NFL' %} bg-rose-100 text-rose-700
-                {% elif score.sport == 'MLB' %} bg-blue-100 text-blue-700
-                {% elif score.sport == 'NHL' %} bg-slate-100 text-slate-700
-                {% else %} bg-gray-100 text-gray-700 {% endif %}">
+                {% if score.sport == 'NBA' %} bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300
+                {% elif score.sport == 'EPL' %} bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300
+                {% elif score.sport == 'NFL' %} bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300
+                {% elif score.sport == 'MLB' %} bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300
+                {% elif score.sport == 'NHL' %} bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300
+                {% else %} bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 {% endif %}">
                 {{ score.get_sport_display }}
               </span>
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 ring-4 ring-amber-50">SOON</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 ring-4 ring-amber-50 dark:bg-amber-900 dark:text-amber-300 dark:ring-amber-900/50">SOON</span>
             </div>
             <div class="mt-2.5 flex items-center justify-center gap-2.5">
               {% if score.logo_tim1 %}
-                <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-cover border border-gray-200">
+                <img src="{{ score.logo_tim1 }}" alt="{{ score.tim1 }}" class="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-slate-600">
               {% else %}
-                <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+                <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-slate-700"></div>
               {% endif %}
-              <span class="text-sm font-semibold text-gray-900">{{ score.tim1 }}</span>
-              <span class="text-gray-400 text-sm">vs</span>
-              <span class="text-sm font-semibold text-gray-900">{{ score.tim2 }}</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-white transition-colors duration-300">{{ score.tim1 }}</span>
+              <span class="text-gray-400 text-sm dark:text-slate-500 transition-colors duration-300">vs</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-white transition-colors duration-300">{{ score.tim2 }}</span>
               {% if score.logo_tim2 %}
-                <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-cover border border-gray-200">
+                <img src="{{ score.logo_tim2 }}" alt="{{ score.tim2 }}" class="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-slate-600">
               {% else %}
-                <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+                <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-slate-700"></div>
               {% endif %}
             </div>
-            <p class="mt-2 text-xs text-gray-500 text-center">{{ score.tanggal }}</p>
+            <p class="mt-2 text-xs text-gray-500 text-center dark:text-slate-400 transition-colors duration-300">{{ score.tanggal }}</p>
           </article>
         {% endfor %}
       </div>
     {% else %}
-      <article class="rounded-2xl border border-amber-200 bg-white shadow-sm p-4">
+      <article class="rounded-2xl border border-amber-200 bg-white shadow-sm p-4 dark:bg-slate-800 dark:border-amber-900/50 transition-colors duration-300">
         <div class="flex items-center justify-between">
-          <p class="text-xs text-gray-400 uppercase tracking-wide">—</p>
-          <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-600">SOON</span>
+          <p class="text-xs text-gray-400 uppercase tracking-wide dark:text-slate-500 transition-colors duration-300">—</p>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">SOON</span>
         </div>
         <div class="mt-2.5 flex items-center justify-center gap-2.5">
-          <span class="text-sm font-semibold text-gray-400">Team A</span>
-          <span class="text-gray-300 text-sm">vs</span>
-          <span class="text-sm font-semibold text-gray-400">Team B</span>
+          <span class="text-sm font-semibold text-gray-400 dark:text-slate-500 transition-colors duration-300">Team A</span>
+          <span class="text-gray-300 text-sm dark:text-slate-600 transition-colors duration-300">vs</span>
+          <span class="text-sm font-semibold text-gray-400 dark:text-slate-500 transition-colors duration-300">Team B</span>
         </div>
-        <p class="mt-2 text-xs text-gray-400 text-center">Belum ada match mendatang</p>
+        <p class="mt-2 text-xs text-gray-400 text-center dark:text-slate-500 transition-colors duration-300">Belum ada match mendatang</p>
       </article>
     {% endif %}
   </section>
@@ -301,15 +301,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const toast = document.createElement("div");
     toast.textContent = msg;
     toast.className = `fixed bottom-6 right-6 px-4 py-2 rounded-lg shadow-md text-sm z-50 animate-fade ${
-      isError ? "bg-rose-600 text-white" : "bg-gray-900 text-white"
+      isError ? "bg-rose-600 text-white" : "bg-gray-900 text-white dark:bg-slate-700"
     }`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2200);
   }
 
   function setActive(group, btn) {
-    group.forEach(b => b.classList.remove("bg-gray-900", "text-white"));
-    btn.classList.add("bg-gray-900", "text-white");
+    group.forEach(b => b.classList.remove("bg-gray-900", "text-white", "dark:bg-slate-600"));
+    group.forEach(b => b.classList.add("bg-gray-100", "dark:bg-slate-700", "dark:text-slate-300"));
+    btn.classList.remove("bg-gray-100", "dark:bg-slate-700", "dark:text-slate-300");
+    btn.classList.add("bg-gray-900", "text-white", "dark:bg-slate-600");
   }
 
   function showOnly(section) {
@@ -318,43 +320,43 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function badgeFor(status) {
-    if (status === "live")    return '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-600 text-white ring-4 ring-rose-100">LIVE</span>';
-    if (status === "finished")return '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-900 text-white ring-4 ring-gray-100">FT</span>';
-    if (status === "upcoming")return '<span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 ring-4 ring-amber-50">SOON</span>';
+    if (status === "live")    return '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-600 text-white ring-4 ring-rose-100 dark:ring-rose-900">LIVE</span>';
+    if (status === "finished")return '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-900 text-white ring-4 ring-gray-100 dark:bg-slate-700 dark:ring-slate-700">FT</span>';
+    if (status === "upcoming")return '<span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 ring-4 ring-amber-50 dark:bg-amber-900 dark:text-amber-300 dark:ring-amber-900/50">SOON</span>';
     return "";
   }
 
   function leagueBadgeClasses(code) {
     switch ((code || '').toUpperCase()) {
-      case 'NBA': return 'bg-indigo-100 text-indigo-700';
-      case 'EPL': return 'bg-emerald-100 text-emerald-700';
-      case 'NFL': return 'bg-rose-100 text-rose-700';
-      case 'MLB': return 'bg-blue-100 text-blue-700';
-      case 'NHL': return 'bg-slate-100 text-slate-700';
-      default:    return 'bg-gray-100 text-gray-700';
+      case 'NBA': return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300';
+      case 'EPL': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300';
+      case 'NFL': return 'bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300';
+      case 'MLB': return 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300';
+      case 'NHL': return 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
+      default:    return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
     }
   }
 
   function teamLogo(logo, name) {
     if (logo) {
-      return `<img src="${logo}" alt="${name}" class="h-9 w-9 rounded-full object-cover shadow-sm hover:scale-105 transition-transform">`;
+      return `<img src="${logo}" alt="${name}" class="h-9 w-9 rounded-full object-cover shadow-sm hover:scale-105 transition-transform bg-white dark:bg-slate-700">`;
     }
-    return `<div class="h-9 w-9 rounded-full bg-gray-50"></div>`;
+    return `<div class="h-9 w-9 rounded-full bg-gray-50 dark:bg-slate-700"></div>`;
   }
 
     function cardHTML(s, status) {
-    let borderClass = 'border-gray-200';
+    let borderClass = 'border-gray-200 dark:border-slate-700';
 
     if (status === 'live') {
-      borderClass = 'border-rose-200';       // sama kayak Flutter live
+      borderClass = 'border-rose-200 dark:border-rose-900/50';
     } else if (status === 'finished') {
-      borderClass = 'border-gray-300';       // sama kayak Flutter finished
+      borderClass = 'border-gray-300 dark:border-slate-700';
     } else if (status === 'upcoming') {
-      borderClass = 'border-amber-200';      // kuning, udah cocok
+      borderClass = 'border-amber-200 dark:border-amber-900/50';
     }
 
     return `
-      <article class="rounded-2xl border ${borderClass} bg-white shadow-sm hover:shadow-md transition p-4">
+      <article class="rounded-2xl border ${borderClass} bg-white shadow-sm hover:shadow-md transition p-4 dark:bg-slate-800 transition-colors duration-300">
         <div class="flex items-start justify-between">
           <span class="text-[10px] font-semibold px-2 py-0.5 rounded ${leagueBadgeClasses(s.sport)}">
             ${s.sport_display || s.sport || "League"}
@@ -364,19 +366,19 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="mt-3 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             ${teamLogo(s.logo_tim1, s.tim1)}
-            <div class="text-base font-semibold text-gray-900">${s.tim1}</div>
+            <div class="text-base font-semibold text-gray-900 dark:text-white transition-colors duration-300">${s.tim1}</div>
           </div>
           <div class="flex items-end gap-2">
-            <span class="text-3xl font-extrabold leading-none">${s.skor_tim1}</span>
-            <span class="text-lg font-bold text-gray-400">-</span>
-            <span class="text-3xl font-extrabold leading-none">${s.skor_tim2}</span>
+            <span class="text-3xl font-extrabold leading-none dark:text-white transition-colors duration-300">${s.skor_tim1}</span>
+            <span class="text-lg font-bold text-gray-400 dark:text-slate-600">-</span>
+            <span class="text-3xl font-extrabold leading-none dark:text-white transition-colors duration-300">${s.skor_tim2}</span>
           </div>
           <div class="flex items-center gap-2.5 justify-end">
-            <div class="text-base font-semibold text-gray-900 text-right">${s.tim2}</div>
+            <div class="text-base font-semibold text-gray-900 text-right dark:text-white transition-colors duration-300">${s.tim2}</div>
             ${teamLogo(s.logo_tim2, s.tim2)}
           </div>
         </div>
-        <p class="mt-2 text-xs text-gray-500">${s.tanggal}</p>
+        <p class="mt-2 text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">${s.tanggal}</p>
       </article>
     `;
   }
@@ -386,7 +388,7 @@ document.addEventListener("DOMContentLoaded", function () {
     targetWrap.innerHTML = "";
     if (!data || data.length === 0) {
       targetWrap.innerHTML = `
-        <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 text-center text-gray-400">
+        <article class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 text-center text-gray-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500 transition-colors duration-300">
           Nggak ada match untuk filter ini.
         </article>`;
       return;
